@@ -9,7 +9,7 @@ type TAURI_WINDOW_ACTIONS = 'minimize' | 'maximize' | 'close';
  */
 export const getDisplayTitle = (title: string | null) => {
     if (title)
-        return title.split('/').pop()
+        return title.split('.')[0]
     return 'Untitled'
 }
 

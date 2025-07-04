@@ -12,7 +12,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
     // TODO: Move this up to a startup page -> sets the vault path and configurations
-    const [vaultPath, setVaultPath] = useState<string | null>(null)
+    const [vaultPath, setVaultPath] = useState<string | null>("/Users/memo/documents")
     const [selectedFile, setSelectedFile] = useState<string | null>(null)
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
 
