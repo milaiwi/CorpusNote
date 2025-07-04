@@ -136,7 +136,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     }
 
     return (
-        <div className="w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-700 flex flex-col">
+        <div className="w-64 border-r border-gray-700 flex flex-col">
             <div className="p-3 border-b border-gray-700">
                 <h2 className="text-sm font-medium text-gray-200 truncate">
                 {vaultPath.split('/').pop() || 'Vault'}

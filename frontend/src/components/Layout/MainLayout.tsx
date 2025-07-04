@@ -29,17 +29,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
                     {/* Main Content Area */}
                     <div className="flex flex-1 overflow-hidden">
                         {/* IconSidebar */}
-                        <IconSidebar
-                            activeOption={activeOption}
-                            onOptionChange={setActiveOption}
-                        />
+                        <div className="bg-primary-foreground flex">
+                            <IconSidebar
+                                activeOption={activeOption}
+                                onOptionChange={setActiveOption}
+                            />
 
-                        {/* File Sidebar */}
-                        <FileSidebar
-                            vaultPath={vaultPath}
-                            selectedFile={selectedFile}
-                            onFileSelect={setSelectedFile}
-                        />
+                            {/* File Sidebar */}
+                            <FileSidebar
+                                vaultPath={vaultPath}
+                                selectedFile={selectedFile}
+                                onFileSelect={setSelectedFile}
+                            />
+                        </div>
 
                         {/* Editor Window */}
                         {}

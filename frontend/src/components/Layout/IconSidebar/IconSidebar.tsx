@@ -27,7 +27,6 @@ const IconSidebar: React.FC<IconSidebarProps> = ({
     return (
         <div className={`
             w-12
-            bg-gray-50 dark:bg-gray-900
             border-r border-gray-200 dark:border-gray-800
             flex flex-col justify-between items-center py-2
             ${className}
