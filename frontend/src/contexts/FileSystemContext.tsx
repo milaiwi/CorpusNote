@@ -1,12 +1,13 @@
 // frontend/src/contexts/FileSystemContext.tsx
 
 interface FileSystemContextProps {
-
 }
 
-const FileSystemContext: React.FC<FileSystemContextProps> = () => {
+const FileSystemContext: React.FC<FileSystemContextProps> = ({ children }: { children: React.ReactNode }) => {
     return (
-        <h1>Hello</h1>
+        <div className={`h-full flex flex-col bg-gray-900 text-gray-100`}>
+            {children}
+        </div>
     )
 }
 

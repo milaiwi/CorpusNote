@@ -7,15 +7,14 @@ import {
     Vault
 } from 'lucide-react'
 
-interface IconProps {
+export interface IconProps {
   id: string;  // 'file', 'search', etc..
   icon: React.ComponentType<{ size?: number; className?: string }>; // Icon to display
   label: string; // Label for element (display on hover)
   action?: () => void; // callback function on selection
 }
 
-// TODO: Create three different levels (top, center, bottom)
-const icons: IconProps[] = [
+export const topLevelIcons: IconProps[] = [
     {
         id: 'files',
         icon: File,
@@ -35,7 +34,10 @@ const icons: IconProps[] = [
         id: 'new-directory',
         icon: FolderPlus,
         label: 'New Directory',
-    },
+    }, 
+] 
+
+export const bottomLevelIcons: IconProps[] = [
     {
         id: 'open-vault',
         icon: Vault,
@@ -43,4 +45,3 @@ const icons: IconProps[] = [
     }
 ]
 
-export default icons

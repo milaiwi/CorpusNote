@@ -10,14 +10,14 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
-    // TODO: Move this up to a startup age -> sets the vault path and configurations
+    // TODO: Move this up to a startup page -> sets the vault path and configurations
     const [vaultPath, setVaultPath] = useState<string | null>(null)
     const [selectedFile, setSelectedFile] = useState<string | null>(null)
 
     return (
         <FileSystemContext>
             {/* TODO: Define custom color schemes for re-usability */}
-            <div className={`h-screen flex flex-col bg-gray-900 text-gray-100 ${className}`}>
+            <div className="h-screen flex flex-col">
                 {/* Title Bar*/}
                 <TitleBar
                     selectedFile={selectedFile}
