@@ -1,51 +1,85 @@
 import React from 'react'
+import { SidebarIconButton } from '../../ui/SidebarButton';
 import { IconProps, topLevelIcons, bottomLevelIcons } from './icons'
+import { ThemeToggle } from '../../ui/ThemeToggle';
+import { LucideIcon } from 'lucide-react';
 
-type iconSidebarOptions = 'files' | 'search' | 'new-note' | 'new-directory' | 'open-vault'
+export type IconSidebarOptions = 'files' | 'search' | 'new-note' | 'new-directory' | 'open-vault'
 
 interface IconSidebarProps {
-    option: iconSidebarOptions
+    activeOption: IconSidebarOptions
+    onOptionChange?: (option: IconSidebarOptions) => void
+    className?: string
 }
 
-interface DisplayIconProps {
+interface IconGroupProps {
     icons: IconProps[]
-    option: iconSidebarOptions
+    activeOption: IconSidebarOptions
+    onOptionChange?: (option: IconSidebarOptions) => void
 }
 
 // TODO: Change this to use shadcn
-const IconSidebar: React.FC<IconSidebarProps> = ({ option }) => {
+const IconSidebar: React.FC<IconSidebarProps> = ({
+    activeOption,
+    onOptionChange,
+    className = ""
+}) => {
     return (
-        <div className="w-12 bg-gray-800 border-r border-gray-700 flex flex-col justify-between items-center py-2">
-            <DisplayIcons icons={topLevelIcons} option={option} />
-            <DisplayIcons icons={bottomLevelIcons} option={option} />
+        <div className={`
+            w-12
+            bg-gray-50 dark:bg-gray-900
+            border-r border-gray-200 dark:border-gray-800
+            flex flex-col justify-between items-center py-2
+            ${className}
+        `}>
+            <IconGroup
+                icons={topLevelIcons}
+                activeOption={activeOption}
+                onOptionChange={onOptionChange}
+            />
+
+            <div className="flex flex-col items-center gap-2">
+                <IconGroup 
+                icons={bottomLevelIcons} 
+                activeOption={activeOption} 
+                onOptionChange={onOptionChange}
+                />
+                <ThemeToggle />
+            </div>
+
         </div>
     )
 }
 
-const DisplayIcons: React.FC<DisplayIconProps> = ({ icons, option }) => {
+const IconGroup: React.FC<IconGroupProps> = ({
+    icons,
+    activeOption,
+    onOptionChange
+}) => {
     return (
-        <div>
+        <div className="flex flex-col gap2">
             {icons.map((item) => {
-                const Icon = item.icon;
-                {/* TODO: change to nextjs conditional css */}
-                const isActive = item.id === 'vault' && option;
+                const Icon = item.icon
+                const isActive = item.id === activeOption
                 
-                return (
-                <button
-                    key={item.id}
-                    onClick={item.action}
-                    className={`
-                    w-8 h-8 mb-2 rounded flex items-center justify-center
-                    transition-colors duration-200 cursor-pointer
-                    ${isActive 
-                        ? 'bg-blue-600 text-white' 
-                        : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                const handleClick = () => {
+                    if (item.action) {
+                        item.action()
                     }
-                    `}
-                    title={item.label}
-                >
-                    <Icon size={16} />
-                </button>
+
+                    if (onOptionChange && item.id !== activeOption) {
+                        onOptionChange(item.id as IconSidebarOptions)
+                    }
+                }
+
+                return (
+                    <SidebarIconButton
+                        key={item.id}
+                        icon={Icon as LucideIcon}
+                        label={item.label}
+                        isActive={isActive}
+                        onClick={handleClick}
+                    />
                 );
             })}
         </div>
