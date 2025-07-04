@@ -2,9 +2,9 @@
 import React, { useState } from 'react'
 import TitleBar from './TitleBar/Titlebar';
 import FileSidebar from './FileSidebar/FileSidebar';
-import FileSystemContext from '@/src/contexts/FileSystemContext';
+import FileSystemContext from '../../contexts/FileSystemContext';
 import IconSidebar, { IconSidebarOptions } from './IconSidebar/IconSidebar';
-import { ThemeProvider } from '@/src/contexts/ThemeContext';
+import { ThemeProvider } from '../../contexts/ThemeContext';
 
 interface MainLayoutProps {
     className?: string;
@@ -19,17 +19,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
     return (
         <ThemeProvider>
             <FileSystemContext>
-                <div className="h-screen flex flex-col">
-                    {/* Title Bar*/}
-                    <TitleBar
-                        selectedFile={selectedFile}
-                        setSelectedFile={setSelectedFile}
-                    />
-
-                    {/* Main Content Area */}
+                <div className="h-screen flex flex-1">
                     <div className="flex flex-1 overflow-hidden">
                         {/* IconSidebar */}
-                        <div className="bg-primary-foreground flex">
+                        <div className="bg-secondary flex">
                             <IconSidebar
                                 activeOption={activeOption}
                                 onOptionChange={setActiveOption}
@@ -43,8 +36,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
                             />
                         </div>
 
-                        {/* Editor Window */}
-                        {}
+                        <div className="flex flex-col flex-1">
+                            {/* Title Bar*/}
+                            <TitleBar
+                                selectedFile={selectedFile}
+                                setSelectedFile={setSelectedFile}
+                            />
+
+                            {/* Editor Window */}
+                            {}
+                        </div>
                     </div>
                 </div>
             </FileSystemContext>

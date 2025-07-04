@@ -1,7 +1,7 @@
 // frontend/src/components/ui/ThemeToggle.tsx
 import React from 'react'
 import { Sun, Moon } from 'lucide-react'
-import { useTheme } from '@/src/contexts/ThemeContext'
+import { useTheme } from '../../contexts/ThemeContext'
 import { SidebarIconButton } from './SidebarButton'
 
 export const ThemeToggle: React.FC = () => {

@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import MainLayout from '@/src/components/Layout/MainLayout';
+import MainLayout from '../frontend/src/components/Layout/MainLayout';
 import '../frontend/globals.css'
 
 export default function HomePage() {

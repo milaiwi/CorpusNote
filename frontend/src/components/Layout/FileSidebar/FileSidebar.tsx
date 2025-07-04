@@ -1,20 +1,23 @@
+// frontend/src/components/Layout/FileSidebar/FileSidebar.tsx
 import React, { useState, useEffect } from 'react'
-import { FileSidebarProps, FileItem } from './utils';
+import { FileSidebarProps, FileItem } from './utils'
 import {
     ChevronRight,
     ChevronDown,
     File,
     Folder
 } from 'lucide-react'
-import { getDisplayTitle } from '../TitleBar/utils';
+import { getDisplayTitle } from '../TitleBar/utils'
+import { Button } from '../../../../shadcn/ui/button'
+import { cn } from '../../../../lib/utils'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
     vaultPath,
     selectedFile,
     onFileSelect
 }) => {
-    const [files, setFiles] = useState<FileItem[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [files, setFiles] = useState<FileItem[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
     // TODO: Instead of mock system, connect to Tauri API
     const mockFileSystem: FileItem[] = [
@@ -27,13 +30,13 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                 { name: 'Daily Notes.md', absPath: '/vault/Notes/Daily Notes.md', type: 'file', timeCreated: Date.now() },
                 { name: 'Project Ideas.md', absPath: '/vault/Notes/Project Ideas.md', type: 'file', timeCreated: Date.now() },
                 {
-                name: 'Archive',
-                absPath: '/vault/Notes/Archive',
-                type: 'directory',
-                children: [
-                    { name: 'Old Notes.md', absPath: '/vault/Notes/Archive/Old Notes.md', type: 'file', timeCreated: Date.now() }
-                ],
-                timeCreated: Date.now(),
+                    name: 'Archive',
+                    absPath: '/vault/Notes/Archive',
+                    type: 'directory',
+                    children: [
+                        { name: 'Old Notes.md', absPath: '/vault/Notes/Archive/Old Notes.md', type: 'file', timeCreated: Date.now() }
+                    ],
+                    timeCreated: Date.now(),
                 }
             ],
             timeCreated: Date.now()
@@ -48,17 +51,17 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
             ],
             timeCreated: Date.now(),
         }
-    ];
+    ]
 
     useEffect(() => {
         if (vaultPath) {
-            setLoading(true);
+            setLoading(true)
             setTimeout(() => {
-                setFiles(mockFileSystem);
-                setLoading(false);
-            }, 500);
+                setFiles(mockFileSystem)
+                setLoading(false)
+            }, 500)
         } else {
-            setFiles([]);
+            setFiles([])
         }
     }, [vaultPath])
 
@@ -66,53 +69,54 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
         const updateExpanded = (items: FileItem[]): FileItem[] => {
             return items.map(item => {
                 if (item.absPath === path && item.type === 'directory')
-                    return { ...item, expanded: !item.expanded };
+                    return { ...item, expanded: !item.expanded }
                 if (item.children)
-                    return { ...item, children: updateExpanded(item.children) };
-                return item;
-            });
-        };
+                    return { ...item, children: updateExpanded(item.children) }
+                return item
+            })
+        }
 
-        setFiles(updateExpanded(files));
-    };
+        setFiles(updateExpanded(files))
+    }
 
     const renderFileItem = (item: FileItem, depth: number = 0) => {
-        const isSelected = selectedFile === item.absPath;
-        const paddingLeft = depth * 16 + 8;
+        const isSelected = selectedFile === item.absPath
+        const paddingLeft = depth * 16 + 8
 
         return (
             <div key={item.absPath}>
-                <div
-                    className={`
-                        flex items-center px-2 py-1 cursor-pointer text-sm
-                        hover:bg-gray-700 transition-colors duration-150
-                        ${isSelected ? 'bg-blue-600/30 border-r-2 border-blue-500' : ''}
-                    `}
-                    style={{ paddingLeft }}
+                <Button
+                    variant={isSelected ? "fileItemActive" : "fileItem"}
+                    size="fileItem"
+                    className={cn(
+                        "w-full",
+                        `pl-[${paddingLeft}px]`
+                    )}
+                    style={{ paddingLeft }} 
                     onClick={() => {
                         if (item.type === 'directory')
-                            toggleDirectory(item.absPath);
+                            toggleDirectory(item.absPath)
                         else
-                            onFileSelect(item.absPath);
+                            onFileSelect(item.absPath)
                     }}
-                    >
+                >
                     {item.type === 'directory' ? (
                         <>
                             {item.expanded ? (
-                                <ChevronDown size={14} className="mr-1 text-gray-400" />
+                                <ChevronDown size={14} className="mr-1 text-muted-foreground" />
                             ) : (
-                                <ChevronRight size={14} className="mr-1 text-gray-400" />
+                                <ChevronRight size={14} className="mr-1 text-muted-foreground" />
                             )}
-                            <Folder size={14} className="mr-2 text-blue-400" />
+                            <Folder size={14} className="mr-2 text-accent-primary" />
                         </>
                     ) : (
                         <>
                             <div className="w-4 mr-1" /> {/* Spacer for alignment */}
-                            <File size={14} className="mr-2 text-gray-400" />
+                            <File size={14} className="mr-2 text-muted-foreground" />
                         </>
                     )}
                     <span className="truncate">{getDisplayTitle(item.name)}</span>
-                </div>
+                </Button>
                 
                 {item.type === 'directory' && item.expanded && item.children && (
                     <div>
@@ -120,43 +124,42 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     </div>
                 )}
             </div>
-        );
-    };
-
+        )
+    }
 
     if (!vaultPath) {
         return (
-            <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 flex items-center justify-center">
-                <div className="text-center text-gray-400">
+            <div className="w-64 bg-background border-r border-border p-4 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
                     <Folder size={48} className="mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Select a vault to begin</p>
                 </div>
             </div>
-        );
+        )
     }
 
     return (
-        <div className="w-64 border-r border-gray-700 flex flex-col">
-            <div className="p-3 border-b border-gray-700">
-                <h2 className="text-sm font-medium text-gray-200 truncate">
-                {vaultPath.split('/').pop() || 'Vault'}
+        <div className="w-64 bg-background border-r border-border flex flex-col">
+            <div className="p-3 border-b border-border">
+                <h2 className="text-sm font-medium text-foreground truncate">
+                    {vaultPath.split('/').pop() || 'Vault'}
                 </h2>
             </div>
             
             <div className="flex-1 overflow-y-auto">
                 {loading ? (
-                <div className="p-4 text-center text-gray-400">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-                    <p className="mt-2 text-xs">Loading files...</p>
-                </div>
+                    <div className="p-4 text-center text-muted-foreground">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"></div>
+                        <p className="mt-2 text-xs">Loading files...</p>
+                    </div>
                 ) : (
-                <div className="py-2">
-                    {files.map(item => renderFileItem(item))}
-                </div>
+                    <div className="py-2">
+                        {files.map(item => renderFileItem(item))}
+                    </div>
                 )}
             </div>
         </div>
-    );
+    )
 }
 
 export default FileSidebar

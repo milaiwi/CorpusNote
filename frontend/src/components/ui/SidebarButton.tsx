@@ -1,8 +1,8 @@
 // frontend/src/components/ui/SidebarButton.tsx
 import React from 'react'
 import { LucideIcon } from 'lucide-react'
-import { Button } from '@/shadcn/ui/button'
-import { cn } from '@/lib/utils'
+import { Button } from '../../../shadcn/ui/button'
+import { cn } from '../../../lib/utils'
 
 interface SidebarButtonProps {
   icon: LucideIcon

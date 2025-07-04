@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* This registers a custom color for tailwind */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -33,6 +34,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -44,16 +46,54 @@
 }
 
 :root {
+  /* ===== YOUR CUSTOM COLORS (LIGHT MODE) ===== */
+  --bg-primary: oklch(1 0 0); /* White background */
+  --bg-secondary: oklch(1 0 0); /* White secondary background */
+  --bg-tertiary: oklch(0.941 0 0); /* Light gray background */
+  
+  --text-primary: oklch(0.4819 0.0049 91.5); /* Your specified light mode text color */
+  --text-secondary: oklch(0.471 0 0); /* Secondary text */
+  --text-tertiary: oklch(0.608 0 0); /* Tertiary text */
+  
+  --primary-hover: oklch(0 0 0 / 0.03); /* Light gray background on hover (255, 255, 255, 0.0.03) */
+
+  --border-primary: oklch(0.902 0 0); /* Light borders */
+  --border-secondary: oklch(0.941 0 0); /* Secondary borders */
+  
+  --interactive-bg: oklch(0.961 0 0); /* Light hover backgrounds */
+  --interactive-bg-active: oklch(0.922 0 0); /* Active backgrounds */
+  --interactive-text: oklch(0.235 0 0); /* Interactive text */
+  
+  --sidebar-bg: oklch(0.973 0 0); /* Sidebar background */
+  --sidebar-text: oklch(0.372 0 0); /* Sidebar text */
+  --sidebar-text-hover: oklch(0.235 0 0); /* Sidebar text on hover */
+  --sidebar-bg-hover: oklch(0.941 0 0); /* Sidebar hover background */
+  --sidebar-bg-active: oklch(0.902 0 0); /* Sidebar active background */
+  
+  --accent-primary: oklch(0.509 0.222 265.75); /* Blue accent */
+  --accent-secondary: oklch(0.729 0.118 184.704); /* Green accent */
+  --accent-destructive: oklch(0.577 0.245 27.325); /* Red accent */
+
   --radius: 0.625rem;
+
+  /* ===== OVERRIDE SHADCN VARIABLES WITH YOUR CUSTOM COLORS ===== */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+
+  /* Cards, Popovers, etc.. */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+
+  /* Components, Backgrounds, Text, etc.. */  
+  --primary: var(--bg-primary);
+  --primary-foreground: var(--text-primary);
+
+  --secondary: var(--bg-secondary);
   --secondary-foreground: oklch(0.205 0 0);
+  
+  /* Miscallenous - Disabled, Faded, Input, Borders, etc.. */
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(66.267% 0.00828 16.866);
@@ -78,36 +118,66 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* ===== YOUR CUSTOM COLORS (DARK MODE) ===== */
+  --bg-primary:  oklch(0.2134 0 0); /* Dark gray background (25,25,25) */
+  --bg-secondary:  oklch(0.2435 0 0); /* Medium gray background (45,45,45) */
+  --bg-tertiary: oklch(0.235 0 0); /* Lighter gray background (60,60,60) */
+  
+  --text-primary: oklch(0.6895 0 0); /* Light gray text (155,155,155) */
+  --text-secondary: oklch(0.471 0 0); /* Medium gray text (120,120,120) */
+  --text-tertiary: oklch(0.372 0 0); /* Darker gray text (95,95,95) */
+
+  --primary-hover: oklch(1 0 0 / 5.5%); /* Light gray background on hover (255, 255, 255, 0.555) */
+  
+  --border-primary: oklch(0.235 0 0); /* Dark borders (60,60,60) */
+  --border-secondary: oklch(0.196 0 0); /* Secondary borders (50,50,50) */
+  
+  --interactive-bg: oklch(0.196 0 0); /* Dark hover backgrounds (50,50,50) */
+  --interactive-bg-active: oklch(0.275 0 0); /* Active backgrounds (70,70,70) */
+  --interactive-text: oklch(0.784 0 0); /* Interactive text (200,200,200) */
+  
+  --sidebar-bg: oklch(0.125 0 0); /* Sidebar background (32,32,32) */
+  --sidebar-text: oklch(0.608 0 0); /* Sidebar text (155,155,155) */
+  --sidebar-text-hover: oklch(0.784 0 0); /* Sidebar text on hover (200,200,200) */
+  --sidebar-bg-hover: oklch(0.196 0 0); /* Sidebar hover background (50,50,50) */
+  --sidebar-bg-active: oklch(0.275 0 0); /* Sidebar active background (70,70,70) */
+  
+  --accent-primary: oklch(0.651 0.222 265.75); /* Lighter blue for dark mode */
+  --accent-secondary: oklch(0.829 0.118 184.704); /* Lighter green for dark mode */
+  --accent-destructive: oklch(0.677 0.245 27.325); /* Lighter red for dark mode */
+
+  /* ===== OVERRIDE SHADCN VARIABLES WITH YOUR CUSTOM COLORS ===== */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+
+  /* Cards, Popovers, etc.. */
+  --card: var(--bg-secondary);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-secondary);
+  --popover-foreground: var(--text-primary);
+
+  /* Components, Backgrounds, Text, etc.. */  
+  --primary: var(--bg-primary);
+  --primary-foreground: var(--text-primary);
+  /* --primary-hover: var(--primary-hover); */
+
+  --secondary: var(--bg-secondary);
+  --secondary-foreground: var(--text-primary);
+
+  --tertiary: var(--bg-tertiary);
+  --tertiary-foreground: var(--text-tertiary);
+
+
+  /* Miscallenous - Disabled, Faded, Input, Borders, etc.. */
+  --muted: var(--bg-tertiary);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--interactive-bg);
+  --accent-foreground: var(--interactive-text);
+  --destructive: var(--accent-destructive);
+  --destructive-foreground: var(--bg-primary);
+  --border: var(--border-primary);
+  --input: var(--border-primary);
+  --ring: var(--text-primary);
 }
 
 @layer base {
