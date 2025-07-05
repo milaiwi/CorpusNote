@@ -100,19 +100,14 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                             onFileSelect(item.absPath)
                     }}
                 >
-                    {item.type === 'directory' ? (
+                    {item.type === 'directory' && (
                         <>
                             {item.expanded ? (
-                                <ChevronDown size={14} className="mr-1 text-muted-foreground" />
+                                <ChevronDown size={14} className="text-muted-foreground" />
                             ) : (
-                                <ChevronRight size={14} className="mr-1 text-muted-foreground" />
+                                <ChevronRight size={14} className="text-muted-foreground" />
                             )}
-                            <Folder size={14} className="mr-2 text-accent-primary" />
-                        </>
-                    ) : (
-                        <>
-                            <div className="w-4 mr-1" /> {/* Spacer for alignment */}
-                            <File size={14} className="mr-2 text-muted-foreground" />
+                            {/* <Folder size={14} className="mr-2 text-accent-primary" /> */}
                         </>
                     )}
                     <span className="truncate">{getDisplayTitle(item.name)}</span>
@@ -129,7 +124,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
 
     if (!vaultPath) {
         return (
-            <div className="w-64 bg-background border-r border-border p-4 flex items-center justify-center">
+            <div className="w-64 border-r border-border p-4 flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
                     <Folder size={48} className="mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Select a vault to begin</p>
@@ -139,7 +134,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     }
 
     return (
-        <div className="w-64 bg-background border-r border-border flex flex-col">
+        <div className="w-64 border-r border-border flex flex-col">
             <div className="p-3 border-b border-border">
                 <h2 className="text-sm font-medium text-foreground truncate">
                     {vaultPath.split('/').pop() || 'Vault'}
