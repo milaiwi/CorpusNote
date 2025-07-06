@@ -30,6 +30,8 @@
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-tertiary: var(--tertiary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -53,7 +55,7 @@
   
   --text-primary: oklch(0.4819 0.0049 91.5); /* Your specified light mode text color */
   --text-secondary: oklch(0.471 0 0); /* Secondary text */
-  --text-tertiary: oklch(0.608 0 0); /* Tertiary text */
+  --text-tertiary: oklch(0.528 0 0); /* Tertiary text */
   
   --primary-hover: oklch(0 0 0 / 0.03); /* Light gray background on hover (255, 255, 255, 0.0.03) */
 
@@ -92,6 +94,9 @@
 
   --secondary: var(--bg-secondary);
   --secondary-foreground: oklch(0.205 0 0);
+
+  --tertiary: var(--bg-tertiary);
+  --tertiary-foreground: var(--text-tertiary);
   
   /* Miscallenous - Disabled, Faded, Input, Borders, etc.. */
   --muted: oklch(0.97 0 0);
@@ -125,7 +130,7 @@
   
   --text-primary: oklch(0.6895 0 0); /* Light gray text (155,155,155) */
   --text-secondary: oklch(0.471 0 0); /* Medium gray text (120,120,120) */
-  --text-tertiary: oklch(0.372 0 0); /* Darker gray text (95,95,95) */
+  --text-tertiary: oklch(0.402 0 0); /* Darker gray text (95,95,95) */
 
   --primary-hover: oklch(1 0 0 / 5.5%); /* Light gray background on hover (255, 255, 255, 0.555) */
   

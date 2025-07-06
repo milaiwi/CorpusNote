@@ -3,6 +3,7 @@ import { SidebarIconButton } from '../../ui/SidebarButton';
 import { IconProps, topLevelIcons, bottomLevelIcons } from './icons'
 import { ThemeToggle } from '../../ui/ThemeToggle';
 import { LucideIcon } from 'lucide-react';
+import { useDialog } from '@/src/contexts/DialogContext';
 
 export type IconSidebarOptions = 'files' | 'search' | 'new-note' | 'new-directory' | 'open-vault'
 
@@ -16,6 +17,7 @@ interface IconGroupProps {
     icons: IconProps[]
     activeOption: IconSidebarOptions
     onOptionChange?: (option: IconSidebarOptions) => void
+    openDialog: (dialog: React.ReactNode) => void
 }
 
 // TODO: Change this to use shadcn
@@ -24,6 +26,8 @@ const IconSidebar: React.FC<IconSidebarProps> = ({
     onOptionChange,
     className = ""
 }) => {
+    const { openDialog } = useDialog()
+
     return (
         <div className={`
             w-12
@@ -35,13 +39,15 @@ const IconSidebar: React.FC<IconSidebarProps> = ({
                 icons={topLevelIcons}
                 activeOption={activeOption}
                 onOptionChange={onOptionChange}
+                openDialog={openDialog}
             />
 
             <div className="flex flex-col items-center gap-2">
                 <IconGroup 
-                icons={bottomLevelIcons} 
-                activeOption={activeOption} 
-                onOptionChange={onOptionChange}
+                    icons={bottomLevelIcons} 
+                    activeOption={activeOption} 
+                    onOptionChange={onOptionChange}
+                    openDialog={openDialog}
                 />
                 <ThemeToggle />
             </div>
@@ -53,8 +59,10 @@ const IconSidebar: React.FC<IconSidebarProps> = ({
 const IconGroup: React.FC<IconGroupProps> = ({
     icons,
     activeOption,
-    onOptionChange
+    onOptionChange,
+    openDialog,
 }) => {
+
     return (
         <div className="flex flex-col gap2">
             {icons.map((item) => {
@@ -63,7 +71,8 @@ const IconGroup: React.FC<IconGroupProps> = ({
                 
                 const handleClick = () => {
                     if (item.action) {
-                        item.action()
+                        item.action(openDialog)
+                        return
                     }
 
                     if (onOptionChange && item.id !== activeOption) {
