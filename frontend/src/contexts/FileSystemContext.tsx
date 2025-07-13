@@ -17,7 +17,7 @@ interface FileSystemContextProps {
 const FileSystemContext = createContext<FileSystemContextProps | undefined>(undefined)
 
 interface FileSystemProviderProps {
-    vaultPath: string
+    vaultPath: string | undefined
     children: ReactNode
 }
 

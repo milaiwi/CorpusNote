@@ -22,7 +22,7 @@ export class FileSystemCache {
     private cache = new Map<string, CachedFile>()
     private writeQueues = new Map<string, WriteQueueItem>()
 
-    constructor (private vaultPath: string) {}
+    constructor (private vaultPath: string | undefined) {}
 
     /**
      * Read file content -- always return the in-memory state that we cached

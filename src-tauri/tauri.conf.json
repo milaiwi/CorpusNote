@@ -13,6 +13,7 @@
   },
   "tauri": {
     "allowlist": {
+      "all": false,
       "fs": {
         "all": true,
         "readFile": true,
@@ -25,8 +26,7 @@
         "message": true,
         "open": true,
         "save": true
-      },
-      "all": false
+      }
     },
     "bundle": {
       "active": true,

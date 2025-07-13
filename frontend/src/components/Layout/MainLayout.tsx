@@ -6,17 +6,15 @@ import FileSystemProvider from '../../contexts/FileSystemContext';
 import IconSidebar, { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import EditorManager from './EditorManager/EditorManager';
-import { AppSettingsProvider, useAppSettings } from '../Settings/AppSettings';
+import { useAppSettings } from '../Settings/AppSettings';
 
 interface MainLayoutProps {
     className?: string;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
-    // TODO: Move this up to a startup page -> sets the vault path and configurations
-    const [vaultPath, setVaultPath] = useState<string>("/Users/milaiwi/Documents/notes")
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
-    const { setVaultPathFn } = useAppSettings()
+    const { vaultPath } = useAppSettings()
 
     // setVaultPathFn('/Users/milaiwi')
 
@@ -24,28 +22,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
         <ThemeProvider>
             <FileSystemProvider vaultPath={vaultPath}>
                 <div className="h-screen flex flex-1">
-                    <div className="flex flex-1 overflow-hidden">
-                        {/* IconSidebar */}
-                        <div className="bg-secondary flex">
-                            <IconSidebar
-                                activeOption={activeOption}
-                                onOptionChange={setActiveOption}
-                            />
+                    {vaultPath === undefined ? (
+                        <h1>Make sure vault is not undefined</h1>
+                    ) : (
+                        <div className="flex flex-1 overflow-hidden">
+                            {/* IconSidebar */}
+                            <div className="bg-secondary flex">
+                                <IconSidebar
+                                    activeOption={activeOption}
+                                    onOptionChange={setActiveOption}
+                                />
 
-                            {/* File Sidebar */}
-                            <FileSidebar
-                                vaultPath={vaultPath}
-                            />
+                                {/* File Sidebar */}
+                                <FileSidebar
+                                    vaultPath={vaultPath}
+                                />
+                            </div>
+
+                            <div className="flex flex-col flex-1">
+                                {/* Title Bar*/}
+                                <TitleBar />
+
+                                {/* Editor Window */}
+                                <EditorManager />
+                            </div>
                         </div>
-
-                        <div className="flex flex-col flex-1">
-                            {/* Title Bar*/}
-                            <TitleBar />
-
-                            {/* Editor Window */}
-                            <EditorManager />
-                        </div>
-                    </div>
+                    )}
                 </div>
             </FileSystemProvider>
         </ThemeProvider>

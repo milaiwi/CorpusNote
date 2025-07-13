@@ -10,6 +10,7 @@ import { getDisplayTitle } from '../TitleBar/utils'
 import { Button } from '../../../../shadcn/ui/button'
 import { cn } from '../../../../lib/utils'
 import { useFileSystem } from '@/src/contexts/FileSystemContext'
+import readSingleDirectoryContent from './FileTree'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
     vaultPath,
@@ -53,10 +54,14 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     ]
 
     useEffect(() => {
+        const readFilesFromDirectory = async () => {
+            setFiles(await readSingleDirectoryContent(vaultPath))
+        }
+
         if (vaultPath) {
             setLoading(true)
             setTimeout(() => {
-                setFiles(mockFileSystem)
+                readFilesFromDirectory()
                 setLoading(false)
             }, 500)
         } else {

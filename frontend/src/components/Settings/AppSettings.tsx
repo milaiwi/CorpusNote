@@ -21,7 +21,6 @@ export const AppSettingsProvider = ({children}: { children: React.ReactNode }) =
                     store.get<string>('vaultPath')
                 ])
 
-                console.log(`get path: ${savedVaultPath}`)
                 setVaultPathFn(savedVaultPath)
             } catch (error) {
                 console.error(`Error is ${error}`)
