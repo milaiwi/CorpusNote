@@ -8,6 +8,7 @@ import {
 import { Button } from '../../../shadcn/ui/button'
 import { Folder, FolderOpen, Plus, History, Vault, CircleSlash2 } from 'lucide-react'
 import { GenericDialog } from '../../components/ui/GenericDialog'
+import { open } from '@tauri-apps/api/dialog'
 
 
 export const VaultSelectorDialog: React.FC = () => {
@@ -16,6 +17,18 @@ export const VaultSelectorDialog: React.FC = () => {
   const handleSelectNewVault = async () => {
     // TODO: Implement Tauri file dialog
     console.log('Opening directory selector...')
+    const selected = await open({
+      directory: true,
+      multiple: false,
+    })
+
+    
+
+    if (selected) {
+      console.log(`User selected: ${selected}`)
+    } else {
+      console.log(`User cancelled selection!`)
+    }
   }
 
   const handleRecentVaults = async () => {

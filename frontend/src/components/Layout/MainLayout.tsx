@@ -2,9 +2,11 @@
 import React, { useState } from 'react'
 import TitleBar from './TitleBar/Titlebar';
 import FileSidebar from './FileSidebar/FileSidebar';
-import FileSystemContext from '../../contexts/FileSystemContext';
+import FileSystemProvider from '../../contexts/FileSystemContext';
 import IconSidebar, { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
+import EditorManager from './EditorManager/EditorManager';
+import { AppSettingsProvider, useAppSettings } from '../Settings/AppSettings';
 
 interface MainLayoutProps {
     className?: string;
@@ -12,13 +14,15 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
     // TODO: Move this up to a startup page -> sets the vault path and configurations
-    const [vaultPath, setVaultPath] = useState<string | null>("/Users/memo/documents")
-    const [selectedFile, setSelectedFile] = useState<string | null>(null)
+    const [vaultPath, setVaultPath] = useState<string>("/Users/milaiwi/Documents/notes")
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
+    const { setVaultPathFn } = useAppSettings()
+
+    // setVaultPathFn('/Users/milaiwi')
 
     return (
         <ThemeProvider>
-            <FileSystemContext>
+            <FileSystemProvider vaultPath={vaultPath}>
                 <div className="h-screen flex flex-1">
                     <div className="flex flex-1 overflow-hidden">
                         {/* IconSidebar */}
@@ -31,24 +35,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
                             {/* File Sidebar */}
                             <FileSidebar
                                 vaultPath={vaultPath}
-                                selectedFile={selectedFile}
-                                onFileSelect={setSelectedFile}
                             />
                         </div>
 
                         <div className="flex flex-col flex-1">
                             {/* Title Bar*/}
-                            <TitleBar
-                                selectedFile={selectedFile}
-                                setSelectedFile={setSelectedFile}
-                            />
+                            <TitleBar />
 
                             {/* Editor Window */}
-                            {}
+                            <EditorManager />
                         </div>
                     </div>
                 </div>
-            </FileSystemContext>
+            </FileSystemProvider>
         </ThemeProvider>
     )
 }

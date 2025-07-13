@@ -1,13 +1,18 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+// src-tauri/src/main.rs
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// We define functions here like (fn greet(..) { ... } )
-// TODO: Define for File APIs
+use tauri::Manager;
 
-// We then invoke a handler so that it can be accessed
-// and used elsewhere (.invoke_handler(tauri::generate_handler![greet]))
 fn main() {
   tauri::Builder::default()
+    .setup(|app| {
+      #[cfg(debug_assertions)]
+      {
+        let window = app.get_window("main").unwrap();
+        window.open_devtools();
+      }
+      Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

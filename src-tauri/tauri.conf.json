@@ -4,7 +4,8 @@
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
     "devPath": "http://localhost:3000",
-    "distDir": "../out"
+    "distDir": "../out",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "corpusnote",
@@ -12,6 +13,19 @@
   },
   "tauri": {
     "allowlist": {
+      "fs": {
+        "all": true,
+        "readFile": true,
+        "scope": ["**"]
+      },
+      "dialog": {
+        "all": true,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
+      },
       "all": false
     },
     "bundle": {
@@ -29,7 +43,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.example.dev",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -55,11 +69,11 @@
     },
     "windows": [
       {
-        "fullscreen": false,
         "height": 600,
-        "resizable": true,
         "title": "CorpusNotes",
-        "width": 800
+        "width": 800,
+        "resizable": true,
+        "fullscreen": false
       }
     ]
   }

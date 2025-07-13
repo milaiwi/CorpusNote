@@ -7,7 +7,7 @@ type TAURI_WINDOW_ACTIONS = 'minimize' | 'maximize' | 'close';
  * @param title: the name of the file
  * @returns removes any extension applied to a file ('Test File 1.md' -> 'Test File 1')
  */
-export const getDisplayTitle = (title: string | null) => {
+export const getDisplayTitle = (title: string | undefined) => {
     if (title)
         return title.split('.')[0]
     return 'Untitled'

@@ -2,17 +2,16 @@
 import React from 'react'
 import { getDisplayTitle, handleWindowControl } from './utils';
 import { Circle, Minimize2, Square, X } from 'lucide-react';
+import { useFileSystem } from '@/src/contexts/FileSystemContext';
 
 
-interface TitleBarProps {
-    selectedFile: string | null;
-    setSelectedFile: (path: string) => void; 
-}
 
 // TODO:
 //  - Need to change button and other containers to shadcn objects
 //  - Need to define default colors for borders
-const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile }) => {    
+const TitleBar: React.FC = () => {    
+    const { currentFilePath } = useFileSystem()
+
     // {/* TODO: Set up custom color schemes for the border*/}        
     return (
         <div 
@@ -42,7 +41,7 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile }) => 
             {/* Center - Title */}
             <div className="flex-1 flex justify-center">
                 <h1 className="text-sm font-medium text-gray-200 truncate max-w-md">
-                    {getDisplayTitle(selectedFile)}
+                    {getDisplayTitle(currentFilePath)}
                 </h1>
             </div>
 

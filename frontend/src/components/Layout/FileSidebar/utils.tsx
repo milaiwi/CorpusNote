@@ -1,8 +1,10 @@
 // frontend/src/components/Layout/FileSidebar/utils
+export type FileType = 'file' | 'directory';
+
 export interface FileItem {
     name: string;   // name of the file
     absPath: string; // absolute path of ifle
-    type: 'file' | 'directory';
+    type: FileType;
     timeCreated: number,
     timeModified?: number,
     currentPosition?: number, // current cursor position
@@ -13,7 +15,5 @@ export interface FileItem {
 
 export interface FileSidebarProps {
     vaultPath: string | null,
-    selectedFile: string | null;
-    onFileSelect: (filePath: string) => void;
 }
 

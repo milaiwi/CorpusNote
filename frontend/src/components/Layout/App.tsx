@@ -2,6 +2,7 @@
 import React from 'react'
 import MainLayout from './MainLayout'
 import { DialogProvider } from '../../contexts/DialogContext'
+import { AppSettingsProvider } from '../Settings/AppSettings'
 
 /**
  * Entry point in the entire app. Does the following functions:
@@ -13,9 +14,11 @@ import { DialogProvider } from '../../contexts/DialogContext'
  */
 const App = () => {
     return (
-        <DialogProvider>
-            <MainLayout />
-        </DialogProvider>
+        <AppSettingsProvider>
+            <DialogProvider>
+                <MainLayout />
+            </DialogProvider>
+        </AppSettingsProvider>
     )
 }
 

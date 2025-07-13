@@ -4,37 +4,36 @@ import { FileSidebarProps, FileItem } from './utils'
 import {
     ChevronRight,
     ChevronDown,
-    File,
     Folder
 } from 'lucide-react'
 import { getDisplayTitle } from '../TitleBar/utils'
 import { Button } from '../../../../shadcn/ui/button'
 import { cn } from '../../../../lib/utils'
+import { useFileSystem } from '@/src/contexts/FileSystemContext'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
     vaultPath,
-    selectedFile,
-    onFileSelect
 }) => {
     const [files, setFiles] = useState<FileItem[]>([])
     const [loading, setLoading] = useState<boolean>(false)
+    const { currentFilePath, readFile } = useFileSystem()
 
     // TODO: Instead of mock system, connect to Tauri API
     const mockFileSystem: FileItem[] = [
         {
             name: 'Notes',
-            absPath: '/vault/Notes',
+            absPath: '/Users/milaiwi/Documents/notes',
             type: 'directory',
             expanded: true,
             children: [
-                { name: 'Daily Notes.md', absPath: '/vault/Notes/Daily Notes.md', type: 'file', timeCreated: Date.now() },
-                { name: 'Project Ideas.md', absPath: '/vault/Notes/Project Ideas.md', type: 'file', timeCreated: Date.now() },
+                { name: 'Daily Notes.md', absPath: '/Users/milaiwi/Documents/notes/Daily_Notes.md', type: 'file', timeCreated: Date.now() },
+                { name: 'Project Ideas.md', absPath: '/Users/milaiwi/Documents/notes/Project_Ideas.md', type: 'file', timeCreated: Date.now() },
                 {
                     name: 'Archive',
-                    absPath: '/vault/Notes/Archive',
+                    absPath: '/Users/milaiwi/Documents/notes/Archive',
                     type: 'directory',
                     children: [
-                        { name: 'Old Notes.md', absPath: '/vault/Notes/Archive/Old Notes.md', type: 'file', timeCreated: Date.now() }
+                        { name: 'Old Notes.md', absPath: '/Users/milaiwi/Documents/notes/Archive/Old_Notes.md', type: 'file', timeCreated: Date.now() }
                     ],
                     timeCreated: Date.now(),
                 }
@@ -80,7 +79,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     }
 
     const renderFileItem = (item: FileItem, depth: number = 0) => {
-        const isSelected = selectedFile === item.absPath
+        const isSelected = currentFilePath === item.absPath
         const paddingLeft = depth * 16 + 8
 
         return (
@@ -97,7 +96,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                         if (item.type === 'directory')
                             toggleDirectory(item.absPath)
                         else
-                            onFileSelect(item.absPath)
+                            readFile(item.absPath)
                     }}
                 >
                     {item.type === 'directory' && (
