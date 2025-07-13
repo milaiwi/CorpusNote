@@ -33,8 +33,6 @@ export const AppSettingsProvider = ({children}: { children: React.ReactNode }) =
     }, [store])
 
     const setVaultPathFn = async (path: string | undefined) => {
-        console.log(`Store is`, store)
-        console.log(`setting path: ${path}`)
         setVaultPath(path)
         await store.set('vaultPath', path)
     }

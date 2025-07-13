@@ -13,8 +13,6 @@ class TauriStore {
             if (this.store) {
                 const value = await this.store.get(key)
                 return value !== null ? value : defaultValue
-            } else {
-                console.log(`this.store does not exist`)
             }
         } catch (error) {
             console.error(`Failed to get value.`)
@@ -26,8 +24,6 @@ class TauriStore {
             if (this.store) {
                 await this.store.set(key, value)
                 await this.store.save()
-            }   else {
-                console.log(`this.store does not exist`)
             }
         } catch (error) {
             console.error(`Failed to get value.`)

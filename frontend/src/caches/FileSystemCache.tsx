@@ -39,9 +39,7 @@ export class FileSystemCache {
         this.updateCache(path, { isLoading: true })
 
         try {
-            console.log(`Attempting to read file at: ${path}`)
             const content = await readTextFile(path)
-            console.log(`content is: ${content}`)
 
             // @ts-ignore - ts doesn't recognize this sets and updates
             // each argument despite spreading the old cache values out

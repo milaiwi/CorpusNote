@@ -19,7 +19,6 @@ export const VaultSelectorDialog: React.FC = () => {
 
   const handleSelectNewVault = async () => {
     // TODO: Implement Tauri file dialog
-    console.log('Opening directory selector...')
     const selected = await open({
       directory: true,
       multiple: false,
@@ -30,14 +29,10 @@ export const VaultSelectorDialog: React.FC = () => {
     if (selected) {
       if (typeof selected === 'string')
         setVaultPathFn(selected)
-      console.log(`User selected: ${selected}`)
-    } else {
-      console.log(`User cancelled selection!`)
     }
   }
 
   const handleRecentVaults = async () => {
-    console.log('Displaying recent vaults directory')
     setShowRecentVaults(true)
   }
 
