@@ -5,6 +5,7 @@ import FileSidebar from './FileSidebar/FileSidebar';
 import FileSystemContext from '../../contexts/FileSystemContext';
 import IconSidebar, { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
+import EditorManager from './EditorManager/EditorManager';
 
 interface MainLayoutProps {
     className?: string;
@@ -44,7 +45,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
                             />
 
                             {/* Editor Window */}
-                            {}
+                            <EditorManager />
                         </div>
                     </div>
                 </div>
