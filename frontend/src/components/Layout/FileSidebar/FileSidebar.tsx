@@ -10,6 +10,7 @@ import {
 import { getDisplayTitle } from '../TitleBar/utils'
 import { Button } from '../../../../shadcn/ui/button'
 import { cn } from '../../../../lib/utils'
+import readSingleDirectoryContent from './FileTree'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
     vaultPath,
@@ -18,6 +19,31 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
 }) => {
     const [files, setFiles] = useState<FileItem[]>([])
     const [loading, setLoading] = useState<boolean>(false)
+
+    useEffect(() => {
+        const readFilesFromDirectory = async () => {
+            setFiles(await readSingleDirectoryContent(vaultPath))
+            console.log('files', files)
+            return true
+        }
+
+        readFilesFromDirectory()
+    }, [vaultPath])
+
+    useEffect(() => {
+        const readFilesFromDirectory = async () => {
+            setFiles(await readSingleDirectoryContent(vaultPath))
+        }
+        
+        if (vaultPath) {
+            setLoading(true)
+            readFilesFromDirectory().then(() => {
+                setLoading(false)
+            })
+        } else {
+            setFiles([])
+        }
+    }, [vaultPath])
 
     // TODO: Instead of mock system, connect to Tauri API
     const mockFileSystem: FileItem[] = [
@@ -52,18 +78,6 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
             timeCreated: Date.now(),
         }
     ]
-
-    useEffect(() => {
-        if (vaultPath) {
-            setLoading(true)
-            setTimeout(() => {
-                setFiles(mockFileSystem)
-                setLoading(false)
-            }, 500)
-        } else {
-            setFiles([])
-        }
-    }, [vaultPath])
 
     const toggleDirectory = (path: string) => {
         const updateExpanded = (items: FileItem[]): FileItem[] => {

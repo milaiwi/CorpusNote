@@ -3,7 +3,7 @@ export interface FileItem {
     name: string;   // name of the file
     absPath: string; // absolute path of ifle
     type: 'file' | 'directory';
-    timeCreated: number,
+    timeCreated?: number,
     timeModified?: number,
     currentPosition?: number, // current cursor position
     mimeType?: string, // image, text file, etc..

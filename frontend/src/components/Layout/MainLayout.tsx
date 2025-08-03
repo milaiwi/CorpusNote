@@ -45,7 +45,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '', vaultPath = '/U
                     />
 
                     {/* Editor Window */}
-                    <EditorManager />
+                    <EditorManager
+                        selectedFile={selectedFile}
+                    />
                 </div>
             </div>
         </div>
@@ -55,7 +57,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '', vaultPath = '/U
 
 const MainPageLayout = () => {
     const queryClient = new QueryClient()
-    const [vaultPath, setVaultPath] = useState<string | null>("/Users/memo/documents")
+    const [vaultPath, setVaultPath] = useState<string | null>("/Users/milaiwi/documents/notes")
 
     return (
         <ThemeProvider>
