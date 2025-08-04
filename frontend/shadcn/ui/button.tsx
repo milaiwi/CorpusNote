@@ -27,9 +27,9 @@ const buttonVariants = cva(
         sidebarActive: 
           "bg-[oklch(0_0_0_/_6%)] text-foreground dark:bg-[oklch(1_0_0_/_10%)] dark:text-foreground",
         // File-specific variants for the FileSidebar
-        fileItem:
-          "text-foreground hover:text-foreground hover:bg-[oklch(0_0_0_/_3%)] dark:hover:bg-[oklch(1_0_0_/_5.49%)] transition-colors duration-150 justify-start",
-        fileItemActive:
+        item_generic:
+          "text-foreground hover:text-foreground hover:bg-[oklch(0_0_0_/_3%)] dark:hover:bg-[oklch(1_0_0_/_5.49%)] transition-colors duration-150",
+        item_generic_active:
           "bg-primary-hover border-r-2 rounded-md",
       },
       size: {

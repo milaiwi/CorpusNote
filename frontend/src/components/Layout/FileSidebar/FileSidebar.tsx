@@ -4,7 +4,8 @@ import { FileSidebarProps, FileItem } from './utils'
 import {
     ChevronRight,
     ChevronDown,
-    Folder
+    Folder,
+    PanelLeft
 } from 'lucide-react'
 import { getDisplayTitle } from '../TitleBar/utils'
 import { Button } from '../../../../shadcn/ui/button'
@@ -27,7 +28,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
         return (
             <div key={item.absPath}>
                 <Button
-                    variant={isSelected ? "fileItemActive" : "fileItem"}
+                    variant={isSelected ? "item_generic_active" : "item_generic"}
                     size="fileItem"
                     className={cn(
                         "w-full",
@@ -74,6 +75,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
 
     return (
         <div className="border-r border-border flex flex-col px-4">
+            <FileSidebarHeader />
             <div className="flex w-full justify-center">
                 <IconSidebar
                     activeOption={activeOption}
@@ -92,6 +94,18 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     </div>
                 )}
             </div>
+        </div>
+    )
+}
+
+
+
+const FileSidebarHeader = () => {
+    return (
+        <div className="flex w-full justify-end h-[45px] border-b border-border items-center">
+            <Button variant="item_generic" size="icon">
+                <PanelLeft size={16} />
+            </Button>
         </div>
     )
 }

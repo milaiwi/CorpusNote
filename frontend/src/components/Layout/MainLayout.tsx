@@ -26,34 +26,33 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '', vaultPath = '/U
 
     return (
         <div className="h-screen flex flex-1">
-            <div className="flex flex-col flex-1">
-                {/* Title Bar*/}
-                <TitleBar
-                    selectedFile={selectedFile}
-                    setSelectedFile={setSelectedFile}
-                />
+            <ResizablePanelGroup direction="horizontal">
+                <ResizablePanel minSize={20} maxSize={30}>  
+                    {/* File Sidebar */}
+                    <FileSidebar
+                        vaultPath={vaultPath}
+                        selectedFile={selectedFile}
+                        onFileSelect={setSelectedFile}
+                        activeOption={activeOption}
+                        setActiveOption={setActiveOption}
+                    />
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel>
+                    <div className="flex flex-col flex-1">
+                        {/* Title Bar*/}
+                        <TitleBar
+                            selectedFile={selectedFile}
+                            setSelectedFile={setSelectedFile}
+                        />
 
-                <div className="flex flex-1">
-                    <ResizablePanelGroup direction="horizontal">
-                        <ResizablePanel minSize={20} maxSize={30}>
-                            <FileSidebar
-                                vaultPath={vaultPath}
-                                selectedFile={selectedFile}
-                                onFileSelect={setSelectedFile}
-                                activeOption={activeOption}
-                                setActiveOption={setActiveOption}
-                            />
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel>
-                            {/* Editor Window */}
-                            <EditorManager
-                                selectedFile={selectedFile}
-                            />
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                </div>
-            </div>
+                        {/* Editor Window */}
+                        <EditorManager
+                            selectedFile={selectedFile}
+                        />
+                    </div>
+                </ResizablePanel>
+            </ResizablePanelGroup>
         </div>
     )
 }
