@@ -3,6 +3,7 @@ import { BlockNoteView } from '@blocknote/mantine'
 import { useCreateBlockNote } from '@blocknote/react'
 import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
+import './editor.css'
 
 import React, { useEffect } from 'react'
 import { useFileCache } from '../../../contexts/FileCache'

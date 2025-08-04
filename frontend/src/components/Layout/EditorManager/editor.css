@@ -1,0 +1,9 @@
+.bn-container {
+    height: calc(100vh - 45px)
+}
+
+.bn-editor {
+    height: 100%;
+    overflow: hidden;
+    padding: 2rem;
+}
