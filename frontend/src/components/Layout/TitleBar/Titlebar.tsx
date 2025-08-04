@@ -18,7 +18,7 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile, isSid
     // {/* TODO: Set up custom color schemes for the border*/}        
     return (
         <div 
-            className="border-b border-gray-700 flex items-center justify-between px-4 select-none h-[45px]"
+            className="border-b border-border flex items-center justify-between px-4 select-none h-[45px]"
             data-tauri-drag-region="true" // Allows dragging the window in Tauri
         >
             <div className="flex items-center space-x-2">

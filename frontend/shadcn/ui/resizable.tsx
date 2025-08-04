@@ -37,7 +37,6 @@ function ResizableHandle({
 }) {
   const [isDragging, setIsDragging] = React.useState(false)
 
-   console.log(`IsDragging: ${isDragging}`)
   return (
     <ResizablePrimitive.PanelResizeHandle
       data-slot="resizable-handle"
