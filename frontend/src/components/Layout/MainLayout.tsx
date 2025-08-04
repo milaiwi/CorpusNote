@@ -8,6 +8,11 @@ import IconSidebar, { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import EditorManager from './EditorManager/EditorManager';
 import FileCacheProvider from '../../contexts/FileCache';
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+} from '../../../shadcn/ui/resizable'
 
 interface MainLayoutProps {
     className?: string;
@@ -21,33 +26,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '', vaultPath = '/U
 
     return (
         <div className="h-screen flex flex-1">
-            <div className="flex flex-1 overflow-hidden">
-                {/* IconSidebar */}
-                <div className="bg-secondary flex">
-                    <IconSidebar
-                        activeOption={activeOption}
-                        onOptionChange={setActiveOption}
-                    />
+            <div className="flex flex-col flex-1">
+                {/* Title Bar*/}
+                <TitleBar
+                    selectedFile={selectedFile}
+                    setSelectedFile={setSelectedFile}
+                />
 
-                    {/* File Sidebar */}
-                    <FileSidebar
-                        vaultPath={vaultPath}
-                        selectedFile={selectedFile}
-                        onFileSelect={setSelectedFile}
-                    />
-                </div>
-
-                <div className="flex flex-col flex-1">
-                    {/* Title Bar*/}
-                    <TitleBar
-                        selectedFile={selectedFile}
-                        setSelectedFile={setSelectedFile}
-                    />
-
-                    {/* Editor Window */}
-                    <EditorManager
-                        selectedFile={selectedFile}
-                    />
+                <div className="flex flex-1">
+                    <ResizablePanelGroup direction="horizontal">
+                        <ResizablePanel minSize={20} maxSize={30}>
+                            <FileSidebar
+                                vaultPath={vaultPath}
+                                selectedFile={selectedFile}
+                                onFileSelect={setSelectedFile}
+                                activeOption={activeOption}
+                                setActiveOption={setActiveOption}
+                            />
+                        </ResizablePanel>
+                        <ResizableHandle withHandle />
+                        <ResizablePanel>
+                            {/* Editor Window */}
+                            <EditorManager
+                                selectedFile={selectedFile}
+                            />
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
                 </div>
             </div>
         </div>

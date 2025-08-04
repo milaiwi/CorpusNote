@@ -4,7 +4,7 @@ import { IconProps, topLevelIcons, bottomLevelIcons } from './icons'
 import { ThemeToggle } from '../../ui/ThemeToggle';
 import { LucideIcon } from 'lucide-react';
 
-export type IconSidebarOptions = 'files' | 'search' | 'new-note' | 'new-directory' | 'open-vault'
+export type IconSidebarOptions = 'files' | 'search' | 'new-note' | 'new-directory'
 
 interface IconSidebarProps {
     activeOption: IconSidebarOptions
@@ -26,9 +26,7 @@ const IconSidebar: React.FC<IconSidebarProps> = ({
 }) => {
     return (
         <div className={`
-            w-12
-            border-r border-gray-200 dark:border-gray-800
-            flex flex-col justify-between items-center py-2
+            flex justify-between items-center py-2
             ${className}
         `}>
             <IconGroup
@@ -37,14 +35,14 @@ const IconSidebar: React.FC<IconSidebarProps> = ({
                 onOptionChange={onOptionChange}
             />
 
-            <div className="flex flex-col items-center gap-2">
+            {/* <div className="flex flex-col items-center gap-2">
                 <IconGroup 
                 icons={bottomLevelIcons} 
                 activeOption={activeOption} 
                 onOptionChange={onOptionChange}
                 />
                 <ThemeToggle />
-            </div>
+            </div> */}
 
         </div>
     )
@@ -56,7 +54,7 @@ const IconGroup: React.FC<IconGroupProps> = ({
     onOptionChange
 }) => {
     return (
-        <div className="flex flex-col gap2">
+        <div className="flex gap-1">
             {icons.map((item) => {
                 const Icon = item.icon
                 const isActive = item.id === activeOption

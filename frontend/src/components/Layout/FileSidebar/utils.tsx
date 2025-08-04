@@ -1,4 +1,6 @@
 // frontend/src/components/Layout/FileSidebar/utils
+import { IconSidebarOptions } from "../IconSidebar/IconSidebar";
+
 export interface FileItem {
     name: string;   // name of the file
     absPath: string; // absolute path of ifle
@@ -15,5 +17,7 @@ export interface FileSidebarProps {
     vaultPath: string | null,
     selectedFile: string | null;
     onFileSelect: (filePath: string) => void;
+    activeOption: IconSidebarOptions;
+    setActiveOption: (option: IconSidebarOptions) => void;
 }
 
