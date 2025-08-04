@@ -79,7 +79,7 @@ const ResizableSidebar: React.FC<ResizableSidebarProps> = ({
       </ResizablePanel>
 
       {/* Resize Handle */}
-      {!isCollapsed && <ResizableHandle withHandle />}
+      {!isCollapsed && <ResizableHandle withHandle/>}
 
       {/* Editor Panel */}
       <ResizablePanel>
