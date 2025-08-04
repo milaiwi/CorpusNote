@@ -1,18 +1,20 @@
 // frontend/src/components/Layout/TitleBar/Titlebar
 import React from 'react'
 import { getDisplayTitle, handleWindowControl } from './utils';
-import { Circle, Minimize2, Square, X } from 'lucide-react';
+import { Circle, Minimize2, Square, X, PanelLeft } from 'lucide-react';
 
 
 interface TitleBarProps {
     selectedFile: string | null;
     setSelectedFile: (path: string) => void; 
+    isSidebarCollapsed?: boolean;
+    onToggleSidebar?: () => void;
 }
 
 // TODO:
 //  - Need to change button and other containers to shadcn objects
 //  - Need to define default colors for borders
-const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile }) => {    
+const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile, isSidebarCollapsed = false, onToggleSidebar }) => {    
     // {/* TODO: Set up custom color schemes for the border*/}        
     return (
         <div 
@@ -21,6 +23,15 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile }) => 
         >
             {/* Left side - Traffic lights (macOS style) or empty space */}
             <div className="flex items-center space-x-2">
+                {isSidebarCollapsed && onToggleSidebar && (
+                    <button
+                        onClick={onToggleSidebar}
+                        className="p-1 hover:bg-gray-700 rounded transition-colors"
+                        title="Show sidebar"
+                    >
+                        <PanelLeft size={16} className="text-gray-400" />
+                    </button>
+                )}
                 <div className="flex space-x-2 md:hidden"> {/* Show on mobile/web */}
                 <button
                     onClick={() => handleWindowControl('close')}

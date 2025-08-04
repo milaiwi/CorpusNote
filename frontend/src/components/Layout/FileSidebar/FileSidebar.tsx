@@ -17,7 +17,9 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     selectedFile,
     onFileSelect,
     activeOption,
-    setActiveOption
+    setActiveOption,
+    isCollapsed = false,
+    onToggleCollapse
 }) => {
     const { vaultTree: files, expandedDirectories, handleDirectoryToggle } = useFileSystem()
     const [loading, setLoading] = useState<boolean>(false)
@@ -74,37 +76,55 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     }
 
     return (
-        <div className="border-r border-border flex flex-col px-4">
-            <FileSidebarHeader />
-            <div className="flex w-full justify-center">
-                <IconSidebar
-                    activeOption={activeOption}
-                    onOptionChange={setActiveOption}
-                />
-            </div>
-            <div className="overflow-y-auto">
-                {loading ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"></div>
-                        <p className="mt-2 text-xs">Loading files...</p>
+        <div className={cn(
+            "flex flex-col transition-all duration-300 ease-in-out",
+            isCollapsed ? "px-0" : "px-4"
+        )}>
+            <FileSidebarHeader onToggleCollapse={onToggleCollapse} isCollapsed={isCollapsed} />
+            {!isCollapsed && (
+                <>
+                    <div className="flex w-full justify-center">
+                        <IconSidebar
+                            activeOption={activeOption}
+                            onOptionChange={setActiveOption}
+                        />
                     </div>
-                ) : (
-                    <div className="flex flex-col gap-1 py-2">
-                        {files.map(item => renderFileItem(item))}
+                    <div className="overflow-y-auto">
+                        {loading ? (
+                            <div className="p-4 text-center text-muted-foreground">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"></div>
+                                <p className="mt-2 text-xs">Loading files...</p>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-1 py-2">
+                                {files.map(item => renderFileItem(item))}
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
+                </>
+            )}
         </div>
     )
 }
 
+interface FileSidebarHeaderProps {
+    onToggleCollapse?: () => void;
+    isCollapsed?: boolean;
+}
 
-
-const FileSidebarHeader = () => {
+const FileSidebarHeader: React.FC<FileSidebarHeaderProps> = ({ onToggleCollapse, isCollapsed = false }) => {
     return (
-        <div className="flex w-full justify-end h-[45px] border-b border-border items-center">
-            <Button variant="item_generic" size="icon">
-                <PanelLeft size={16} />
+        <div className="flex justify-end h-[45px] border-b border-border items-center">
+            <Button 
+                variant="item_generic" 
+                size="icon"
+                onClick={onToggleCollapse}
+                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+                <PanelLeft size={16} className={cn(
+                    "transition-transform duration-300",
+                    isCollapsed && "rotate-180"
+                )} />
             </Button>
         </div>
     )
