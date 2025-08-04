@@ -76,35 +76,30 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     }
 
     return (
-        <div className={cn(
-            "flex flex-col transition-all duration-300 ease-in-out",
-            isCollapsed ? "px-0" : "px-4"
-        )}>
-            <FileSidebarHeader onToggleCollapse={onToggleCollapse} isCollapsed={isCollapsed} />
-            {!isCollapsed && (
-                <>
-                    <div className="flex w-full justify-center">
-                        <IconSidebar
-                            activeOption={activeOption}
-                            onOptionChange={setActiveOption}
-                        />
-                    </div>
-                    <div className="overflow-y-auto">
-                        {loading ? (
-                            <div className="p-4 text-center text-muted-foreground">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"></div>
-                                <p className="mt-2 text-xs">Loading files...</p>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-1 py-2">
-                                {files.map(item => renderFileItem(item))}
-                            </div>
-                        )}
-                    </div>
-                </>
+        <div className="flex flex-col px-4 transition-all duration-300 ease-in-out border-r border-border h-full">
+          <FileSidebarHeader onToggleCollapse={onToggleCollapse} isCollapsed={isCollapsed} />
+      
+          <div className="flex w-full justify-center">
+            <IconSidebar
+              activeOption={activeOption}
+              onOptionChange={setActiveOption}
+            />
+          </div>
+      
+          <div className="overflow-y-auto">
+            {loading ? (
+              <div className="p-4 text-center text-muted-foreground">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"></div>
+                <p className="mt-2 text-xs">Loading files...</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1 py-2">
+                {files.map(item => renderFileItem(item))}
+              </div>
             )}
+          </div>
         </div>
-    )
+    )      
 }
 
 interface FileSidebarHeaderProps {

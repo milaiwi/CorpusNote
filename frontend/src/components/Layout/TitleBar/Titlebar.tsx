@@ -21,7 +21,6 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, setSelectedFile, isSid
             className="border-b border-gray-700 flex items-center justify-between px-4 select-none h-[45px]"
             data-tauri-drag-region="true" // Allows dragging the window in Tauri
         >
-            {/* Left side - Traffic lights (macOS style) or empty space */}
             <div className="flex items-center space-x-2">
                 {isSidebarCollapsed && onToggleSidebar && (
                     <button
