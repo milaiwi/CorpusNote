@@ -4,94 +4,19 @@ import { FileSidebarProps, FileItem } from './utils'
 import {
     ChevronRight,
     ChevronDown,
-    File,
     Folder
 } from 'lucide-react'
 import { getDisplayTitle } from '../TitleBar/utils'
 import { Button } from '../../../../shadcn/ui/button'
 import { cn } from '../../../../lib/utils'
-import readSingleDirectoryContent from './FileTree'
+import { useFileSystem } from '../../../contexts/FileSystemContext'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
-    vaultPath,
     selectedFile,
     onFileSelect
 }) => {
-    const [files, setFiles] = useState<FileItem[]>([])
+    const { vaultTree: files, expandedDirectories, handleDirectoryToggle } = useFileSystem()
     const [loading, setLoading] = useState<boolean>(false)
-
-    useEffect(() => {
-        const readFilesFromDirectory = async () => {
-            setFiles(await readSingleDirectoryContent(vaultPath))
-            console.log('files', files)
-            return true
-        }
-
-        readFilesFromDirectory()
-    }, [vaultPath])
-
-    useEffect(() => {
-        const readFilesFromDirectory = async () => {
-            setFiles(await readSingleDirectoryContent(vaultPath))
-        }
-        
-        if (vaultPath) {
-            setLoading(true)
-            readFilesFromDirectory().then(() => {
-                setLoading(false)
-            })
-        } else {
-            setFiles([])
-        }
-    }, [vaultPath])
-
-    // TODO: Instead of mock system, connect to Tauri API
-    const mockFileSystem: FileItem[] = [
-        {
-            name: 'Notes',
-            absPath: '/vault/Notes',
-            type: 'directory',
-            expanded: true,
-            children: [
-                { name: 'Daily Notes.md', absPath: '/vault/Notes/Daily Notes.md', type: 'file', timeCreated: Date.now() },
-                { name: 'Project Ideas.md', absPath: '/vault/Notes/Project Ideas.md', type: 'file', timeCreated: Date.now() },
-                {
-                    name: 'Archive',
-                    absPath: '/vault/Notes/Archive',
-                    type: 'directory',
-                    children: [
-                        { name: 'Old Notes.md', absPath: '/vault/Notes/Archive/Old Notes.md', type: 'file', timeCreated: Date.now() }
-                    ],
-                    timeCreated: Date.now(),
-                }
-            ],
-            timeCreated: Date.now()
-        },
-        {
-            name: 'Documents',
-            absPath: '/vault/Documents',
-            type: 'directory',
-            children: [
-                { name: 'README.md', absPath: '/vault/Documents/README.md', type: 'file', timeCreated: Date.now() },
-                { name: 'TODO.md', absPath: '/vault/Documents/TODO.md', type: 'file', timeCreated: Date.now() }
-            ],
-            timeCreated: Date.now(),
-        }
-    ]
-
-    const toggleDirectory = (path: string) => {
-        const updateExpanded = (items: FileItem[]): FileItem[] => {
-            return items.map(item => {
-                if (item.absPath === path && item.type === 'directory')
-                    return { ...item, expanded: !item.expanded }
-                if (item.children)
-                    return { ...item, children: updateExpanded(item.children) }
-                return item
-            })
-        }
-
-        setFiles(updateExpanded(files))
-    }
 
     const renderFileItem = (item: FileItem, depth: number = 0) => {
         const isSelected = selectedFile === item.absPath
@@ -109,14 +34,14 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     style={{ paddingLeft }} 
                     onClick={() => {
                         if (item.type === 'directory')
-                            toggleDirectory(item.absPath)
+                            handleDirectoryToggle(item.absPath)
                         else
                             onFileSelect(item.absPath)
                     }}
                 >
                     {item.type === 'directory' && (
                         <>
-                            {item.expanded ? (
+                            {expandedDirectories.get(item.absPath) ? (
                                 <ChevronDown size={14} className="text-muted-foreground" />
                             ) : (
                                 <ChevronRight size={14} className="text-muted-foreground" />
@@ -127,7 +52,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     <span className="truncate">{getDisplayTitle(item.name)}</span>
                 </Button>
                 
-                {item.type === 'directory' && item.expanded && item.children && (
+                {item.type === 'directory' && expandedDirectories.get(item.absPath) && item.children && (
                     <div>
                         {item.children.map(child => renderFileItem(child, depth + 1))}
                     </div>
@@ -136,12 +61,12 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
         )
     }
 
-    if (!vaultPath) {
+    if (!files) {
         return (
             <div className="w-64 border-r border-border p-4 flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
                     <Folder size={48} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Select a vault to begin</p>
+                    <p className="text-sm">There are no files in this vault</p>
                 </div>
             </div>
         )
@@ -149,11 +74,11 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
 
     return (
         <div className="w-64 border-r border-border flex flex-col">
-            <div className="p-3 border-b border-border">
+            {/* <div className="p-3 border-b border-border">
                 <h2 className="text-sm font-medium text-foreground truncate">
                     {vaultPath.split('/').pop() || 'Vault'}
                 </h2>
-            </div>
+            </div> */}
             
             <div className="flex-1 overflow-y-auto">
                 {loading ? (

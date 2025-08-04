@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import TitleBar from './TitleBar/Titlebar';
 import FileSidebar from './FileSidebar/FileSidebar';
-import FileSystemContext from '../../contexts/FileSystemContext';
+import FileSystemProvider from '../../contexts/FileSystemContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import IconSidebar, { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
@@ -63,11 +63,11 @@ const MainPageLayout = () => {
         <ThemeProvider>
             <QueryClientProvider client={queryClient}>
                 <FileCacheProvider queryClient={queryClient} vaultPath={vaultPath}>
-                    <FileSystemContext>
+                    <FileSystemProvider vaultPath={vaultPath}>
                         <MainLayout
                             vaultPath={vaultPath}
                         />
-                    </FileSystemContext>
+                    </FileSystemProvider>
                 </FileCacheProvider>
             </QueryClientProvider>
         </ThemeProvider>
