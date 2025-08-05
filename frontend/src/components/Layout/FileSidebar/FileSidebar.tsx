@@ -1,4 +1,4 @@
-// frontend/src/components/Layout/FileSidebar/FileSidebar.tsx
+// frontend/src/components/layout/FileSidebar/FileSidebar.tsx
 import React, { useState, useEffect } from 'react'
 import { FileSidebarProps, FileItem } from './utils'
 import {
@@ -13,6 +13,7 @@ import { cn } from '../../../../lib/utils'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { IconGroup } from '../IconSidebar/IconSidebar'
 import { bottomLevelIcons, topLevelIcons } from '../IconSidebar/icons'
+import { useDialog } from '../../../contexts/DialogContext'
 import { ThemeToggle } from '../../ui/ThemeToggle'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
@@ -25,6 +26,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
 }) => {
     const { vaultTree: files, expandedDirectories, handleDirectoryToggle } = useFileSystem()
     const [loading, setLoading] = useState<boolean>(false)
+    const { openDialog } = useDialog()
 
     const renderFileItem = (item: FileItem, depth: number = 0) => {
         const isSelected = selectedFile === item.absPath
@@ -88,6 +90,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                 activeOption={activeOption}
                 onOptionChange={setActiveOption}
                 className="justify-center"
+                openDialog={openDialog}
             />
         
             {/* File Content - Takes remaining space */}
@@ -111,6 +114,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     activeOption={activeOption}
                     onOptionChange={setActiveOption}
                     customIcons={[<ThemeToggle />]}
+                    openDialog={openDialog}
                 />
             </div>
         </div>

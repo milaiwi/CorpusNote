@@ -1,7 +1,7 @@
 // frontend/src/contexts/FileSystemContext.tsx
 import React, { createContext, useContext, ReactNode, useState, useEffect } from "react"
-import { FileItem } from "../components/Layout/FileSidebar/utils"
-import readSingleDirectoryContent from "../components/Layout/FileSidebar/FileTree"
+import { FileItem } from "../components/layout/FileSidebar/utils"
+import readSingleDirectoryContent from "../components/layout/FileSidebar/FileTree"
 import { useFileCache } from "./FileCache"
 
 type FileSystemContextType = {

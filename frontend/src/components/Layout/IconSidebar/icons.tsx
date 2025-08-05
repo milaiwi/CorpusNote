@@ -6,12 +6,13 @@ import {
     FolderPlus,
     Vault,
 } from 'lucide-react'
+import { VaultSelectorDialog } from '../../dialog/VaultSelectorDialog'
 
 export interface IconProps {
   id: string;  // 'file', 'search', etc..
   icon: React.ComponentType<{ size?: number; className?: string }>; // Icon to display
   label: string; // Label for element (display on hover)
-  action?: () => void; // callback function on selection
+  action?: (openDialog: (component: React.ReactNode) => void) => void; // callback function on selection
 }
 
 const FileIcon: IconProps = {
@@ -42,8 +43,12 @@ const OpenVaultIcon: IconProps = {
     id: 'open-vault',
     icon: Vault,
     label: 'Open Vault',
+    action: (openDialog) => {
+        openDialog(
+            <VaultSelectorDialog />
+        )
+    }
 }
-
 
 export const topLevelIcons: IconProps[] = [
     FileIcon,

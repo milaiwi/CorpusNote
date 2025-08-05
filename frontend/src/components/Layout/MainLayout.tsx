@@ -1,4 +1,4 @@
-// frontend/src/components/Layout/MainLayout.tsx
+// frontend/src/components/layout/MainLayout.tsx
 import React, { useState } from 'react'
 import TitleBar from './TitleBar/Titlebar';
 import ResizableSidebar from './ResizableSidebar';
@@ -8,9 +8,7 @@ import { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import EditorManager from './EditorManager/EditorManager';
 import FileCacheProvider from '../../contexts/FileCache';
-import {
-    ResizablePanel,
-} from '../../../shadcn/ui/resizable'
+import { DialogProvider } from '../../contexts/DialogContext';
 
 interface MainLayoutProps {
     className?: string;
@@ -63,9 +61,11 @@ const MainPageLayout = () => {
             <QueryClientProvider client={queryClient}>
                 <FileCacheProvider queryClient={queryClient} vaultPath={vaultPath}>
                     <FileSystemProvider vaultPath={vaultPath}>
-                        <MainLayout
-                            vaultPath={vaultPath}
-                        />
+                        <DialogProvider>
+                            <MainLayout
+                                vaultPath={vaultPath}
+                            />
+                        </DialogProvider>
                     </FileSystemProvider>
                 </FileCacheProvider>
             </QueryClientProvider>
