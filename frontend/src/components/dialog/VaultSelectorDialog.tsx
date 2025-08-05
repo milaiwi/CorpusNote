@@ -7,13 +7,15 @@ import { Folder, FolderOpen, Plus, History, Vault, CircleSlash2 } from 'lucide-r
 import { GenericDialog } from '../ui/GenericDialog'
 import { open } from '@tauri-apps/api/dialog'
 import { useAppSettings } from '../../contexts/AppContext'
+import { useDialog } from '../../contexts/DialogContext'
 
 
 export const VaultSelectorDialog: React.FC = () => {
   const [showRecentVaults, setShowRecentVaults] = useState<boolean>(false)
   // const [vaultPath, setVaultPathFn] = useState<string | null>(null)
   const { vaultPath, setVaultPath } = useAppSettings()
-
+  const [isOpen, setIsOpen] = useState<boolean>(true)
+  const { closeDialog } = useDialog()
 
   useEffect(() => {
     console.log('vaultPath', vaultPath)
@@ -27,8 +29,10 @@ export const VaultSelectorDialog: React.FC = () => {
     })    
 
     if (selected) {
-      if (typeof selected === 'string')
+      if (typeof selected === 'string') {
         setVaultPath(selected)
+        closeDialog()
+      }
     }
   }
 
@@ -73,7 +77,11 @@ export const VaultSelectorDialog: React.FC = () => {
   // const mockRecentVaults: any[] = []
 
   return (
-    <GenericDialog isOpen={true}>
+    <GenericDialog isOpen={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        closeDialog()
+      }
+    }}>
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Folder className="h-5 w-5" />
@@ -98,7 +106,13 @@ export const VaultSelectorDialog: React.FC = () => {
           className="w-full justify-start h-12"
           variant="outline"
         >
-          <GenericDialog isOpen={showRecentVaults} className="min-h-80 max-h-96 overflow-auto">
+          <GenericDialog isOpen={showRecentVaults} onOpenChange={(open) => {
+            if (!open) {
+              setShowRecentVaults(false)
+              closeDialog()
+            }
+          }} 
+          className="min-h-80 max-h-96 overflow-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <History className="h-5 w-5" />
@@ -109,7 +123,10 @@ export const VaultSelectorDialog: React.FC = () => {
               {mockRecentVaults.length > 0 ? (
                 mockRecentVaults.map((item) => {
                   return (
-                    <div key={item.absPath} onClick={() => setVaultPath(item.absPath)} className="flex p-2 bg-tertiary items-center gap-5 rounded-sm cursor-pointer">
+                    <div key={item.absPath} onClick={() => {
+                      setVaultPath(item.absPath)
+                      closeDialog()
+                    }} className="flex p-2 bg-tertiary items-center gap-5 rounded-sm cursor-pointer">
                       <Vault className="h-5 w-5" />
                       <div className="flex flex-col h-full">
                         <p className="text-sm">{item.title}</p>

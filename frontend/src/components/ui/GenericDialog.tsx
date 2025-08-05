@@ -1,32 +1,22 @@
 // frontend/src/components/ui/GenericDialog
 import React, { ReactNode } from 'react'
 import { Dialog, DialogContent } from '../../../shadcn/ui/dialog'
-import { useDialog } from '../../contexts/DialogContext'
 
 interface GenericDialogProps {
     children: ReactNode
     isOpen: boolean
-    onClose?: () => void
+    onOpenChange?: (open: boolean) => void
     className?: string
 }
 
 export const GenericDialog: React.FC<GenericDialogProps> = ({
     children,
     isOpen,
-    onClose,
+    onOpenChange,
     className = "sm:max-w-md"
 }) => {
-    const { closeDialog } = useDialog()
-
-    const handleOpenChange = (open: boolean) => {
-        if (!open) {
-            onClose?.()
-            closeDialog()
-        }
-    }
-
     return (
-        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className={className}>
                 {children}
             </DialogContent>
