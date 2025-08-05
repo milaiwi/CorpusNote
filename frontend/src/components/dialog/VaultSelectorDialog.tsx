@@ -1,17 +1,23 @@
 // frontend/src/components/dialogs/VaultSelectorDialog.tsx
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { DialogDescription, DialogHeader, DialogTitle } from '../../../shadcn/ui/dialog'
 import { Button } from '../../../shadcn/ui/button'
 import { Folder, FolderOpen, Plus, History, Vault, CircleSlash2 } from 'lucide-react'
 import { GenericDialog } from '../ui/GenericDialog'
 import { open } from '@tauri-apps/api/dialog'
-import readDirectoryContents from '../layout/FileSidebar/FileTree'
+import { useAppSettings } from '../../contexts/AppContext'
 
 
 export const VaultSelectorDialog: React.FC = () => {
   const [showRecentVaults, setShowRecentVaults] = useState<boolean>(false)
-  const [vaultPath, setVaultPathFn] = useState<string | null>(null)
+  // const [vaultPath, setVaultPathFn] = useState<string | null>(null)
+  const { vaultPath, setVaultPath } = useAppSettings()
+
+
+  useEffect(() => {
+    console.log('vaultPath', vaultPath)
+  }, [vaultPath])
 
   const handleSelectNewVault = async () => {
     // TODO: Implement Tauri file dialog
@@ -22,7 +28,7 @@ export const VaultSelectorDialog: React.FC = () => {
 
     if (selected) {
       if (typeof selected === 'string')
-        setVaultPathFn(selected)
+        setVaultPath(selected)
     }
   }
 
@@ -103,7 +109,7 @@ export const VaultSelectorDialog: React.FC = () => {
               {mockRecentVaults.length > 0 ? (
                 mockRecentVaults.map((item) => {
                   return (
-                    <div key={item.absPath} onClick={() => setVaultPathFn(item.absPath)} className="flex p-2 bg-tertiary items-center gap-5 rounded-sm cursor-pointer">
+                    <div key={item.absPath} onClick={() => setVaultPath(item.absPath)} className="flex p-2 bg-tertiary items-center gap-5 rounded-sm cursor-pointer">
                       <Vault className="h-5 w-5" />
                       <div className="flex flex-col h-full">
                         <p className="text-sm">{item.title}</p>

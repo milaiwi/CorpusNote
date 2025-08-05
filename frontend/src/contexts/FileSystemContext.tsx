@@ -3,6 +3,7 @@ import React, { createContext, useContext, ReactNode, useState, useEffect } from
 import { FileItem } from "../components/layout/FileSidebar/utils"
 import readSingleDirectoryContent from "../components/layout/FileSidebar/FileTree"
 import { useFileCache } from "./FileCache"
+import { useAppSettings } from "./AppContext"
 
 type FileSystemContextType = {
     // File tree state
@@ -37,10 +38,10 @@ export const useFileSystem = () => {
 
 interface FileSystemProviderProps {
     children?: ReactNode,
-    vaultPath: string
 }
 
-const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children, vaultPath }) => {
+const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => {
+    const { vaultPath } = useAppSettings()
     // File tree state
     const [files, setFiles] = useState<FileItem[]>([])
     const [expandedDirectories, setExpandedDirectories] = useState<Map<string, boolean>>(new Map())

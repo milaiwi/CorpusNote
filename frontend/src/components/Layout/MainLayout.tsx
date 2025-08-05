@@ -9,17 +9,19 @@ import { ThemeProvider } from '../../contexts/ThemeContext';
 import EditorManager from './EditorManager/EditorManager';
 import FileCacheProvider from '../../contexts/FileCache';
 import { DialogProvider } from '../../contexts/DialogContext';
+import { AppProvider } from '../../contexts/AppContext';
+import { useAppSettings } from '../../contexts/AppContext';
 
 interface MainLayoutProps {
     className?: string;
-    vaultPath: string;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ className = '', vaultPath = '/Users/memo/documents' }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
     // TODO: Move this up to a startup page -> sets the vault path and configurations
     const [selectedFile, setSelectedFile] = useState<string | null>(null)
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
+    const { vaultPath } = useAppSettings()
 
     return (
         <div className="h-screen flex flex-1">
@@ -54,20 +56,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '', vaultPath = '/U
 
 const MainPageLayout = () => {
     const queryClient = new QueryClient()
-    const [vaultPath, setVaultPath] = useState<string | null>("/Users/milaiwi/documents/notes")
 
     return (
         <ThemeProvider>
             <QueryClientProvider client={queryClient}>
-                <FileCacheProvider queryClient={queryClient} vaultPath={vaultPath}>
-                    <FileSystemProvider vaultPath={vaultPath}>
-                        <DialogProvider>
-                            <MainLayout
-                                vaultPath={vaultPath}
-                            />
-                        </DialogProvider>
-                    </FileSystemProvider>
-                </FileCacheProvider>
+                <AppProvider>
+                    <FileCacheProvider queryClient={queryClient}>
+                        <FileSystemProvider>
+                            <DialogProvider>
+                                <MainLayout />
+                            </DialogProvider>
+                        </FileSystemProvider>
+                    </FileCacheProvider>
+                </AppProvider>
             </QueryClientProvider>
         </ThemeProvider>
     )

@@ -2,6 +2,7 @@
 import React, { useContext, useMemo } from 'react'
 import { QueryClient } from '@tanstack/react-query'
 import { readTextFile, writeTextFile } from '@tauri-apps/api/fs'
+import { useAppSettings } from './AppContext'
 
 // Global reference to the query client for use outside of React components
 let globalQueryClient: QueryClient | null = null
@@ -90,13 +91,13 @@ interface FileCacheContextType {
 
 const FileCacheContext = React.createContext<FileCacheContextType | undefined>(undefined)
 
-const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: QueryClient; vaultPath: string }> = ({
+const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: QueryClient }> = ({
   children,
   queryClient,
-  vaultPath,
 }) => {
   // Set global query client reference for use outside of React components
   setGlobalQueryClient(queryClient)
+  const { vaultPath } = useAppSettings()
 
   const readFileAndCache = async (path: string): Promise<string | null> => {
     try {
