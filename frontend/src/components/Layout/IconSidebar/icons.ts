@@ -4,7 +4,7 @@ import {
     Search,
     SquarePen,
     FolderPlus,
-    Vault
+    Vault,
 } from 'lucide-react'
 
 export interface IconProps {
@@ -14,34 +14,53 @@ export interface IconProps {
   action?: () => void; // callback function on selection
 }
 
+const FileIcon: IconProps = {
+    id: 'file',
+    icon: File,
+    label: 'File',
+}
+
+const SearchIcon: IconProps = {
+    id: 'search',
+    icon: Search,
+    label: 'Search',
+}
+
+const NewNoteIcon: IconProps = {
+    id: 'new-note',
+    icon: SquarePen,
+    label: 'New Note',
+}
+
+const NewDirectoryIcon: IconProps = {
+    id: 'new-directory',
+    icon: FolderPlus,
+    label: 'New Directory',
+}
+
+const OpenVaultIcon: IconProps = {
+    id: 'open-vault',
+    icon: Vault,
+    label: 'Open Vault',
+}
+
+
 export const topLevelIcons: IconProps[] = [
-    {
-        id: 'files',
-        icon: File,
-        label: 'Files',
-    },
-    {
-        id: 'search',
-        icon: Search,
-        label: 'Search',
-    },
-    {
-        id: 'new-note',
-        icon: SquarePen,
-        label: 'New Note',
-    },
-    {
-        id: 'new-directory',
-        icon: FolderPlus,
-        label: 'New Directory',
-    }, 
+    FileIcon,
+    SearchIcon,
+    NewNoteIcon,
+    NewDirectoryIcon,
 ] 
 
 export const bottomLevelIcons: IconProps[] = [
-    {
-        id: 'open-vault',
-        icon: Vault,
-        label: 'Open Vault',
-    }
+    OpenVaultIcon,
 ]
 
+
+export {
+    FileIcon,
+    SearchIcon,
+    NewNoteIcon,
+    NewDirectoryIcon,
+    OpenVaultIcon,
+}

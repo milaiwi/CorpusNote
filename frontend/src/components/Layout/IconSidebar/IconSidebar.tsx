@@ -1,8 +1,8 @@
 import React from 'react'
 import { SidebarIconButton } from '../../ui/SidebarButton';
-import { IconProps, topLevelIcons, bottomLevelIcons } from './icons'
-import { ThemeToggle } from '../../ui/ThemeToggle';
+import { IconProps } from './icons'
 import { LucideIcon } from 'lucide-react';
+import { cn } from '../../../../lib/utils';
 
 export type IconSidebarOptions = 'files' | 'search' | 'new-note' | 'new-directory'
 
@@ -16,45 +16,19 @@ interface IconGroupProps {
     icons: IconProps[]
     activeOption: IconSidebarOptions
     onOptionChange?: (option: IconSidebarOptions) => void
+    className?: string
+    customIcons?: React.ReactNode[]
 }
 
-// TODO: Change this to use shadcn
-const IconSidebar: React.FC<IconSidebarProps> = ({
-    activeOption,
-    onOptionChange,
-    className = ""
-}) => {
-    return (
-        <div className={`
-            flex justify-between items-center py-2
-            ${className}
-        `}>
-            <IconGroup
-                icons={topLevelIcons}
-                activeOption={activeOption}
-                onOptionChange={onOptionChange}
-            />
-
-            {/* <div className="flex flex-col items-center gap-2">
-                <IconGroup 
-                icons={bottomLevelIcons} 
-                activeOption={activeOption} 
-                onOptionChange={onOptionChange}
-                />
-                <ThemeToggle />
-            </div> */}
-
-        </div>
-    )
-}
-
-const IconGroup: React.FC<IconGroupProps> = ({
+export const IconGroup: React.FC<IconGroupProps> = ({
     icons,
     activeOption,
-    onOptionChange
+    onOptionChange,
+    className = "",
+    customIcons = []
 }) => {
     return (
-        <div className="flex gap-1">
+        <div className={cn("flex gap-1 w-full", className)}>
             {icons.map((item) => {
                 const Icon = item.icon
                 const isActive = item.id === activeOption
@@ -79,8 +53,15 @@ const IconGroup: React.FC<IconGroupProps> = ({
                     />
                 );
             })}
+
+            {/* Custom icons */}
+            {customIcons.map((customIcon, index) => {
+                return (
+                    <div key={index}>
+                        {customIcon}
+                    </div>
+                )
+            })}
         </div>
     )
 }
-
-export default IconSidebar
