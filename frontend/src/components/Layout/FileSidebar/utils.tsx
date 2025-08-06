@@ -11,6 +11,7 @@ export interface FileItem {
     mimeType?: string, // image, text file, etc..
     children?: FileItem[], // directory children
     expanded?: boolean, // currently showing children
+    parent?: FileItem, // parent of the file
 }
 
 export interface FileSidebarProps {

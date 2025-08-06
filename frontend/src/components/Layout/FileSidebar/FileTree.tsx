@@ -10,7 +10,7 @@ import { FileItem } from './utils';
     }
 */
 
-async function readSingleDirectoryContent(vaultPath: string, directoryPath: string | string[]): Promise<FileItem[]> {
+async function readSingleDirectoryContent(vaultPath: string, directoryPath: string | string[], parent?: FileItem): Promise<FileItem[]> {
     try {
         let directoryContents: FileItem[] = [];
 
@@ -25,11 +25,12 @@ async function readSingleDirectoryContent(vaultPath: string, directoryPath: stri
                         name: entry.name,
                         absPath: entry.path,
                         isDirectory: entry.children ? true : false,
+                        parent: parent,
                     };
 
                     // If it's a directory, recursively read its contents
                     if (entry.children) {
-                        fileItem.children = await readSingleDirectoryContent(vaultPath, entry.path);
+                        fileItem.children = await readSingleDirectoryContent(vaultPath, entry.path, fileItem);
                         fileItem.expanded = fileItem.children.length > 0;
                     }
 
@@ -84,24 +85,37 @@ export const addItemToDirectory = (files: FileItem[], vaultPath: string, targetP
  * @param files - The file tree
  * @param oldPath - The path of the item to rename
  * @param newName - The new name of the item
- * @returns The updated file tree with the item renamed
+ * @returns The updated file tree with the item renamed and sorted
  */
 export const renameItemInFileTree = (files: FileItem[], oldPath: string, newName: string): FileItem[] => {
     return files.map(file => {
         if (file.absPath === oldPath) {
             // Found the item to rename
             const newPath = file.absPath.substring(0, file.absPath.lastIndexOf('/') + 1) + newName
-            return { 
+            
+            const renamedFile = { 
                 ...file, 
                 name: newName, 
                 absPath: newPath,
                 children: file.children
             }
+            
+            return renamedFile
         } else if (file.children) {
             // Recursively search in children
+            const updatedChildren = renameItemInFileTree(file.children, oldPath, newName)
+            
+            // If we found and renamed the item in children, sort the children
+            if (updatedChildren !== file.children) {
+                return {
+                    ...file,
+                    children: sortFiles(updatedChildren)
+                }
+            }
+            
             return {
                 ...file,
-                children: renameItemInFileTree(file.children, oldPath, newName)
+                children: updatedChildren
             }
         }
         return file

@@ -63,7 +63,20 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             const startingPath = vaultPath
             const fileItems = await readSingleDirectoryContent(vaultPath, startingPath)
             const sortedFiles = sortFiles(fileItems)
-            setFiles(sortedFiles)
+            
+            // Create a dummy root node that contains all top-level files
+            const dummyRoot: FileItem = {
+                name: '.corpusnotes-dummy',
+                absPath: vaultPath,
+                isDirectory: true,
+                timeCreated: Date.now(),
+                timeModified: Date.now(),
+                currentPosition: 0,
+                children: sortedFiles,
+                expanded: true,
+            }
+            
+            setFiles([dummyRoot])
             return true
         }
 
@@ -87,9 +100,9 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     }
 
     const createNewNote = (title: string) => {
-        if (!currentOpenedFile) return
-        const basePath = extractCurrentDirectory(currentOpenedFile)
-        const newNotePath = `${basePath}/${title}.md`
+        const targetPath = currentOpenedFile ? extractCurrentDirectory(currentOpenedFile) : vaultPath
+        const newNotePath = `${targetPath}/${title}.md`
+        
         writeFileAndCache(newNotePath, '# ' + title + '\n\n')
         
         const newFile: FileItem = {
@@ -104,13 +117,23 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             expanded: false,
         }
         
-        setFiles(prev => addItemToDirectory(prev, vaultPath, basePath, newFile))
+        // If targetPath is the vault root, add to dummy root's children
+        if (targetPath === vaultPath) {
+            setFiles(prev => {
+                const dummyRoot = prev[0]
+                return [{
+                    ...dummyRoot,
+                    children: sortFiles([...dummyRoot.children, newFile])
+                }]
+            })
+        } else {
+            setFiles(prev => addItemToDirectory(prev, vaultPath, targetPath, newFile))
+        }
     }
 
     const createNewDirectory = (directory: string) => {
-        if (!currentOpenedFile) return
-        const basePath = extractCurrentDirectory(currentOpenedFile)
-        const newDirectoryPath = `${basePath}/${directory}`
+        const targetPath = currentOpenedFile ? extractCurrentDirectory(currentOpenedFile) : vaultPath
+        const newDirectoryPath = `${targetPath}/${directory}`
         createDirectory(newDirectoryPath)
         
         const newDir: FileItem = {
@@ -124,7 +147,18 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             expanded: false,
         }
         
-        setFiles(prev => addItemToDirectory(prev, vaultPath, basePath, newDir))
+        // If targetPath is the vault root, add to dummy root's children
+        if (targetPath === vaultPath) {
+            setFiles(prev => {
+                const dummyRoot = prev[0]
+                return [{
+                    ...dummyRoot,
+                    children: sortFiles([...dummyRoot.children, newDir])
+                }]
+            })
+        } else {
+            setFiles(prev => addItemToDirectory(prev, vaultPath, targetPath, newDir))
+        }
     }
 
     const handleRename = (filePath: string, newName: string): [boolean, string] => {
@@ -137,7 +171,9 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         const newFilePath = `${basePath}/${newName}`
         
         // Check if the new name already exists in the same directory
-        const existingFile = files.find(file => file.absPath === newFilePath)
+        // Since we have a dummy root, we need to search in its children
+        const dummyRoot = files[0]
+        const existingFile = dummyRoot?.children?.find(file => file.absPath === newFilePath)
         if (existingFile) return [false, 'New name already exists'] // New name already exists
 
         console.log('Renaming:', filePath, 'to:', newFilePath)

@@ -30,6 +30,11 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     const { openDialog } = useDialog()
 
     const renderFileItem = (item: FileItem, depth: number = 0) => {
+        // Don't render the dummy root
+        if (item.name === '.corpusnotes-dummy') {
+            return null
+        }
+        
         const isSelected = selectedFile === item.absPath
         const paddingLeft = depth * 16 + 8
         return (
@@ -107,7 +112,11 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1 py-2">
-                        {files.map(item => renderFileItem(item))}
+                        {/* Only render the dummy root's children, never the dummy root itself */}
+                        {files.length > 0 && files[0]?.name === '.corpusnotes-dummy' 
+                            ? files[0].children?.map(item => renderFileItem(item)) || []
+                            : files.map(item => renderFileItem(item))
+                        }
                     </div>
                 )}
             </div>
