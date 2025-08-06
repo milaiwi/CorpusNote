@@ -11,6 +11,9 @@ import {
     Copy, 
     Type,
 } from "lucide-react"
+import { RenameDialog } from "../dialog/RenameDialog"
+import { useDialog } from "../../contexts/DialogContext";
+import { NewNoteDialog } from "../dialog/NewNoteDialog";
 
 interface FilesContextMenuProps {
     children: React.ReactNode;
@@ -21,17 +24,16 @@ export function FilesContextMenu({
     children, 
     item, 
 }: FilesContextMenuProps) {
-
-    const handleRename = () => {
-        // TODO: Implement rename functionality
-        console.log('Rename:', item.name);
-    };
+    const { openDialog } = useDialog()
     
     const handleCopyPath = () => {
-        // TODO: Implement copy path functionality
         navigator.clipboard.writeText(item.absPath);
         console.log('Copy path:', item.absPath);
     };
+    
+    const handleNewNote = () => {
+        openDialog(<NewNoteDialog />)
+    }
 
     const handleDelete = () => {
         // TODO: Implement delete functionality
@@ -44,7 +46,7 @@ export function FilesContextMenu({
                 {children}
             </ContextMenuTrigger>
             <ContextMenuContent className="w-16">                
-                <ContextMenuItem onClick={handleRename} className="cursor-pointer">
+                <ContextMenuItem onClick={() => openDialog(<RenameDialog item={item} />)} className="cursor-pointer">
                     <Type size={8} />
                     <span className="text-xs">Rename</span>
                 </ContextMenuItem>

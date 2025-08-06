@@ -79,6 +79,35 @@ export const addItemToDirectory = (files: FileItem[], vaultPath: string, targetP
     })
 }
 
+/**
+ * Rename an item in the file tree
+ * @param files - The file tree
+ * @param oldPath - The path of the item to rename
+ * @param newName - The new name of the item
+ * @returns The updated file tree with the item renamed
+ */
+export const renameItemInFileTree = (files: FileItem[], oldPath: string, newName: string): FileItem[] => {
+    return files.map(file => {
+        if (file.absPath === oldPath) {
+            // Found the item to rename
+            const newPath = file.absPath.substring(0, file.absPath.lastIndexOf('/') + 1) + newName
+            return { 
+                ...file, 
+                name: newName, 
+                absPath: newPath,
+                children: file.children
+            }
+        } else if (file.children) {
+            // Recursively search in children
+            return {
+                ...file,
+                children: renameItemInFileTree(file.children, oldPath, newName)
+            }
+        }
+        return file
+    })
+}
+
 
 /**
  * Sort files: directories first, then files, both alphabetically

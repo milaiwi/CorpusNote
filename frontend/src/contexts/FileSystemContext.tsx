@@ -1,7 +1,7 @@
 // frontend/src/contexts/FileSystemContext.tsx
 import React, { createContext, useContext, ReactNode, useState, useEffect } from "react"
 import { FileItem } from "../components/layout/FileSidebar/utils"
-import readSingleDirectoryContent, { sortFiles, addItemToDirectory } from "../components/layout/FileSidebar/FileTree"
+import readSingleDirectoryContent, { sortFiles, addItemToDirectory, renameItemInFileTree } from "../components/layout/FileSidebar/FileTree"
 import { useFileCache, writeFileAndCache } from "./FileCache"
 import { useAppSettings } from "./AppContext"
 import { extractCurrentDirectory, invalidCharactersExist } from "../../lib/utils"
@@ -16,6 +16,8 @@ type FileSystemContextType = {
     loadFileIntoEditor: (filePath: string) => void
     createNewNote: (title: string) => void
     createNewDirectory: (directory: string) => void
+    handleRename: (filePath: string, newName: string) => [boolean, string]
+
     // File tree management
 
     // File state management
@@ -53,7 +55,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     const [changingFilePath, setChangingFilePath] = useState<boolean>(false)
     const [editorContent, setEditorContent] = useState<string | null>(null)
 
-    const { readFileAndCache, createDirectory } = useFileCache()
+    const { readFileAndCache, createDirectory, renameFileAndCache } = useFileCache()
 
     // Load files from vault
     useEffect(() => {
@@ -125,6 +127,27 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         setFiles(prev => addItemToDirectory(prev, vaultPath, basePath, newDir))
     }
 
+    const handleRename = (filePath: string, newName: string): [boolean, string] => {
+        if (!filePath) return [false, 'File path is empty'] // No file is opened
+        if (invalidCharactersExist(newName)) return [false, 'There is an invalid character'] // There is an invalid character
+        if (newName === '') return [false, 'New name is empty'] // New name is empty
+        
+        // Check if the new name already exists in the same directory
+        const basePath = extractCurrentDirectory(filePath)
+        const newFilePath = `${basePath}/${newName}`
+        
+        // Check if the new name already exists in the same directory
+        const existingFile = files.find(file => file.absPath === newFilePath)
+        if (existingFile) return [false, 'New name already exists'] // New name already exists
+
+        console.log('Renaming:', filePath, 'to:', newFilePath)
+        renameFileAndCache(filePath, newFilePath)
+        
+        // Use the tree traversal function to properly update the file tree
+        setFiles(prev => renameItemInFileTree(prev, filePath, newName))
+        return [true, newFilePath]
+    }
+
     const contextValue: FileSystemContextType = {
         vaultTree: files,
         expandedDirectories,
@@ -132,6 +155,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         loadFileIntoEditor,
         createNewNote,
         createNewDirectory,
+        handleRename,
         changingFilePath,
         editorContent,
         currentOpenedFile: currentOpenedFile,

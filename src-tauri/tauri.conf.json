@@ -20,6 +20,7 @@
         "writeFile": true,
         "readDir": true,
         "createDir": true,
+        "renameFile": true,
         "scope": ["**"]
       },
       "all": false

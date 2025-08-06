@@ -1,7 +1,7 @@
 // src/contexts/FileCache.tsx
 import React, { useContext, useMemo } from 'react'
 import { QueryClient } from '@tanstack/react-query'
-import { createDir, readTextFile, writeTextFile } from '@tauri-apps/api/fs'
+import { createDir, readTextFile, writeTextFile, renameFile } from '@tauri-apps/api/fs'
 import { useAppSettings } from './AppContext'
 
 // Global reference to the query client for use outside of React components
@@ -82,11 +82,12 @@ interface FileCacheContextType {
   writeFileAndCache: (path: string, content: string) => Promise<void>
   renameFileAndCache: (oldPath: string, newPath: string) => Promise<void>
   deleteFileAndCache: (path: string) => Promise<void>
-//   createFileAndCache: (path: string, content: string) => Promise<void>
 
   // Cache management
   invalidateFile: (path: string) => void
   prefetchFile: (path: string) => Promise<void>
+
+  // File system operations with no cache validation
   createDirectory: (path: string) => Promise<void>
 }
 
@@ -137,15 +138,6 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
     }
   }
 
-  const renameFileAndCache = async (oldPath: string, newPath: string): Promise<void> => {
-    try {
-    //   await window.fileSystem.renameFile({ oldFilePath: oldPath, newFilePath: newPath })
-      queryClient.invalidateQueries({ queryKey: ['file', oldPath] })
-      queryClient.invalidateQueries({ queryKey: ['file', newPath] })
-    } catch (error) {
-      console.error('Error renaming file:', error)
-    }
-  }
 
   const deleteFileAndCache = async (path: string): Promise<void> => {
     try {
@@ -153,6 +145,16 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
       queryClient.invalidateQueries({ queryKey: ['file', path] })
     } catch (error) {
       console.error('Error deleting file:', error)
+    }
+  }
+
+  const renameFileAndCache = async (oldPath: string, newPath: string): Promise<void> => {
+    try {
+      await renameFile(oldPath, newPath)
+      queryClient.invalidateQueries({ queryKey: ['file', oldPath] })
+      queryClient.invalidateQueries({ queryKey: ['file', newPath] })
+    } catch (error) {
+      console.error('Error renaming file:', error)
     }
   }
 
@@ -199,6 +201,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
       invalidateFile,
       prefetchFile,
       createDirectory,
+      renameFile,
     }),
     [queryClient],
   )

@@ -1,4 +1,4 @@
-// frontend/src/components/dialogs/NewNoteDialog.tsx
+// frontend/src/components/dialogs/RenameDialog.tsx
 import React, { useState } from 'react'
 
 import { DialogDescription, DialogHeader, DialogTitle } from '../../../shadcn/ui/dialog'
@@ -19,30 +19,35 @@ import {
 } from '../../../shadcn/ui/form'
 import { Input } from '../../../shadcn/ui/input'
 import { useFileSystem } from '../../contexts/FileSystemContext'
-import { INVALID_CHARACTERS_STRING, invalidCharactersExist } from '../../../lib/utils'
+import { FileItem } from '../layout/FileSidebar/utils'
+import { extractFileName } from '../../../lib/utils'
 
-const newNoteSchema = z.object({
+interface RenameDialogProps {
+    item: FileItem
+}
+
+const renameNoteSchema = z.object({
     title: z.string().min(2, { message: 'Title is required' }),
 })
 
-export const NewNoteDialog: React.FC = () => {
+export const RenameDialog: React.FC<RenameDialogProps> = ({ item }) => {
     const [isOpen, setIsOpen] = useState<boolean>(true)
     const { closeDialog } = useDialog()
-    const { createNewNote } = useFileSystem()
+    const { handleRename } = useFileSystem()
 
-    const form = useForm<z.infer<typeof newNoteSchema>>({
-        resolver: zodResolver(newNoteSchema),
+    const form = useForm<z.infer<typeof renameNoteSchema>>({
+        resolver: zodResolver(renameNoteSchema),
         defaultValues: {
-            title: '',
+            title: extractFileName(item.name),
         }
     })
 
-    const onSubmit = (values: z.infer<typeof newNoteSchema>) => {
-        if (invalidCharactersExist(values.title)) {
-            form.setError('title', { message: `Title contains invalid characters: ${INVALID_CHARACTERS_STRING}` })
+    const onSubmit = (values: z.infer<typeof renameNoteSchema>) => {
+        const [success, error] = handleRename(item.absPath, values.title)
+        if (!success) {
+            form.setError('title', { message: error })
             return
         }
-        createNewNote(values.title)
         closeDialog()
     }
 
@@ -54,10 +59,10 @@ export const NewNoteDialog: React.FC = () => {
         }}>
             <DialogHeader className="gap-2">
                 <DialogTitle className="flex items-center">
-                    New Note
+                    Rename Note
                 </DialogTitle>
                 <DialogDescription>
-                    Create a new note in the current vault.
+                    Rename the note
                 </DialogDescription>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -67,13 +72,13 @@ export const NewNoteDialog: React.FC = () => {
                             render={({ field }) => (
                                 <FormItem className="my-4">
                                     <FormControl>
-                                        <Input placeholder="Note Name" {...field} />
+                                        <Input placeholder="Rename Note" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" variant="secondary">Create Note</Button>
+                        <Button type="submit" variant="secondary">Rename Note</Button>
                     </form>
                 </Form>
             </DialogHeader>
