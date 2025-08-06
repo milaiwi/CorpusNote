@@ -41,13 +41,13 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     )}
                     style={{ paddingLeft }}
                     onClick={() => {
-                        if (item.type === 'directory')
+                        if (item.isDirectory)
                             handleDirectoryToggle(item.absPath)
                         else
                             onFileSelect(item.absPath)
                     }}
                 >
-                    {item.type === 'directory' && (
+                    {item.isDirectory && (
                         <>
                             {expandedDirectories.get(item.absPath) ? (
                                 <ChevronDown size={14} className="text-muted-foreground" />
@@ -59,7 +59,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                     <span className="truncate">{getDisplayTitle(item.name)}</span>
                 </Button>
                 
-                {item.type === 'directory' && expandedDirectories.get(item.absPath) && item.children && (
+                {item.isDirectory && expandedDirectories.get(item.absPath) && item.children && (
                     <div>
                         {item.children.map(child => renderFileItem(child, depth + 1))}
                     </div>

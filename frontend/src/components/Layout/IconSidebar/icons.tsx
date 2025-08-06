@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { VaultSelectorDialog } from '../../dialog/VaultSelectorDialog'
 import { NewNoteDialog } from '../../dialog/NewNoteDialog'
+import { NewDirectoryDialog } from '../../dialog/NewDirectoryDialog'
 
 export interface IconProps {
   id: string;  // 'file', 'search', etc..
@@ -43,6 +44,11 @@ const NewDirectoryIcon: IconProps = {
     id: 'new-directory',
     icon: FolderPlus,
     label: 'New Directory',
+    action: (openDialog) => {
+        openDialog(
+            <NewDirectoryDialog />
+        )
+    }
 }
 
 const OpenVaultIcon: IconProps = {

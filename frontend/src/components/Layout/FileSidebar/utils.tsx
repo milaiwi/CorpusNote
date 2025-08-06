@@ -4,7 +4,7 @@ import { IconSidebarOptions } from "../IconSidebar/IconSidebar";
 export interface FileItem {
     name: string;   // name of the file
     absPath: string; // absolute path of ifle
-    type: 'file' | 'directory';
+    isDirectory: boolean;
     timeCreated?: number,
     timeModified?: number,
     currentPosition?: number, // current cursor position

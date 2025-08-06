@@ -19,6 +19,7 @@
         "readFile": true,
         "writeFile": true,
         "readDir": true,
+        "createDir": true,
         "scope": ["**"]
       },
       "all": false

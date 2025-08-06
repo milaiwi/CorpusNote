@@ -1,7 +1,7 @@
 // src/contexts/FileCache.tsx
 import React, { useContext, useMemo } from 'react'
 import { QueryClient } from '@tanstack/react-query'
-import { readTextFile, writeTextFile } from '@tauri-apps/api/fs'
+import { createDir, readTextFile, writeTextFile } from '@tauri-apps/api/fs'
 import { useAppSettings } from './AppContext'
 
 // Global reference to the query client for use outside of React components
@@ -87,6 +87,7 @@ interface FileCacheContextType {
   // Cache management
   invalidateFile: (path: string) => void
   prefetchFile: (path: string) => Promise<void>
+  createDirectory: (path: string) => Promise<void>
 }
 
 const FileCacheContext = React.createContext<FileCacheContextType | undefined>(undefined)
@@ -180,6 +181,14 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
     })
   }
 
+  const createDirectory = async (path: string): Promise<void> => {
+    try {
+      await createDir(path)
+    } catch (error) {
+      console.error('Error creating directory:', error)
+    }
+  }
+
   const value = useMemo(
     () => ({
       readFileAndCache,
@@ -189,6 +198,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
     //   createFileAndCache,
       invalidateFile,
       prefetchFile,
+      createDirectory,
     }),
     [queryClient],
   )
