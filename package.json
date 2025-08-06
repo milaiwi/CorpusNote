@@ -12,7 +12,9 @@
     "@blocknote/core": "^0.35.0",
     "@blocknote/mantine": "^0.35.0",
     "@blocknote/react": "^0.35.0",
+    "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/query-core": "^5.83.1",
     "@tanstack/react-query": "^5.84.1",
@@ -23,8 +25,10 @@
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.62.0",
     "react-resizable-panels": "^3.0.4",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

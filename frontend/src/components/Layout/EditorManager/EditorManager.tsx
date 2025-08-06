@@ -6,7 +6,6 @@ import '@blocknote/core/fonts/inter.css'
 import './editor.css'
 
 import React, { useEffect } from 'react'
-import { useFileCache } from '../../../contexts/FileCache'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 
@@ -16,7 +15,7 @@ interface EditorManagerProps {
 
 const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
     const { editorContent, changingFilePath } = useFileSystem()
-    const { readFileAndCache } = useFileCache()
+    const { loadFileIntoEditor } = useFileSystem()
 
     const editor = useCreateBlockNote()
 
@@ -28,8 +27,7 @@ const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
     useEffect(() => {
         const fetchFile = async () => {
             if (!selectedFile) return
-            const content = await readFileAndCache(selectedFile)
-            editor.pasteText(content)
+            loadFileIntoEditor(selectedFile)
         }
 
         fetchFile()

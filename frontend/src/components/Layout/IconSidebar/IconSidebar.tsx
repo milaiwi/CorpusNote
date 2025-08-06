@@ -31,9 +31,7 @@ export const IconGroup: React.FC<IconGroupProps> = ({
                 const isActive = item.id === activeOption
 
                 const handleClick = () => {
-                    console.log("handleClick", item.action)
                     if (item.action) {
-                        console.log("opening dialog")
                         item.action(openDialog)
                     }
 

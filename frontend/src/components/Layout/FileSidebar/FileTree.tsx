@@ -46,6 +46,19 @@ async function readSingleDirectoryContent(directoryPath: string | string[]): Pro
     }
 }
 
+/**
+ * Sort files: directories first, then files, both alphabetically
+ * @param files - The files to sort
+ * @returns The sorted files
+ */
+export const sortFiles = (files: FileItem[]) => {
+    return files.sort((a, b) => {
+        if (a.type === 'directory' && b.type === 'file') return -1
+        if (a.type === 'file' && b.type === 'directory') return 1
+        return a.name.localeCompare(b.name)
+    })
+}
+
 const validDisplayableFile = (entry: FileEntry) => {
     return entry.name && !entry.name.startsWith('.') && entry.path
 }

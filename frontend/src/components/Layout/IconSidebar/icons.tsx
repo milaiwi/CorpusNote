@@ -7,6 +7,7 @@ import {
     Vault,
 } from 'lucide-react'
 import { VaultSelectorDialog } from '../../dialog/VaultSelectorDialog'
+import { NewNoteDialog } from '../../dialog/NewNoteDialog'
 
 export interface IconProps {
   id: string;  // 'file', 'search', etc..
@@ -31,6 +32,11 @@ const NewNoteIcon: IconProps = {
     id: 'new-note',
     icon: SquarePen,
     label: 'New Note',
+    action: (openDialog) => {
+        openDialog(
+            <NewNoteDialog />
+        )
+    }
 }
 
 const NewDirectoryIcon: IconProps = {
@@ -60,7 +66,6 @@ export const topLevelIcons: IconProps[] = [
 export const bottomLevelIcons: IconProps[] = [
     OpenVaultIcon,
 ]
-
 
 export {
     FileIcon,

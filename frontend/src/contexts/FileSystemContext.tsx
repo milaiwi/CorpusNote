@@ -1,9 +1,10 @@
 // frontend/src/contexts/FileSystemContext.tsx
 import React, { createContext, useContext, ReactNode, useState, useEffect } from "react"
 import { FileItem } from "../components/layout/FileSidebar/utils"
-import readSingleDirectoryContent from "../components/layout/FileSidebar/FileTree"
-import { useFileCache } from "./FileCache"
+import readSingleDirectoryContent, { sortFiles } from "../components/layout/FileSidebar/FileTree"
+import { useFileCache, writeFileAndCache } from "./FileCache"
 import { useAppSettings } from "./AppContext"
+import { extractCurrentDirectory, invalidCharactersExist } from "../../lib/utils"
 
 type FileSystemContextType = {
     // File tree state
@@ -13,6 +14,7 @@ type FileSystemContextType = {
     // File operations
     handleDirectoryToggle: (path: string) => void
     loadFileIntoEditor: (filePath: string) => void
+    createNewNote: (title: string) => void
 
     // File tree management
 
@@ -56,8 +58,9 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     // Load files from vault
     useEffect(() => {
         const readFilesFromDirectory = async () => {
-            setFiles(await readSingleDirectoryContent(vaultPath))
-            console.log('files', files)
+            const fileItems = await readSingleDirectoryContent(vaultPath)
+            const sortedFiles = sortFiles(fileItems)
+            setFiles(sortedFiles)
             return true
         }
 
@@ -75,18 +78,37 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         setCurrentOpenedFile(filePath)
         setChangingFilePath(true)
         readFileAndCache(filePath).then((content) => {
-            console.log('content', content)
             setEditorContent(content)
             setChangingFilePath(false)
         })
     }
 
+    const createNewNote = (title: string) => {
+        if (!currentOpenedFile) return
+        const basePath = extractCurrentDirectory(currentOpenedFile)
+        const newNotePath = `${basePath}/${title}.md`
+        console.log('New note path', newNotePath)
+        writeFileAndCache(newNotePath, '# ' + title + '\n\n')
+        setFiles(prev => [...prev, {
+            name: title,
+            absPath: newNotePath,
+            type: 'file',
+            isDirectory: false,
+            timeCreated: Date.now(),
+            timeModified: Date.now(),
+            currentPosition: 0,
+            mimeType: 'text/markdown',
+            children: [],
+            expanded: false,
+        }])
+    }
 
     const contextValue: FileSystemContextType = {
         vaultTree: files,
         expandedDirectories,
         handleDirectoryToggle,
         loadFileIntoEditor,
+        createNewNote,
         changingFilePath,
         editorContent,
         currentOpenedFile: currentOpenedFile,
