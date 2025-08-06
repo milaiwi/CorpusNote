@@ -15,6 +15,7 @@ import { IconGroup } from '../IconSidebar/IconSidebar'
 import { bottomLevelIcons, topLevelIcons } from '../IconSidebar/icons'
 import { useDialog } from '../../../contexts/DialogContext'
 import { ThemeToggle } from '../../ui/ThemeToggle'
+import { FilesContextMenu } from '../../ui/FilesContextMenu'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
     selectedFile,
@@ -33,31 +34,35 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
         const paddingLeft = depth * 16 + 8
         return (
             <div key={item.absPath}>
-                <Button
-                    variant={isSelected ? "item_generic_active" : "item_generic"}
-                    size="fileItem"
-                    className={cn(
-                        "w-full",
-                    )}
-                    style={{ paddingLeft }}
-                    onClick={() => {
-                        if (item.isDirectory)
-                            handleDirectoryToggle(item.absPath)
-                        else
-                            onFileSelect(item.absPath)
-                    }}
+                <FilesContextMenu
+                    item={item}
                 >
-                    {item.isDirectory && (
-                        <>
-                            {expandedDirectories.get(item.absPath) ? (
-                                <ChevronDown size={14} className="text-muted-foreground" />
-                            ) : (
-                                <ChevronRight size={14} className="text-muted-foreground" />
-                            )}
-                        </>
-                    )}
-                    <span className="truncate">{getDisplayTitle(item.name)}</span>
-                </Button>
+                    <Button
+                        variant={isSelected ? "item_generic_active" : "item_generic"}
+                        size="fileItem"
+                        className={cn(
+                            "w-full",
+                        )}
+                        style={{ paddingLeft }}
+                        onClick={() => {
+                            if (item.isDirectory)
+                                handleDirectoryToggle(item.absPath)
+                            else
+                                onFileSelect(item.absPath)
+                        }}
+                    >
+                        {item.isDirectory && (
+                            <>
+                                {expandedDirectories.get(item.absPath) ? (
+                                    <ChevronDown size={14} className="text-muted-foreground" />
+                                ) : (
+                                    <ChevronRight size={14} className="text-muted-foreground" />
+                                )}
+                            </>
+                        )}
+                        <span className="truncate">{getDisplayTitle(item.name)}</span>
+                    </Button>
+                </FilesContextMenu>
                 
                 {item.isDirectory && expandedDirectories.get(item.absPath) && item.children && (
                     <div>
