@@ -14,7 +14,7 @@ type FileSystemContextType = {
     // File operations
     handleDirectoryToggle: (path: string) => void
     loadFileIntoEditor: (filePath: string) => void
-    createNewNote: (title: string) => void
+    createNewNote: (title: string, targetDirectory?: string) => void
     createNewDirectory: (directory: string) => void
     handleRename: (filePath: string, newName: string) => [boolean, string]
 
@@ -99,8 +99,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         })
     }
 
-    const createNewNote = (title: string) => {
-        const targetPath = currentOpenedFile ? extractCurrentDirectory(currentOpenedFile) : vaultPath
+    const createNewNote = (title: string, targetDirectory?: string) => {
+        const targetPath = targetDirectory || (currentOpenedFile ? extractCurrentDirectory(currentOpenedFile) : vaultPath)
         const newNotePath = `${targetPath}/${title}.md`
         
         writeFileAndCache(newNotePath, '# ' + title + '\n\n')

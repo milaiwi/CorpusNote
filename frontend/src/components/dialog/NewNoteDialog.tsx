@@ -25,7 +25,11 @@ const newNoteSchema = z.object({
     title: z.string().min(2, { message: 'Title is required' }),
 })
 
-export const NewNoteDialog: React.FC = () => {
+interface NewNoteDialogProps {
+    directoryPath?: string;
+}
+
+export const NewNoteDialog: React.FC<NewNoteDialogProps> = ({ directoryPath }) => {
     const [isOpen, setIsOpen] = useState<boolean>(true)
     const { closeDialog } = useDialog()
     const { createNewNote } = useFileSystem()
@@ -42,7 +46,8 @@ export const NewNoteDialog: React.FC = () => {
             form.setError('title', { message: `Title contains invalid characters: ${INVALID_CHARACTERS_STRING}` })
             return
         }
-        createNewNote(values.title)
+
+        createNewNote(values.title, directoryPath)
         closeDialog()
     }
 

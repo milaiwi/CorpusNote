@@ -10,6 +10,7 @@ import {
     Trash2, 
     Copy, 
     Type,
+    File,
 } from "lucide-react"
 import { RenameDialog } from "../dialog/RenameDialog"
 import { useDialog } from "../../contexts/DialogContext";
@@ -31,8 +32,8 @@ export function FilesContextMenu({
         console.log('Copy path:', item.absPath);
     };
     
-    const handleNewNote = () => {
-        openDialog(<NewNoteDialog />)
+    const handleNewNote = (directoryPath: string) => {
+        openDialog(<NewNoteDialog directoryPath={directoryPath} />)
     }
 
     const handleDelete = () => {
@@ -45,7 +46,14 @@ export function FilesContextMenu({
             <ContextMenuTrigger asChild>
                 {children}
             </ContextMenuTrigger>
-            <ContextMenuContent className="w-16">                
+            <ContextMenuContent className="w-16">    
+                {item.isDirectory && (
+                    <ContextMenuItem onClick={() => handleNewNote(item.absPath)} className="cursor-pointer">
+                        <File size={8} />
+                        <span className="text-xs">New Note</span>
+                    </ContextMenuItem>
+                )}
+
                 <ContextMenuItem onClick={() => openDialog(<RenameDialog item={item} />)} className="cursor-pointer">
                     <Type size={8} />
                     <span className="text-xs">Rename</span>
