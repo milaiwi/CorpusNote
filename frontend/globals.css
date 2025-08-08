@@ -129,7 +129,7 @@
 
   --primary-hover: oklch(1 0 0 / 5.5%); /* Light gray background on hover (255, 255, 255, 0.555) */
   
-  --border-primary: oklch(0.235 0 0); /* Dark borders (60,60,60) */
+  --border-primary: oklch(0.335 0 0); /* Dark borders (60,60,60) */
   --border-secondary: oklch(0.196 0 0); /* Secondary borders (50,50,50) */
   
   --interactive-bg: oklch(0.196 0 0); /* Dark hover backgrounds (50,50,50) */

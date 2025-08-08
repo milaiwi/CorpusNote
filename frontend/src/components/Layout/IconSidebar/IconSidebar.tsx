@@ -28,7 +28,8 @@ export const IconGroup: React.FC<IconGroupProps> = ({
         <div className={cn("flex gap-1 w-full", className)}>
             {icons.map((item) => {
                 const Icon = item.icon
-                const isActive = item.id === activeOption
+                const isActive = !item.action && item.id === activeOption
+                console.log(`Item: ${item.id} isActive: ${isActive}`)
 
                 const handleClick = () => {
                     if (item.action) {

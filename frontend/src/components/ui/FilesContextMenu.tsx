@@ -58,7 +58,7 @@ export function FilesContextMenu({
             <ContextMenuTrigger asChild>
                 {children}
             </ContextMenuTrigger>
-            <ContextMenuContent className="w-24">    
+            <ContextMenuContent className="w-36">    
                 {item.isDirectory && (
                     <>
                         <ContextMenuItem onClick={() => handleNewDirectory(item.absPath)} className="cursor-pointer">
