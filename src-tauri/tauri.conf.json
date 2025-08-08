@@ -21,6 +21,7 @@
         "readDir": true,
         "createDir": true,
         "renameFile": true,
+        "removeFile": true,
         "scope": ["**"]
       },
       "all": false

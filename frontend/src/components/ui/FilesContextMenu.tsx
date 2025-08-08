@@ -17,6 +17,7 @@ import { RenameDialog } from "../dialog/RenameDialog"
 import { useDialog } from "../../contexts/DialogContext";
 import { NewNoteDialog } from "../dialog/NewNoteDialog";
 import { NewDirectoryDialog } from "../dialog/NewDirectoryDialog";
+import { useFileSystem } from "../../contexts/FileSystemContext";
 
 interface FilesContextMenuProps {
     children: React.ReactNode;
@@ -28,10 +29,10 @@ export function FilesContextMenu({
     item, 
 }: FilesContextMenuProps) {
     const { openDialog } = useDialog()
+    const { handleRemove } = useFileSystem()
     
     const handleCopyPath = () => {
         navigator.clipboard.writeText(item.absPath);
-        console.log('Copy path:', item.absPath);
     };
     
     const handleNewNote = (directoryPath: string) => {
@@ -43,8 +44,13 @@ export function FilesContextMenu({
     }
 
     const handleDelete = () => {
-        // TODO: Implement delete functionality
-        console.log('Delete:', item.name);
+        // TODO: Implement delete 
+        const [success, error] = handleRemove(item)
+        if (success) {
+            console.log('File deleted:', item.name)
+        } else {
+            console.error('Error deleting file:', error)
+        }
     };
 
     return (

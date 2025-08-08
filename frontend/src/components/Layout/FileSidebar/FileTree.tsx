@@ -20,6 +20,7 @@ async function readSingleDirectoryContent(vaultPath: string, directoryPath: stri
 
             for (const entry of entries) {
                 if (validDisplayableFile(entry)) {
+                    console.log(`Entry: ${entry.name} has parent: ${parent?.name}`)
                     const fileItem: FileItem = {
                         // @ts-ignore
                         name: entry.name,
@@ -122,6 +123,41 @@ export const renameItemInFileTree = (files: FileItem[], oldPath: string, newName
     })
 }
 
+/**
+ * Remove an item from the file tree
+ * @param files - The file tree
+ * @param itemPath - The path of the item to remove
+ * @returns The updated file tree with the item removed
+ */
+export const removeItemFromFileTree = (files: FileItem[], itemPath: string): FileItem[] => {
+    return files.map(file => {
+        if (file.children) {
+            // Check if any child matches the path to remove
+            const hasItemToRemove = file.children.some(child => child.absPath === itemPath)
+            
+            if (hasItemToRemove) {
+                // Remove the item from this directory's children
+                const updatedChildren = file.children.filter(child => child.absPath !== itemPath)
+                return {
+                    ...file,
+                    children: updatedChildren
+                }
+            } else {
+                // Recursively search in children
+                const updatedChildren = removeItemFromFileTree(file.children, itemPath)
+                
+                // Only update if children actually changed
+                if (updatedChildren !== file.children) {
+                    return {
+                        ...file,
+                        children: updatedChildren
+                    }
+                }
+            }
+        }
+        return file
+    })
+}
 
 /**
  * Sort files: directories first, then files, both alphabetically

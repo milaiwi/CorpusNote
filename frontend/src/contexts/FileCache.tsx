@@ -1,7 +1,7 @@
 // src/contexts/FileCache.tsx
 import React, { useContext, useMemo } from 'react'
 import { QueryClient } from '@tanstack/react-query'
-import { createDir, readTextFile, writeTextFile, renameFile } from '@tauri-apps/api/fs'
+import { createDir, readTextFile, writeTextFile, renameFile, removeFile } from '@tauri-apps/api/fs'
 import { useAppSettings } from './AppContext'
 
 // Global reference to the query client for use outside of React components
@@ -141,7 +141,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
 
   const deleteFileAndCache = async (path: string): Promise<void> => {
     try {
-    //   await window.fileSystem.deleteFile(path)
+      await removeFile(path)
       queryClient.invalidateQueries({ queryKey: ['file', path] })
     } catch (error) {
       console.error('Error deleting file:', error)

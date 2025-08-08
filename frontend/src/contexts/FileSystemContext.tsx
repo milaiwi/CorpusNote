@@ -1,7 +1,7 @@
 // frontend/src/contexts/FileSystemContext.tsx
 import React, { createContext, useContext, ReactNode, useState, useEffect } from "react"
 import { FileItem } from "../components/layout/FileSidebar/utils"
-import readSingleDirectoryContent, { sortFiles, addItemToDirectory, renameItemInFileTree } from "../components/layout/FileSidebar/FileTree"
+import readSingleDirectoryContent, { sortFiles, addItemToDirectory, renameItemInFileTree, removeItemFromFileTree } from "../components/layout/FileSidebar/FileTree"
 import { useFileCache, writeFileAndCache } from "./FileCache"
 import { useAppSettings } from "./AppContext"
 import { extractCurrentDirectory, invalidCharactersExist } from "../../lib/utils"
@@ -17,6 +17,7 @@ type FileSystemContextType = {
     createNewNote: (title: string, targetDirectory?: string) => void
     createNewDirectory: (directory: string, targetDirectory?: string) => void
     handleRename: (filePath: string, newName: string) => [boolean, string]
+    handleRemove: (item: FileItem) => [boolean, string]
 
     // File tree management
 
@@ -55,15 +56,13 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     const [changingFilePath, setChangingFilePath] = useState<boolean>(false)
     const [editorContent, setEditorContent] = useState<string | null>(null)
 
-    const { readFileAndCache, createDirectory, renameFileAndCache } = useFileCache()
+    const { readFileAndCache, createDirectory, renameFileAndCache, deleteFileAndCache } = useFileCache()
 
     // Load files from vault
     useEffect(() => {
         const readFilesFromDirectory = async () => {
             const startingPath = vaultPath
-            const fileItems = await readSingleDirectoryContent(vaultPath, startingPath)
-            const sortedFiles = sortFiles(fileItems)
-            
+
             // Create a dummy root node that contains all top-level files
             const dummyRoot: FileItem = {
                 name: '.corpusnotes-dummy',
@@ -72,9 +71,14 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
                 timeCreated: Date.now(),
                 timeModified: Date.now(),
                 currentPosition: 0,
-                children: sortedFiles,
                 expanded: true,
+                children: [],
             }
+
+            const fileItems = await readSingleDirectoryContent(vaultPath, startingPath, dummyRoot)
+            const sortedFiles = sortFiles(fileItems)
+
+            dummyRoot.children = sortedFiles
             
             setFiles([dummyRoot])
             return true
@@ -184,6 +188,15 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, newFilePath]
     }
 
+    const handleRemove = (item: FileItem): [boolean, string] => {
+        console.log('Removing in handleRemove:', item.absPath)
+        if (!item) return [false, 'File does not exist'] // Theoretically impossible
+
+        deleteFileAndCache(item.absPath)        
+        setFiles(prev => removeItemFromFileTree(prev, item.absPath))
+        return [true, 'File deleted']
+    }
+
     const contextValue: FileSystemContextType = {
         vaultTree: files,
         expandedDirectories,
@@ -192,6 +205,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         createNewNote,
         createNewDirectory,
         handleRename,
+        handleRemove,
         changingFilePath,
         editorContent,
         currentOpenedFile: currentOpenedFile,
