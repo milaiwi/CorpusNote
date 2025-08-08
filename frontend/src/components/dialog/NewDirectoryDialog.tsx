@@ -25,7 +25,11 @@ const newDirectorySchema = z.object({
     directory: z.string().min(2, { message: 'Directory name is required' }),
 })
 
-export const NewDirectoryDialog: React.FC = () => {
+interface NewDirectoryDialogProps {
+    directoryPath?: string;
+}
+
+export const NewDirectoryDialog: React.FC<NewDirectoryDialogProps> = ({ directoryPath }) => {
     const [isOpen, setIsOpen] = useState<boolean>(true)
     const { closeDialog } = useDialog()
     const { createNewDirectory } = useFileSystem()
@@ -42,7 +46,7 @@ export const NewDirectoryDialog: React.FC = () => {
             form.setError('directory', { message: `Directory name contains invalid characters: ${INVALID_CHARACTERS_STRING}` })
             return
         }
-        createNewDirectory(values.directory)
+        createNewDirectory(values.directory, directoryPath)
         closeDialog()
     }
 

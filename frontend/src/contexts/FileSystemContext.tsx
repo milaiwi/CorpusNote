@@ -15,7 +15,7 @@ type FileSystemContextType = {
     handleDirectoryToggle: (path: string) => void
     loadFileIntoEditor: (filePath: string) => void
     createNewNote: (title: string, targetDirectory?: string) => void
-    createNewDirectory: (directory: string) => void
+    createNewDirectory: (directory: string, targetDirectory?: string) => void
     handleRename: (filePath: string, newName: string) => [boolean, string]
 
     // File tree management
@@ -131,8 +131,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         }
     }
 
-    const createNewDirectory = (directory: string) => {
-        const targetPath = currentOpenedFile ? extractCurrentDirectory(currentOpenedFile) : vaultPath
+    const createNewDirectory = (directory: string, targetDirectory?: string) => {
+        const targetPath = targetDirectory || (currentOpenedFile ? extractCurrentDirectory(currentOpenedFile) : vaultPath)
         const newDirectoryPath = `${targetPath}/${directory}`
         createDirectory(newDirectoryPath)
         

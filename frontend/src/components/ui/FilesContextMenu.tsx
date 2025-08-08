@@ -11,10 +11,12 @@ import {
     Copy, 
     Type,
     File,
+    Folder
 } from "lucide-react"
 import { RenameDialog } from "../dialog/RenameDialog"
 import { useDialog } from "../../contexts/DialogContext";
 import { NewNoteDialog } from "../dialog/NewNoteDialog";
+import { NewDirectoryDialog } from "../dialog/NewDirectoryDialog";
 
 interface FilesContextMenuProps {
     children: React.ReactNode;
@@ -36,6 +38,10 @@ export function FilesContextMenu({
         openDialog(<NewNoteDialog directoryPath={directoryPath} />)
     }
 
+    const handleNewDirectory = (directoryPath: string) => {
+        openDialog(<NewDirectoryDialog directoryPath={directoryPath} />)
+    }
+
     const handleDelete = () => {
         // TODO: Implement delete functionality
         console.log('Delete:', item.name);
@@ -46,12 +52,18 @@ export function FilesContextMenu({
             <ContextMenuTrigger asChild>
                 {children}
             </ContextMenuTrigger>
-            <ContextMenuContent className="w-16">    
+            <ContextMenuContent className="w-24">    
                 {item.isDirectory && (
-                    <ContextMenuItem onClick={() => handleNewNote(item.absPath)} className="cursor-pointer">
-                        <File size={8} />
-                        <span className="text-xs">New Note</span>
-                    </ContextMenuItem>
+                    <>
+                        <ContextMenuItem onClick={() => handleNewDirectory(item.absPath)} className="cursor-pointer">
+                            <Folder size={8} />
+                            <span className="text-xs">New Directory</span>
+                        </ContextMenuItem>
+                        <ContextMenuItem onClick={() => handleNewNote(item.absPath)} className="cursor-pointer">
+                            <File size={8} />
+                            <span className="text-xs">New Note</span>
+                        </ContextMenuItem>
+                    </>
                 )}
 
                 <ContextMenuItem onClick={() => openDialog(<RenameDialog item={item} />)} className="cursor-pointer">
