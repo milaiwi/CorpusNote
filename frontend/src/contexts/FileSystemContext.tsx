@@ -180,7 +180,6 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         const existingFile = dummyRoot?.children?.find(file => file.absPath === newFilePath)
         if (existingFile) return [false, 'New name already exists'] // New name already exists
 
-        console.log('Renaming:', filePath, 'to:', newFilePath)
         renameFileAndCache(filePath, newFilePath)
         
         // Use the tree traversal function to properly update the file tree
@@ -189,7 +188,6 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     }
 
     const handleRemove = (item: FileItem): [boolean, string] => {
-        console.log('Removing in handleRemove:', item.absPath)
         if (!item) return [false, 'File does not exist'] // Theoretically impossible
 
         deleteFileAndCache(item.absPath)        

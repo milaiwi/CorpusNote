@@ -13,13 +13,9 @@ import { useDialog } from '../../contexts/DialogContext'
 export const VaultSelectorDialog: React.FC = () => {
   const [showRecentVaults, setShowRecentVaults] = useState<boolean>(false)
   // const [vaultPath, setVaultPathFn] = useState<string | null>(null)
-  const { vaultPath, setVaultPath } = useAppSettings()
+  const { setVaultPath } = useAppSettings()
   const [isOpen, setIsOpen] = useState<boolean>(true)
   const { closeDialog } = useDialog()
-
-  useEffect(() => {
-    console.log('vaultPath', vaultPath)
-  }, [vaultPath])
 
   const handleSelectNewVault = async () => {
     // TODO: Implement Tauri file dialog

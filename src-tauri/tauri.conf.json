@@ -22,7 +22,11 @@
         "createDir": true,
         "renameFile": true,
         "removeFile": true,
-        "scope": ["**"]
+        "scope": [
+          "**",
+          "$HOME/.ollama/models/manifests/registry.ollama.ai/library",
+          "http://127.0.0.1:11434/*"
+        ]
       },
       "all": false
     },

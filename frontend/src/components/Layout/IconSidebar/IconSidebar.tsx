@@ -29,7 +29,6 @@ export const IconGroup: React.FC<IconGroupProps> = ({
             {icons.map((item) => {
                 const Icon = item.icon
                 const isActive = !item.action && item.id === activeOption
-                console.log(`Item: ${item.id} isActive: ${isActive}`)
 
                 const handleClick = () => {
                     if (item.action) {

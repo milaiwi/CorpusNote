@@ -5,10 +5,12 @@ import {
     SquarePen,
     FolderPlus,
     Vault,
+    Settings,
 } from 'lucide-react'
 import { VaultSelectorDialog } from '../../dialog/VaultSelectorDialog'
 import { NewNoteDialog } from '../../dialog/NewNoteDialog'
 import { NewDirectoryDialog } from '../../dialog/NewDirectoryDialog'
+import { SettingsDialog } from '../../dialog/Settings/AppSettingsDialog'
 
 export interface IconProps {
   id: string;  // 'file', 'search', etc..
@@ -62,6 +64,17 @@ const OpenVaultIcon: IconProps = {
     }
 }
 
+const SettingsIcon: IconProps ={ 
+    id: 'settings',
+    icon: Settings,
+    label: 'Settings',
+    action: (openDialog) => {
+        openDialog(
+            <SettingsDialog />
+        )
+    }
+}
+
 export const topLevelIcons: IconProps[] = [
     FileIcon,
     SearchIcon,
@@ -71,6 +84,7 @@ export const topLevelIcons: IconProps[] = [
 
 export const bottomLevelIcons: IconProps[] = [
     OpenVaultIcon,
+    SettingsIcon,
 ]
 
 export {

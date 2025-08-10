@@ -2,7 +2,7 @@
 import React, { useContext, useMemo } from 'react'
 import { QueryClient } from '@tanstack/react-query'
 import { createDir, readTextFile, writeTextFile, renameFile, removeFile } from '@tauri-apps/api/fs'
-import { useAppSettings } from './AppContext'
+import { fetchOllamaModels, OllamaTagsResp } from '../components/models/ollama'
 
 // Global reference to the query client for use outside of React components
 let globalQueryClient: QueryClient | null = null
@@ -86,6 +86,7 @@ interface FileCacheContextType {
   // Cache management
   invalidateFile: (path: string) => void
   prefetchFile: (path: string) => Promise<void>
+  prefetchOllamaModels: () => Promise<OllamaTagsResp | null>
 
   // File system operations with no cache validation
   createDirectory: (path: string) => Promise<void>
@@ -99,7 +100,6 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
 }) => {
   // Set global query client reference for use outside of React components
   setGlobalQueryClient(queryClient)
-  const { vaultPath } = useAppSettings()
 
   const readFileAndCache = async (path: string): Promise<string | null> => {
     try {
@@ -191,6 +191,16 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
     }
   }
 
+  const prefetchOllamaModels = async (): Promise<OllamaTagsResp | null> => {
+    const _models = await queryClient.fetchQuery({
+      queryKey: ['ollamaModels'],
+      queryFn: fetchOllamaModels,
+      staleTime: 1000 * 60 * 20, // 20 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
+    })
+    return _models
+  }
+
   const value = useMemo(
     () => ({
       readFileAndCache,
@@ -200,6 +210,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
     //   createFileAndCache,
       invalidateFile,
       prefetchFile,
+      prefetchOllamaModels,
       createDirectory,
       renameFile,
     }),

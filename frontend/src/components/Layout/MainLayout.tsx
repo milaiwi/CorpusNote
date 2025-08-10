@@ -11,6 +11,7 @@ import FileCacheProvider from '../../contexts/FileCache';
 import { DialogProvider } from '../../contexts/DialogContext';
 import { AppProvider } from '../../contexts/AppContext';
 import { useAppSettings } from '../../contexts/AppContext';
+import { AIProvider } from '../../contexts/AIContext';
 
 interface MainLayoutProps {
     className?: string;
@@ -63,9 +64,11 @@ const MainPageLayout = () => {
                 <AppProvider>
                     <FileCacheProvider queryClient={queryClient}>
                         <FileSystemProvider>
-                            <DialogProvider>
-                                <MainLayout />
-                            </DialogProvider>
+                            <AIProvider>
+                                <DialogProvider>
+                                    <MainLayout />
+                                </DialogProvider>
+                            </AIProvider>
                         </FileSystemProvider>
                     </FileCacheProvider>
                 </AppProvider>

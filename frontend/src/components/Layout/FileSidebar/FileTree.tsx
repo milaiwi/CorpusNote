@@ -20,7 +20,6 @@ async function readSingleDirectoryContent(vaultPath: string, directoryPath: stri
 
             for (const entry of entries) {
                 if (validDisplayableFile(entry)) {
-                    console.log(`Entry: ${entry.name} has parent: ${parent?.name}`)
                     const fileItem: FileItem = {
                         // @ts-ignore
                         name: entry.name,

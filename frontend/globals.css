@@ -74,6 +74,8 @@
   --accent-secondary: oklch(0.729 0.118 184.704); /* Green accent */
   --accent-destructive: oklch(0.577 0.245 27.325); /* Red accent */
 
+  --button-blue: oklch(0.6582 0.169 248.81);
+
   --radius: 0.625rem;
 
   /* ===== OVERRIDE SHADCN VARIABLES WITH YOUR CUSTOM COLORS ===== */
@@ -92,7 +94,9 @@
 
   --secondary: var(--bg-secondary);
   --secondary-foreground: oklch(0.205 0 0);
-  
+
+  --button: var(--button-blue);
+
   /* Miscallenous - Disabled, Faded, Input, Borders, etc.. */
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -145,6 +149,8 @@
   --accent-primary: oklch(0.651 0.222 265.75); /* Lighter blue for dark mode */
   --accent-secondary: oklch(0.829 0.118 184.704); /* Lighter green for dark mode */
   --accent-destructive: oklch(0.677 0.245 27.325); /* Lighter red for dark mode */
+  
+  --button-blue: oklch(0.6582 0.169 248.81);
 
   /* ===== OVERRIDE SHADCN VARIABLES WITH YOUR CUSTOM COLORS ===== */
   --background: var(--bg-primary);
@@ -166,6 +172,8 @@
 
   --tertiary: var(--bg-tertiary);
   --tertiary-foreground: var(--text-tertiary);
+
+  --button: var(--button-blue);
 
 
   /* Miscallenous - Disabled, Faded, Input, Borders, etc.. */
