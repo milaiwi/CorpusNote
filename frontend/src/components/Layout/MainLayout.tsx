@@ -22,7 +22,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
     const [selectedFile, setSelectedFile] = useState<string | null>(null)
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
-    const { vaultPath } = useAppSettings()
+    const { vaultPath, settings } = useAppSettings()
 
     return (
         <div className="h-screen flex flex-1">

@@ -1,18 +1,54 @@
 // frontend/src/contexts/AppContext
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react'
+import { SettingsRepository } from '../../../backend/domain/settings/SettingsRepository'
+import TauriStoreAdapter from '../../../backend/api/TauriStoreAdapter'
+import { Settings } from '../../../backend/domain/settings/schema'
 
 interface AppContextType {
     vaultPath: string,
     setVaultPath: (path: string) => void
+    settings: Settings
+    updateSettings: (patch: Partial<Omit<Settings, "version">>) => Promise<void>
+    resetSettings: () => Promise<void>
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [vaultPath, setVaultPath] = useState<string>('/Users/milaiwi/documents/notes')
+    const [settings, setSettings] = useState<Settings>()
+
+    const repo = useMemo(() => {
+        return new SettingsRepository(new TauriStoreAdapter())
+    }, [])
+
+    // Set up watch and init our settings state
+    useEffect(() => {
+        let unlisten = () => {};
+        (async () => {
+          const s = await repo.load();
+          setSettings(s);
+          unlisten = repo.watch?.((next) => setSettings(next)) ?? (() => {});
+        })();
+        return () => unlisten();
+      }, [repo]);
+
+    // Update settings state and persist to disk
+    const updateSettings = async (patch: Partial<Omit<Settings, "version">>) => {
+        const next = await repo.update(patch)
+        setVaultPath(next.vaultPath)
+    }
+
+    // Reset settings to default
+    const resetSettings = async () => {
+        const next = await repo.reset()
+        setVaultPath(next.vaultPath)
+    }
+
+    const value = useMemo(() => ({ vaultPath, setVaultPath, settings, updateSettings, resetSettings }), [settings]);
 
     return (
-        <AppContext.Provider value={{ vaultPath, setVaultPath }}>
+        <AppContext.Provider value={value}>
             {children}
         </AppContext.Provider>
     )
