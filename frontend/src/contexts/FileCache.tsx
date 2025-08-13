@@ -1,22 +1,11 @@
+"use client"
 // src/contexts/FileCache.tsx
 import React, { useContext, useMemo } from 'react'
-import { QueryClient } from '@tanstack/react-query'
 import { createDir, readTextFile, writeTextFile, renameFile, removeFile } from '@tauri-apps/api/fs'
 import { fetchOllamaModels, OllamaTagsResp } from '../components/models/ollama'
+import { FileItem } from '../components/layout/FileSidebar/utils'
+import { useQueryClient } from '@tanstack/react-query'
 
-// Global reference to the query client for use outside of React components
-let globalQueryClient: QueryClient | null = null
-
-export const setGlobalQueryClient = (queryClient: QueryClient) => {
-  globalQueryClient = queryClient
-}
-
-export const getGlobalQueryClient = () => {
-  if (!globalQueryClient) {
-    throw new Error('Global query client not set. Make sure FileCacheProvider is initialized.')
-  }
-  return globalQueryClient
-}
 
 /**
  *  ========================================================
@@ -27,7 +16,7 @@ export const getGlobalQueryClient = () => {
  *  ========================================================
  */
 export const readFileCached = async (path: string): Promise<string | null> => {
-  const queryClient = getGlobalQueryClient()
+  const queryClient = useQueryClient()
 
   try {
     // Check if the file is in the cache
@@ -40,8 +29,6 @@ export const readFileCached = async (path: string): Promise<string | null> => {
     const fileContent = await queryClient.fetchQuery({
       queryKey: ['file', path],
       queryFn: async () => {
-        // const content = await window.fileSystem.readFile(path, 'utf-8')
-        console.log
         const content = await readTextFile(path)
         return content
       },
@@ -56,18 +43,18 @@ export const readFileCached = async (path: string): Promise<string | null> => {
   }
 }
 
-export const writeFileAndCache = async (path: string, content: string): Promise<void> => {
-  const queryClient = getGlobalQueryClient()
+// export const writeFileAndCache = async (file: FileItem, content: string): Promise<void> => {
+//   const queryClient = getGlobalQueryClient()
 
-  try {
-    await writeTextFile(path, content)
-    // Invalidate the cache after writing
-    queryClient.invalidateQueries({ queryKey: ['file', path] })
-  } catch (error) {
-    console.error('Error writing file:', error)
-    throw error
-  }
-}
+//   try {
+//     await writeTextFile(file.absPath, content)
+//     // Invalidate the cache after writing
+//     queryClient.invalidateQueries({ queryKey: ['file', file.absPath] })
+//   } catch (error) {
+//     console.error('Error writing file:', error)
+//     throw error
+//   }
+// }
 /**
  *  =============================
  *
@@ -78,8 +65,8 @@ export const writeFileAndCache = async (path: string, content: string): Promise<
 
 interface FileCacheContextType {
   // File operations with cache validation and invalidation
-  readFileAndCache: (path: string) => Promise<string | null>
-  writeFileAndCache: (path: string, content: string) => Promise<void>
+  readFileAndCache: (file: FileItem) => Promise<string | null>
+  writeFileAndCache: (file: FileItem, content: string) => Promise<void>
   renameFileAndCache: (oldPath: string, newPath: string) => Promise<void>
   deleteFileAndCache: (path: string) => Promise<void>
 
@@ -94,26 +81,21 @@ interface FileCacheContextType {
 
 const FileCacheContext = React.createContext<FileCacheContextType | undefined>(undefined)
 
-const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: QueryClient }> = ({
-  children,
-  queryClient,
-}) => {
-  // Set global query client reference for use outside of React components
-  setGlobalQueryClient(queryClient)
+const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const queryClient = useQueryClient()
 
-  const readFileAndCache = async (path: string): Promise<string | null> => {
+  const readFileAndCache = async (file: FileItem): Promise<string | null> => {
     try {
       // Use the cache instead of bypassing it
-      const cachedData = queryClient.getQueryData(['file', path])
-      if (cachedData) {
+      const cachedData = queryClient.getQueryData(['file', file.absPath])
+      if (cachedData)
         return cachedData as string
-      }
 
       // If not in cache, fetch and cache it
       const fileContent = await queryClient.fetchQuery({
-        queryKey: ['file', path],
+        queryKey: ['file', file.absPath],
         queryFn: async () => {
-          const content = await readTextFile(path)
+          const content = await readTextFile(file.absPath)
           return content
         },
         staleTime: 1000 * 60 * 5,
@@ -127,11 +109,12 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode; queryClient: Quer
     }
   }
 
-  const writeFileAndCache = async (path: string, content: string): Promise<void> => {
+  const writeFileAndCache = async (file: FileItem, content: string): Promise<void> => {
     try {
-      await writeTextFile(path, content)
+      console.log(`Writing file to ${file.absPath} that is ${file.isDirty ? 'dirty' : 'clean'}`)
+      await writeTextFile(file.absPath, content)
 
-      queryClient.invalidateQueries({ queryKey: ['file', path] })
+      queryClient.setQueryData(['file', file.absPath], content)
     } catch (error) {
       console.error('Error writing file:', error)
       throw error

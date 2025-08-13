@@ -7,11 +7,12 @@ import {
 import FileSidebar from './FileSidebar/FileSidebar'
 import { IconSidebarOptions } from './IconSidebar/IconSidebar'
 import { cn } from '../../../lib/utils'
+import { FileItem } from './FileSidebar/utils'
 
 interface ResizableSidebarProps {
   vaultPath: string
-  selectedFile: string | null
-  onFileSelect: (filePath: string) => void
+  selectedFile: FileItem | null
+  onFileSelect: (file: FileItem) => void
   activeOption: IconSidebarOptions
   setActiveOption: (option: IconSidebarOptions) => void
   isCollapsed: boolean

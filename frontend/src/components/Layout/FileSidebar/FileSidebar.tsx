@@ -35,7 +35,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
             return null
         }
         
-        const isSelected = selectedFile === item.absPath
+        const isSelected = selectedFile?.absPath === item.absPath
         const paddingLeft = depth * 16 + 8
         return (
             <div key={item.absPath}>
@@ -53,7 +53,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                             if (item.isDirectory)
                                 handleDirectoryToggle(item.absPath)
                             else
-                                onFileSelect(item.absPath)
+                                onFileSelect(item)
                         }}
                     >
                         {item.isDirectory && (

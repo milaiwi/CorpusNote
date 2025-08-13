@@ -6,20 +6,28 @@ import FileSystemProvider from '../../contexts/FileSystemContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
-import EditorManager from './EditorManager/EditorManager';
+// import EditorManager from './EditorManager/EditorManager';
 import FileCacheProvider from '../../contexts/FileCache';
 import { DialogProvider } from '../../contexts/DialogContext';
 import { AppProvider } from '../../contexts/AppContext';
 import { useAppSettings } from '../../contexts/AppContext';
 import { AIProvider } from '../../contexts/AIContext';
+import dynamic from "next/dynamic"
+import { FileItem } from './FileSidebar/utils';
 
 interface MainLayoutProps {
     className?: string;
 }
 
+// Prevent the editor manager from being loaded immediately on the server side
+// -- prevents 'document is not defined' error
+const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
+    ssr: false,
+})
+
 const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
     // TODO: Move this up to a startup page -> sets the vault path and configurations
-    const [selectedFile, setSelectedFile] = useState<string | null>(null)
+    const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
     const { vaultPath, settings } = useAppSettings()
@@ -39,7 +47,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
                     {/* Title Bar*/}
                     <TitleBar
                         selectedFile={selectedFile}
-                        setSelectedFile={setSelectedFile}
                         isSidebarCollapsed={isSidebarCollapsed}
                         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                     />
@@ -62,7 +69,7 @@ const MainPageLayout = () => {
         <ThemeProvider>
             <QueryClientProvider client={queryClient}>
                 <AppProvider>
-                    <FileCacheProvider queryClient={queryClient}>
+                    <FileCacheProvider>
                         <FileSystemProvider>
                             <AIProvider>
                                 <DialogProvider>
