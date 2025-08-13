@@ -1,7 +1,7 @@
 // frontend/src/contexts/AppContext
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react'
 import { useFileCache } from './FileCache'
-import { OllamaModel } from '../components/models/ollama'
+import { OllamaModel } from '../components/models/llm/ollama'
 import { useAppSettings } from './AppContext'
 
 interface AIContextType {

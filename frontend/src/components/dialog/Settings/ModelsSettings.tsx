@@ -2,7 +2,7 @@ import React from 'react'
 import { SettingsRow } from './utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../../shadcn/ui/dropdown-menu'
 import { Button } from '../../../../shadcn/ui/button'
-import { OllamaModel } from '../../models/ollama'
+import { OllamaModel } from '../../models/llm/ollama'
 import { useAppSettings } from '../../../contexts/AppContext'
 
 interface ModelsSettingsProps {

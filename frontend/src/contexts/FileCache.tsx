@@ -2,7 +2,7 @@
 import React, { useContext, useMemo } from 'react'
 import { QueryClient } from '@tanstack/react-query'
 import { createDir, readTextFile, writeTextFile, renameFile, removeFile } from '@tauri-apps/api/fs'
-import { fetchOllamaModels, OllamaTagsResp } from '../components/models/ollama'
+import { fetchOllamaModels, OllamaTagsResp } from '../components/models/llm/ollama'
 
 // Global reference to the query client for use outside of React components
 let globalQueryClient: QueryClient | null = null
