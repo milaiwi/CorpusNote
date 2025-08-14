@@ -5,27 +5,29 @@ import readSingleDirectoryContent, { sortFiles, addItemToDirectory, renameItemIn
 import { useFileCache } from "./FileCache"
 import { useAppSettings } from "./AppContext"
 import { extractCurrentDirectory, invalidCharactersExist } from "../../lib/utils"
+import { Block } from "@blocknote/core"
 
 type FileSystemContextType = {
     // File tree state
     vaultTree: FileItem[]
     expandedDirectories: Map<string, boolean>
+    handleDirectoryToggle: (path: string) => void
 
     // File operations
-    handleDirectoryToggle: (path: string) => void
-    loadFileIntoEditor: (file: FileItem) => void
-    createNewNote: (title: string, targetDirectory?: string) => void
-    createNewDirectory: (directory: string, targetDirectory?: string) => void
-    handleRename: (filePath: string, newName: string) => [boolean, string]
-    handleRemove: (item: FileItem) => [boolean, string]
-    saveFileFromEditor: (markdown: string) => void
+    loadFileIntoEditor: (file: FileItem) => Promise<void>
+    createNewNote: (title: string, targetDirectory?: string) => Promise<void>
+    createNewDirectory: (directory: string, targetDirectory?: string) => Promise<void>
+    handleRename: (filePath: string, newName: string) => Promise<[boolean, string]>
+    handleRemove: (item: FileItem) => Promise<[boolean, string]>
+    saveFileFromEditor: (blocks: Block[]) => Promise<void>
 
     // File tree management
 
     // File state management
     currentOpenedFile: FileItem | null
     changingFilePath: boolean
-    editorContent: string | null
+    editorInitialBlocks: Block[] | null
+    editorInitialMarkdown: string | null
 
     // File content operations
 
@@ -55,7 +57,10 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     // File state management
     const [currentOpenedFile, setCurrentOpenedFile] = useState<FileItem | null>(null)
     const [changingFilePath, setChangingFilePath] = useState<boolean>(false)
-    const [editorContent, setEditorContent] = useState<string | null>(null)
+
+    // State to hold the initial content of the editor
+    const [editorInitialBlocks, setEditorInitialBlocks] = useState<Block[] | null>(null)
+    const [editorInitialMarkdown, setEditorInitialMarkdown] = useState<string | null>(null)
 
     const { readFileAndCache, createDirectory, renameFileAndCache, deleteFileAndCache, writeFileAndCache } = useFileCache()
 
@@ -93,35 +98,38 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         setExpandedDirectories(prev => new Map(prev).set(path, !isExpanded))
     }
 
-    const loadFileIntoEditor = (file: FileItem) => {
+    const loadFileIntoEditor = async (file: FileItem) => {
         if (currentOpenedFile?.absPath === file.absPath)
             setCurrentOpenedFile(null)
+        console.log(`Loading file into editor: ${file.absPath}`)
         setCurrentOpenedFile(file)
         setChangingFilePath(true)
-        readFileAndCache(file).then((content) => {
-            setEditorContent(content)
-            setChangingFilePath(false)
-        })
+
+        setEditorInitialBlocks(null)
+        setEditorInitialMarkdown(null)
+        const result = await readFileAndCache(file)
+
+        if (result) {
+            if (result.source === 'json') {
+                setEditorInitialBlocks(result.content as Block[])
+            } else {
+                setEditorInitialMarkdown(result.content as string)
+            }
+        }
+        setChangingFilePath(false)
     }
 
-    const createNewNote = (title: string, targetDirectory?: string) => {
+    const createNewNote = async (title: string, targetDirectory?: string) => {
         const targetPath = targetDirectory || (currentOpenedFile ? extractCurrentDirectory(currentOpenedFile.absPath) : vaultPath)
         const newNotePath = `${targetPath}/${title}.md`
         
+        await writeFileAndCache({ absPath: newNotePath, name: title, isDirectory: false }, [])
+
         const newFile: FileItem = {
             name: title,
             absPath: newNotePath,
             isDirectory: false,
-            timeCreated: Date.now(),
-            timeModified: Date.now(),
-            currentPosition: 0,
-            mimeType: 'text/markdown',
-            children: [],
-            expanded: false,
         }
-
-        writeFileAndCache(newFile, '# ' + title + '\n\n')
-
         // If targetPath is the vault root, add to dummy root's children
         if (targetPath === vaultPath) {
             setFiles(prev => {
@@ -136,7 +144,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         }
     }
 
-    const createNewDirectory = (directory: string, targetDirectory?: string) => {
+    const createNewDirectory = async (directory: string, targetDirectory?: string) => {
         const targetPath = targetDirectory || (currentOpenedFile ? extractCurrentDirectory(currentOpenedFile.absPath) : vaultPath)
         const newDirectoryPath = `${targetPath}/${directory}`
         createDirectory(newDirectoryPath)
@@ -166,7 +174,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         }
     }
 
-    const handleRename = (filePath: string, newName: string): [boolean, string] => {
+    const handleRename = async (filePath: string, newName: string): Promise<[boolean, string]> => {
         if (!filePath) return [false, 'File path is empty'] // No file is opened
         if (invalidCharactersExist(newName)) return [false, 'There is an invalid character'] // There is an invalid character
         if (newName === '') return [false, 'New name is empty'] // New name is empty
@@ -188,7 +196,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, newFilePath]
     }
 
-    const handleRemove = (item: FileItem): [boolean, string] => {
+    const handleRemove = async (item: FileItem): Promise<[boolean, string]> => {
         if (!item) return [false, 'File does not exist'] // Theoretically impossible
 
         deleteFileAndCache(item.absPath)        
@@ -196,9 +204,9 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, 'File deleted']
     }
 
-    const saveFileFromEditor = (markdown: string) => {
+    const saveFileFromEditor = async (blocks: Block[]) => {
         if (!currentOpenedFile) return
-        writeFileAndCache(currentOpenedFile, markdown)
+        writeFileAndCache(currentOpenedFile, blocks)
         currentOpenedFile.isDirty = false
     }
 
@@ -213,7 +221,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         handleRemove,
         saveFileFromEditor,
         changingFilePath,
-        editorContent,
+        editorInitialBlocks,
+        editorInitialMarkdown,
         currentOpenedFile: currentOpenedFile,
     }
 

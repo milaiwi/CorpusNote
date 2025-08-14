@@ -7,10 +7,9 @@ import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
 import './editor.css'
 
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
-import MarkdownTransformer from './lib/MarkdownTransformer'
 import { FileItem } from '../FileSidebar/utils'
 
 interface EditorManagerProps {
@@ -19,7 +18,8 @@ interface EditorManagerProps {
 
 const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
     const {
-        editorContent,
+        editorInitialBlocks,
+        editorInitialMarkdown,
         changingFilePath,
         currentOpenedFile,
         loadFileIntoEditor,
@@ -27,8 +27,6 @@ const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
     } = useFileSystem()
 
     const editor = useCreateBlockNote()
-    const markdownTransformer = useMemo(() => new MarkdownTransformer(editor), [editor])
-
     const isInitialLoad = useRef<boolean>(false)
 
     useEffect(() => {
@@ -36,12 +34,16 @@ const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
 
         const loadMarkdownContent = async () => {
             isInitialLoad.current = true
-            const blocks = await markdownTransformer.parse(editorContent)
-            editor.replaceBlocks(editor.document, blocks)
+            if (editorInitialBlocks) {
+                editor.replaceBlocks(editor.document, editorInitialBlocks)
+            } else {
+                const blocks = await editor.tryParseMarkdownToBlocks(editorInitialMarkdown)
+                editor.replaceBlocks(editor.document, blocks)
+            }
         }
 
         loadMarkdownContent()
-    }, [changingFilePath, editorContent])
+    }, [changingFilePath, editor, editorInitialBlocks, editorInitialMarkdown])
 
     useEffect(() => {
         const fetchFile = async () => {
@@ -49,8 +51,8 @@ const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
 
             // Before loading the new file, we need to save the current opened file
             if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
-                const markdown = await markdownTransformer.serialize(editor.document)
-                saveFileFromEditor(markdown)
+                // const markdown = await markdownTransformer.serialize(editor.document)
+                saveFileFromEditor(editor.document)
             } else {
                 console.log('No changes to save')
             }

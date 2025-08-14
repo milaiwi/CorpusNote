@@ -1,72 +1,34 @@
 "use client"
 // src/contexts/FileCache.tsx
 import React, { useContext, useMemo } from 'react'
-import { createDir, readTextFile, writeTextFile, renameFile, removeFile } from '@tauri-apps/api/fs'
+import { createDir, readTextFile, writeTextFile, renameFile, removeFile, exists } from '@tauri-apps/api/fs'
 import { fetchOllamaModels, OllamaTagsResp } from '../components/models/ollama'
 import { FileItem } from '../components/layout/FileSidebar/utils'
 import { useQueryClient } from '@tanstack/react-query'
+import { useAppSettings } from './AppContext'
 
+import { join } from '@tauri-apps/api/path'
+import { Block } from '@blocknote/core'
 
 /**
- *  ========================================================
- *
- *    GLOBAL FILE CACHE TO USE OUTSIDE OF REACT COMPONENTS
- *      PREVENTS react-hook ERRORS
- *
- *  ========================================================
+ * A helper function to generate the path for the shadow JSON file.
+ * It replaces directory separators with a safe character to create a flat file structure
+ * within the .corpus-notes directory.
+ * @param vaultPath The absolute path to the user's vault.
+ * @param originalPath The absolute path of the original markdown file.
+ * @returns The absolute path for the corresponding shadow JSON file.
  */
-export const readFileCached = async (path: string): Promise<string | null> => {
-  const queryClient = useQueryClient()
-
-  try {
-    // Check if the file is in the cache
-    const cachedData = queryClient.getQueryData(['file', path])
-    if (cachedData) {
-      return cachedData as string
-    }
-
-    // If not in cache, fetch and cache it
-    const fileContent = await queryClient.fetchQuery({
-      queryKey: ['file', path],
-      queryFn: async () => {
-        const content = await readTextFile(path)
-        return content
-      },
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 10,
-    })
-
-    return fileContent
-  } catch (error) {
-    console.error('Error reading file:', error)
-    return null
-  }
+const getShadowPath = async (vaultPath: string, originalPath: string): Promise<string> => {
+  const relativePath = originalPath.replace(vaultPath, '')
+  const safeFileName = relativePath.replace(/[\/\\]/g, '_') + '.json'
+  return await join(vaultPath, '.corpus-notes', safeFileName)
 }
 
-// export const writeFileAndCache = async (file: FileItem, content: string): Promise<void> => {
-//   const queryClient = getGlobalQueryClient()
-
-//   try {
-//     await writeTextFile(file.absPath, content)
-//     // Invalidate the cache after writing
-//     queryClient.invalidateQueries({ queryKey: ['file', file.absPath] })
-//   } catch (error) {
-//     console.error('Error writing file:', error)
-//     throw error
-//   }
-// }
-/**
- *  =============================
- *
- *    END OF GLOBAL FILE CACHE
- *
- *  =============================
- */
 
 interface FileCacheContextType {
   // File operations with cache validation and invalidation
-  readFileAndCache: (file: FileItem) => Promise<string | null>
-  writeFileAndCache: (file: FileItem, content: string) => Promise<void>
+  readFileAndCache: (file: FileItem) => Promise<{ content: Block[] | string; source: 'json' | 'markdown'} | null>
+  writeFileAndCache: (file: FileItem, content: Block[]) => Promise<void>
   renameFileAndCache: (oldPath: string, newPath: string) => Promise<void>
   deleteFileAndCache: (path: string) => Promise<void>
 
@@ -83,38 +45,46 @@ const FileCacheContext = React.createContext<FileCacheContextType | undefined>(u
 
 const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient()
+  const { vaultPath } = useAppSettings()
 
-  const readFileAndCache = async (file: FileItem): Promise<string | null> => {
+  const readFileAndCache = async (file: FileItem): Promise<{ content: Block[] | string; source: 'json' | 'markdown'} | null> => {
     try {
+      const queryKey = ['note-blocks', file.absPath]
       // Use the cache instead of bypassing it
-      const cachedData = queryClient.getQueryData(['file', file.absPath])
+      const cachedData = queryClient.getQueryData<Block[]>(queryKey)
       if (cachedData)
-        return cachedData as string
+        return { content: cachedData, source: 'json' }
 
-      // If not in cache, fetch and cache it
-      const fileContent = await queryClient.fetchQuery({
-        queryKey: ['file', file.absPath],
-        queryFn: async () => {
-          const content = await readTextFile(file.absPath)
-          return content
-        },
-        staleTime: 1000 * 60 * 5,
-        gcTime: 1000 * 60 * 10,
-      })
+      const shadowPath = await getShadowPath(vaultPath, file.absPath)
 
-      return fileContent
+      try {
+        if (await exists(shadowPath)) {
+          const jsonString = await readTextFile(shadowPath)
+          const blocks = JSON.parse(jsonString) as Block[]
+          queryClient.setQueryData(queryKey, blocks)
+          return { content: blocks, source: 'json' }
+        }
+      } catch (e) {
+        console.error('Error reading shadow file:', e)
+      }
+
+      // If the shadow file doesn't exist, read the markdown file
+      const markdown = await readTextFile(file.absPath)
+      return { content: markdown, source: 'markdown' }
     } catch (error) {
       console.error('Error reading file:', error)
       return null
     }
   }
 
-  const writeFileAndCache = async (file: FileItem, content: string): Promise<void> => {
+  const writeFileAndCache = async (file: FileItem, content: Block[]): Promise<void> => {
+    const shadowPath = await getShadowPath(vaultPath, file.absPath)
+    const queryKey = ['note-blocks', file.absPath]
     try {
-      console.log(`Writing file to ${file.absPath} that is ${file.isDirty ? 'dirty' : 'clean'}`)
-      await writeTextFile(file.absPath, content)
+      const jsonString = JSON.stringify(content, null, 2)
+      await writeTextFile(shadowPath, jsonString)
 
-      queryClient.setQueryData(['file', file.absPath], content)
+      queryClient.setQueryData(queryKey, content)
     } catch (error) {
       console.error('Error writing file:', error)
       throw error
@@ -123,19 +93,34 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
 
   const deleteFileAndCache = async (path: string): Promise<void> => {
+    const shadowPath = await getShadowPath(vaultPath, path)
+    const queryKey = ['note-blocks', path]
     try {
+      if (await exists(shadowPath)) {
+        // Remove from the shadow file
+        await removeFile(shadowPath)
+      }
+      // Now remove the actual '.md' file
       await removeFile(path)
-      queryClient.invalidateQueries({ queryKey: ['file', path] })
+      queryClient.removeQueries({ queryKey })
     } catch (error) {
       console.error('Error deleting file:', error)
     }
   }
 
   const renameFileAndCache = async (oldPath: string, newPath: string): Promise<void> => {
+    const oldShadowPath = await getShadowPath(vaultPath, oldPath)
+    const newShadowPath = await getShadowPath(vaultPath, newPath)
+    const oldQueryKey = ['note-blocks', oldPath]
+    const newQueryKey = ['note-blocks', newPath]
     try {
       await renameFile(oldPath, newPath)
-      queryClient.invalidateQueries({ queryKey: ['file', oldPath] })
-      queryClient.invalidateQueries({ queryKey: ['file', newPath] })
+      if (await exists(oldShadowPath)) {
+        await renameFile(oldShadowPath, newShadowPath)
+      }
+
+      queryClient.removeQueries({ queryKey: oldQueryKey })
+      queryClient.invalidateQueries({ queryKey: newQueryKey })
     } catch (error) {
       console.error('Error renaming file:', error)
     }

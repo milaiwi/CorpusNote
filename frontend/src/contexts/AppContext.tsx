@@ -3,6 +3,9 @@ import React, { createContext, useContext, useState, ReactNode, useMemo, useEffe
 import { SettingsRepository } from '../../../backend/domain/settings/SettingsRepository'
 import TauriStoreAdapter from '../../../backend/api/TauriStoreAdapter'
 import { Settings } from '../../../backend/domain/settings/schema'
+import { createDir, exists } from '@tauri-apps/api/fs'
+import { join } from '@tauri-apps/api/path'
+
 
 interface AppContextType {
     vaultPath: string,
@@ -21,6 +24,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const repo = useMemo(() => {
         return new SettingsRepository(new TauriStoreAdapter())
     }, [])
+
+    useEffect(() => {
+        const createCorpusDir = async () => {
+            const corpusDir = await join(vaultPath, '.corpus-notes')
+            const dirExists = await exists(corpusDir)
+            console.log(`Corpus directory exists: ${dirExists}`)
+            if (!dirExists) {
+                await createDir(corpusDir)
+            }
+        }
+        
+        createCorpusDir()
+    }, [vaultPath])
 
     // Set up watch and init our settings state
     useEffect(() => {
