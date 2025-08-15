@@ -21,7 +21,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [vaultPath, setVaultPath] = useState<string>('/Users/milaiwi/documents/notes')
     const [settings, setSettings] = useState<Settings>()
-    const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
 
     const repo = useMemo(() => {
         return new SettingsRepository(new TauriStoreAdapter())
@@ -39,21 +38,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         
         createCorpusDir()
     }, [vaultPath])
-
-    useEffect(() => {
-        const loadEmbeddingModel = async () => {
-            const embeddingModel = settings?.embeddingModel
-
-            // Defaults to hugging face so do not need to check for undefined
-            if (embeddingModel.embeddingModelType === "huggingface") {
-                const huggingFacePipeline = new HuggingFaceEmbed(embeddingModel.embeddingModelName!)
-                const embeddingPipeline = await huggingFacePipeline.getInstance(embeddingModel.embeddingModelName!)
-                setEmbeddingModel(embeddingPipeline)
-            }    
-        }
-
-        loadEmbeddingModel()
-    }, [settings])
 
     // Set up watch and init our settings state
     useEffect(() => {

@@ -7,6 +7,8 @@ import runIndexingPipeline from '../../../backend/domain/index/run-workflow'
 import { useFileSystem } from './FileSystemContext'
 import { useCreateBlockNote } from '@blocknote/react'
 import { BlockNoteEditor } from '@blocknote/core'
+import HuggingFaceEmbed from '../../../backend/domain/llm/huggingfaceembed'
+import { Embedding } from '../../../backend/domain/llm/embedding'
 
 interface AIContextType {
     configuredModels: OllamaModel[],
@@ -27,12 +29,12 @@ const AIContext = createContext<AIContextType | undefined>(undefined)
 export const AIProvider = ({ children }: { children: ReactNode }) => {
     const [configuredModels, setConfiguredModels] = useState<OllamaModel[]>([])
     const [selectedModel, setSelectedModel] = useState<OllamaModel | null>(null)
+    const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
     const { prefetchOllamaModels } = useFileCache()
     const { settings, vaultPath } = useAppSettings()
     const { vaultTree } = useFileSystem()
 
     const editor = useCreateBlockNote()
-
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -44,9 +46,34 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     }, [])
 
     useEffect(() => {
-        if (vaultTree.length > 0)
-            runIndexingPipeline(vaultPath, vaultTree[0].children, editor.tryParseMarkdownToBlocks.bind(editor))
-    }, [vaultTree])
+        const loadEmbeddingModel = async () => {
+            const embeddingModel = settings?.embeddingModel
+
+            // Defaults to hugging face so do not need to check for undefined
+            if (embeddingModel.embeddingModelType === "huggingface") {
+                const huggingFacePipeline = new HuggingFaceEmbed(embeddingModel.embeddingModelName!)
+                const embeddingPipeline = await huggingFacePipeline.getInstance(embeddingModel.embeddingModelName!)
+                setEmbeddingModel(embeddingPipeline)
+            }    
+        }
+
+        loadEmbeddingModel()
+    }, [settings])
+
+    useEffect(() => {
+        if (vaultTree.length > 0 && embeddingModel) {
+            console.log(`[AIContext] Running indexing pipeline...`)
+            const files = vaultTree[0].children
+            const parseMarkdownToBlocks = editor.tryParseMarkdownToBlocks.bind(editor)
+
+            runIndexingPipeline(
+                vaultPath,
+                files,
+                parseMarkdownToBlocks,
+                embeddingModel!,
+            )
+        }
+    }, [vaultTree, embeddingModel])
 
     // Load the previous selected model from settings
     useEffect(() => {

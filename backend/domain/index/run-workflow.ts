@@ -6,6 +6,7 @@ import { join } from '@tauri-apps/api/path'
 import { exists, writeFile, readTextFile } from '@tauri-apps/api/fs'
 import IndexingPipeline from './IndexingPipeline'
 import { Block } from '@blocknote/core'
+import { Embedding } from '../llm/embedding'
 
 
 /**
@@ -58,13 +59,19 @@ const fetchManifest = async (vaultPath: string) => {
     return manifestJson
 }
 
-const runIndexingPipeline = async (vaultPath: string, files: FileItem[], parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>) => {
+const runIndexingPipeline = async (
+    vaultPath: string,
+    files: FileItem[],
+    parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
+    embeddingModel: Embedding
+) => {
     const manifestJson = await fetchManifest(vaultPath)
     const newFiles = diffCheck(files, manifestJson)
+    const verbose = true
 
     if (newFiles.length > 0) {
         console.log(`Creating indexing pipeline...`)
-        const pipeline = new IndexingPipeline(parseMarkdownToBlocks, true)
+        const pipeline = new IndexingPipeline(parseMarkdownToBlocks, embeddingModel, verbose)
         pipeline.addToQueue(newFiles)
         pipeline.startWorker()
     } else {

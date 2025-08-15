@@ -4,9 +4,13 @@ import { FileItem } from "@/src/components/layout/FileSidebar/utils"
 import { readTextFile } from "@tauri-apps/api/fs"
 import { splitBlocksIntoChunks } from "./chunking"
 import { Block } from "@blocknote/core"
+import { Embedding } from "../llm/embedding"
 
-async function processFile(file: FileItem, parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>) {
-    console.log(`[Worker] Starting to process: ${file.absPath}`)
+async function processFile(
+    file: FileItem,
+    parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
+    embeddingModel: Embedding
+) {
     // Step 1: Load the content
     // TODO: We could optimize this by caching the content
     // for potential future use. However, our current cache
@@ -27,8 +31,10 @@ async function processFile(file: FileItem, parseMarkdownToBlocks: (markdown: str
         console.log(`[Worker] Chunk ${i}: ${JSON.stringify(chunk, null, 2)}`)
         i++
     }
-
     // Step 3: Embed the chunks
+    console.log(`[Worker] Attempting Embedding ${chunks.length} chunks`)
+    const embeddings = await embeddingModel.batchEmbed(chunks.map(chunk => chunk.text))
+    console.log(`[Worker] Finsihed embeddings with size ${embeddings.length}`)
 
     // Step 4: Store the embeddings in the vector database
 
@@ -41,10 +47,12 @@ class IndexingPipeline {
     private workerIntervalId: NodeJS.Timeout | null = null
     private verbose: boolean = false
     private parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>
+    private embeddingModel: Embedding
 
-    constructor(parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>, verbose: boolean = false) {
-        this.verbose = verbose
+    constructor(parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>, embeddingModel: Embedding, verbose: boolean = false) {
         this.parseMarkdownToBlocks = parseMarkdownToBlocks
+        this.embeddingModel = embeddingModel
+        this.verbose = verbose
     }
 
     public addToQueue(files: FileItem[]): void {
@@ -68,7 +76,7 @@ class IndexingPipeline {
         }
 
         try {
-            await processFile(fileToIndex, this.parseMarkdownToBlocks)
+            await processFile(fileToIndex, this.parseMarkdownToBlocks, this.embeddingModel)
         } catch (error) {
             console.error(`[Worker] Failed to process file ${fileToIndex.absPath}`, error)
         } finally {
