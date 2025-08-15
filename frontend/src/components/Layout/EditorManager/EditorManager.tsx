@@ -51,8 +51,8 @@ const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
 
             // Before loading the new file, we need to save the current opened file
             if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
-                // const markdown = await markdownTransformer.serialize(editor.document)
-                saveFileFromEditor(editor.document)
+                const markdown = await editor.blocksToMarkdownLossy(editor.document)
+                saveFileFromEditor(editor.document, markdown)
             } else {
                 console.log('No changes to save')
             }

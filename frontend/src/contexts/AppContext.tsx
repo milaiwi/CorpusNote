@@ -8,7 +8,6 @@ import { Embedding } from '../../../backend/domain/llm/embedding'
 import { createDir, exists } from '@tauri-apps/api/fs'
 import { join } from '@tauri-apps/api/path'
 
-
 interface AppContextType {
     vaultPath: string,
     setVaultPath: (path: string) => void
@@ -29,13 +28,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [])
 
     useEffect(() => {
+        // Creates the .corpus-notes directory to store 
+        // hidden files
         const createCorpusDir = async () => {
             const corpusDir = await join(vaultPath, '.corpus-notes')
             const dirExists = await exists(corpusDir)
-            console.log(`Corpus directory exists: ${dirExists}`)
-            if (!dirExists) {
+            if (!dirExists)
                 await createDir(corpusDir)
-            }
         }
         
         createCorpusDir()

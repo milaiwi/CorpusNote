@@ -19,7 +19,7 @@ type FileSystemContextType = {
     createNewDirectory: (directory: string, targetDirectory?: string) => Promise<void>
     handleRename: (filePath: string, newName: string) => Promise<[boolean, string]>
     handleRemove: (item: FileItem) => Promise<[boolean, string]>
-    saveFileFromEditor: (blocks: Block[]) => Promise<void>
+    saveFileFromEditor: (blocks: Block[], markdown?: string) => Promise<void>
 
     // File tree management
 
@@ -204,9 +204,9 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, 'File deleted']
     }
 
-    const saveFileFromEditor = async (blocks: Block[]) => {
+    const saveFileFromEditor = async (blocks: Block[], markdown?: string) => {
         if (!currentOpenedFile) return
-        writeFileAndCache(currentOpenedFile, blocks)
+        writeFileAndCache(currentOpenedFile, blocks, markdown)
         currentOpenedFile.isDirty = false
     }
 

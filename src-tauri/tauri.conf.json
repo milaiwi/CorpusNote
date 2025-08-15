@@ -30,6 +30,7 @@
           "$HOME/Downloads/**",
           "$DOCUMENT/notes/.corpus-notes",
           "$DOCUMENT/notes/.corpus-notes/**",
+          "$DOCUMENT/notes/.corpus-notes/.vector-indexing-manifest.json",
           "$HOME/.ollama/models/manifests/registry.ollama.ai/library",
           "http://127.0.0.1:11434/*"
           ]

@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, ReactNode, useMemo, useEffe
 import { useFileCache } from './FileCache'
 import { OllamaModel } from '../components/models/ollama'
 import { useAppSettings } from './AppContext'
+import runIndexingPipeline from '../../../backend/domain/index/run-workflow'
+import { useFileSystem } from './FileSystemContext'
 
 interface AIContextType {
     configuredModels: OllamaModel[],
@@ -23,7 +25,8 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     const [configuredModels, setConfiguredModels] = useState<OllamaModel[]>([])
     const [selectedModel, setSelectedModel] = useState<OllamaModel | null>(null)
     const { prefetchOllamaModels } = useFileCache()
-    const { settings } = useAppSettings()
+    const { settings, vaultPath } = useAppSettings()
+    const { vaultTree } = useFileSystem()
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -33,6 +36,11 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
         }
         fetchModels()
     }, [])
+
+    useEffect(() => {
+        if (vaultTree.length > 0)
+            runIndexingPipeline(vaultPath, vaultTree[0].children)
+    }, [vaultTree])
 
     // Load the previous selected model from settings
     useEffect(() => {

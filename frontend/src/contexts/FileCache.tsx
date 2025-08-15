@@ -28,7 +28,7 @@ const getShadowPath = async (vaultPath: string, originalPath: string): Promise<s
 interface FileCacheContextType {
   // File operations with cache validation and invalidation
   readFileAndCache: (file: FileItem) => Promise<{ content: Block[] | string; source: 'json' | 'markdown'} | null>
-  writeFileAndCache: (file: FileItem, content: Block[]) => Promise<void>
+  writeFileAndCache: (file: FileItem, content: Block[], markdown?: string) => Promise<void>
   renameFileAndCache: (oldPath: string, newPath: string) => Promise<void>
   deleteFileAndCache: (path: string) => Promise<void>
 
@@ -77,12 +77,14 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }
 
-  const writeFileAndCache = async (file: FileItem, content: Block[]): Promise<void> => {
+  const writeFileAndCache = async (file: FileItem, content: Block[], markdown?: string): Promise<void> => {
     const shadowPath = await getShadowPath(vaultPath, file.absPath)
     const queryKey = ['note-blocks', file.absPath]
     try {
       const jsonString = JSON.stringify(content, null, 2)
       await writeTextFile(shadowPath, jsonString)
+      if (markdown)
+        await writeTextFile(file.absPath, markdown)
 
       queryClient.setQueryData(queryKey, content)
     } catch (error) {
