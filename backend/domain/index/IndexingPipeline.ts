@@ -2,9 +2,10 @@
 
 import { FileItem } from "@/src/components/layout/FileSidebar/utils"
 import { readTextFile } from "@tauri-apps/api/fs"
-import { splitMarkdownIntoChunks } from "./chunking"
+import { splitBlocksIntoChunks } from "./chunking"
+import { Block } from "@blocknote/core"
 
-async function processFile(file: FileItem) {
+async function processFile(file: FileItem, parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>) {
     console.log(`[Worker] Starting to process: ${file.absPath}`)
     // Step 1: Load the content
     // TODO: We could optimize this by caching the content
@@ -17,11 +18,13 @@ async function processFile(file: FileItem) {
     const content = await readTextFile(file.absPath)
 
     // Step 2: Split the content into chunks
-    const chunks = splitMarkdownIntoChunks(content)
+    const blocks = await parseMarkdownToBlocks(content)
+    const chunks = splitBlocksIntoChunks(blocks)
+
     console.log(`[Worker] Split into ${chunks.length} chunks`)
     let i = 0
     for (const chunk of chunks) {
-        console.log(`[Worker] Chunk ${i}: ${chunk}`)
+        console.log(`[Worker] Chunk ${i}: ${JSON.stringify(chunk, null, 2)}`)
         i++
     }
 
@@ -37,9 +40,11 @@ class IndexingPipeline {
     private isWorkerRunning: boolean = false
     private workerIntervalId: NodeJS.Timeout | null = null
     private verbose: boolean = false
+    private parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>
 
-    constructor(verbose: boolean = false) {
+    constructor(parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>, verbose: boolean = false) {
         this.verbose = verbose
+        this.parseMarkdownToBlocks = parseMarkdownToBlocks
     }
 
     public addToQueue(files: FileItem[]): void {
@@ -63,7 +68,7 @@ class IndexingPipeline {
         }
 
         try {
-            await processFile(fileToIndex)
+            await processFile(fileToIndex, this.parseMarkdownToBlocks)
         } catch (error) {
             console.error(`[Worker] Failed to process file ${fileToIndex.absPath}`, error)
         } finally {

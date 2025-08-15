@@ -2,7 +2,7 @@
 "use client"
 import { BlockNoteView } from '@blocknote/mantine'
 import { BlockNoteEditor } from '@blocknote/core'
-import { useCreateBlockNote } from '@blocknote/react'
+// import { useCreateBlockNote } from '@blocknote/react'
 import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
 import './editor.css'
@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 import { FileItem } from '../FileSidebar/utils'
+import { useAIContext } from '../../../contexts/AIContext'
 
 interface EditorManagerProps {
     selectedFile: FileItem | null;
@@ -26,7 +27,8 @@ const EditorManager: React.FC<EditorManagerProps> = ({ selectedFile }) => {
         saveFileFromEditor,
     } = useFileSystem()
 
-    const editor = useCreateBlockNote()
+    const { editor } = useAIContext()
+
     const isInitialLoad = useRef<boolean>(false)
 
     useEffect(() => {

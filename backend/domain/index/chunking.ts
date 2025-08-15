@@ -1,56 +1,75 @@
-// backend/domain/index/chunking.ts
+import { Block, InlineContent } from "@blocknote/core";
 
-
+// A reasonable approximation for a token limit. 
+// Average token is ~4 chars. 1024 * 4 = 4096.
 const MAX_CHUNK_SIZE_IN_CHARS = 4096;
 
+export interface Chunk {
+    text: string;
+    sourceBlockIds: string[];
+}
+
 /**
- * Splits a raw markdown string into chunks based on headings and a character limit.
- * - Each heading starts a new semantic chunk.
- * - If a section under a heading exceeds the character limit, it is split into
- * smaller chunks.
- * - Every chunk created from a split is prepended with the original heading
- * to preserve context for the embedding model.
- * @param markdownContent The raw markdown string from a file.
- * @returns An array of strings, where each string is a content chunk.
+ * Converts the `InlineContent[]` of a BlockNote block into a plain string.
  */
-export const splitMarkdownIntoChunks = (markdownContent: string): string[] => {
-    const chunks: string[] = [];
-    if (!markdownContent) {
+const inlineContentToString = (content: any): string => {
+    if (Array.isArray(content)) {
+        return content.map(item => {
+            if ('text' in item) {
+                return item.text || '';
+            }
+            return '';
+        }).join('');
+    }
+    return '';
+};
+
+/**
+ * Splits BlockNote content into chunks based on headings and a character limit.
+ * Each chunk includes the text content and the IDs of the source blocks.
+ * @param blocks The array of Block objects from a BlockNote editor.
+ * @returns An array of Chunk objects.
+ */
+export const splitBlocksIntoChunks = (blocks: Block[]): Chunk[] => {
+    const chunks: Chunk[] = [];
+    if (!blocks || blocks.length === 0) {
         return chunks;
     }
 
-    const lines = markdownContent.split('\n');
-    let currentChunk = "";
-    let currentHeading = "";
-    const headingRegex = /^(#+)\s(.*)/; // Matches lines starting with #, ##, etc.
+    let currentChunkText = "";
+    let currentChunkBlockIds: string[] = [];
+    let currentHeadingText = "";
 
-    for (const line of lines) {
-        const headingMatch = line.match(headingRegex);
-
-        if (headingMatch) {
-            if (currentChunk.trim() !== "" && currentChunk.trim() !== currentHeading.trim()) {
-                chunks.push(currentChunk.trim());
+    for (const block of blocks) {
+        if (block.type === 'heading') {
+            if (currentChunkText.trim() !== "" && currentChunkText.trim() !== currentHeadingText.trim()) {
+                chunks.push({ text: currentChunkText.trim(), sourceBlockIds: [...currentChunkBlockIds] });
             }
 
-            currentHeading = line + "\n\n";
-            currentChunk = currentHeading;
+            currentHeadingText = inlineContentToString(block.content) + "\n\n";
+            currentChunkText = currentHeadingText;
+            currentChunkBlockIds = [block.id];
             continue;
         }
 
-        if (line.trim() === "") continue; // Skip empty lines
+        const blockText = block.content ? inlineContentToString(block.content) : '';
+        if (blockText.trim() === "") continue; // Skip empty blocks
 
-        const potentialChunkSize = currentChunk.length + line.length + 1; // +1 for newline
+        const potentialChunkSize = currentChunkText.length + blockText.length + 2; // +2 for newlines
 
-        if (potentialChunkSize > MAX_CHUNK_SIZE_IN_CHARS && currentChunk.length > currentHeading.length) {
-            chunks.push(currentChunk.trim());            
-            currentChunk = currentHeading + line + "\n";
+        if (potentialChunkSize > MAX_CHUNK_SIZE_IN_CHARS && currentChunkText.length > currentHeadingText.length) {
+            chunks.push({ text: currentChunkText.trim(), sourceBlockIds: [...currentChunkBlockIds] });
+            
+            currentChunkText = currentHeadingText + blockText;
+            currentChunkBlockIds = [block.id];
         } else {
-            currentChunk += line + "\n";
+            currentChunkText += blockText + "\n\n";
+            currentChunkBlockIds.push(block.id);
         }
     }
 
-    if (currentChunk.trim() !== "" && currentChunk.trim() !== currentHeading.trim()) {
-        chunks.push(currentChunk.trim());
+    if (currentChunkText.trim() !== "" && currentChunkText.trim() !== currentHeadingText.trim()) {
+        chunks.push({ text: currentChunkText.trim(), sourceBlockIds: [...currentChunkBlockIds] });
     }
 
     return chunks;

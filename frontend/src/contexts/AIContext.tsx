@@ -5,11 +5,14 @@ import { OllamaModel } from '../components/models/ollama'
 import { useAppSettings } from './AppContext'
 import runIndexingPipeline from '../../../backend/domain/index/run-workflow'
 import { useFileSystem } from './FileSystemContext'
+import { useCreateBlockNote } from '@blocknote/react'
+import { BlockNoteEditor } from '@blocknote/core'
 
 interface AIContextType {
     configuredModels: OllamaModel[],
     selectedModel: OllamaModel | null,
     setSelectedModel: (model: OllamaModel | null) => void
+    editor: BlockNoteEditor
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined)
@@ -28,6 +31,9 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     const { settings, vaultPath } = useAppSettings()
     const { vaultTree } = useFileSystem()
 
+    const editor = useCreateBlockNote()
+
+
     useEffect(() => {
         const fetchModels = async () => {
             const _models = await prefetchOllamaModels()
@@ -39,7 +45,7 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (vaultTree.length > 0)
-            runIndexingPipeline(vaultPath, vaultTree[0].children)
+            runIndexingPipeline(vaultPath, vaultTree[0].children, editor.tryParseMarkdownToBlocks.bind(editor))
     }, [vaultTree])
 
     // Load the previous selected model from settings
@@ -55,6 +61,7 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
             configuredModels,
             selectedModel,
             setSelectedModel,
+            editor,
         }),
         [configuredModels, selectedModel, setSelectedModel]
     )
