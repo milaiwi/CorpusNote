@@ -19,6 +19,8 @@ abstract class Embedding {
     abstract similarity(embedding1: number[], embedding2: number[]): number;
 
     abstract batchSimilarity(embedding1: number[], embedding2: number[]): Promise<number[]>;
+
+    abstract getEmbeddingDimension(): number;
 }
 
 export { embeddingModelSchema, Embedding }

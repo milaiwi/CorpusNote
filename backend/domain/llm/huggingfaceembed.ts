@@ -43,7 +43,11 @@ class HuggingFaceEmbed extends Embedding {
 
     public async batchSimilarity(embedding1: number[], embedding2: number[]): Promise<number[]> {
         return this.model.similarity(embedding1, embedding2)
-    }   
+    }
+    
+    public getEmbeddingDimension(): number {
+        return this.model.embedding_dimension
+    }
 }
 
 export default HuggingFaceEmbed
