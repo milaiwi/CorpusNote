@@ -33,7 +33,8 @@ class HuggingFaceEmbed extends Embedding {
 
     public async batchEmbed(texts: string[]): Promise<number[][]> {
         const embeddings = await Promise.all(texts.map(text => this.embed(text)))
-        return embeddings
+        const plainEmbeddings = embeddings.map(arr => Array.from(arr))
+        return plainEmbeddings
     }
 
     public similarity(embedding1: number[], embedding2: number[]): number {

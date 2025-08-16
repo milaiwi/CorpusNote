@@ -5,13 +5,12 @@ import { readTextFile } from "@tauri-apps/api/fs"
 import { splitBlocksIntoChunks } from "./chunking"
 import { Block } from "@blocknote/core"
 import { Embedding } from "../llm/embedding"
-import VectorDBManager from "../db/db"
+import { invoke } from "@tauri-apps/api/tauri"
 
 async function processFile(
     file: FileItem,
     parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
     embeddingModel: Embedding,
-    vectorDBManager: VectorDBManager
 ) {
     // Step 1: Load the content
     // TODO: We could optimize this by caching the content
@@ -41,6 +40,12 @@ async function processFile(
     // Step 4: Store the embeddings in the vector database
     console.log(`[Worker] Attempting to upsert ${chunks.length} chunks into vector database`)
     // await vectorDBManager.upsert(chunks, embeddings, file.absPath)
+    console.log(`Embeddings: `, embeddings)
+    await invoke('db_upsert', {
+        chunks: chunks,
+        vectors: embeddings,
+        filePath: file.absPath,
+    })
 
     // Step 5: Update the manifest file
 }
@@ -52,18 +57,15 @@ class IndexingPipeline {
     private verbose: boolean = false
     private parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>
     private embeddingModel: Embedding
-    private vectorDBManager: VectorDBManager
 
     constructor(
         parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
         embeddingModel: Embedding,
-        vectorDBManager: VectorDBManager,
         verbose: boolean = false
     ) {
         this.parseMarkdownToBlocks = parseMarkdownToBlocks
         this.embeddingModel = embeddingModel
         this.verbose = verbose
-        this.vectorDBManager = vectorDBManager
     }
 
     public addToQueue(files: FileItem[]): void {
@@ -87,7 +89,7 @@ class IndexingPipeline {
         }
 
         try {
-            await processFile(fileToIndex, this.parseMarkdownToBlocks, this.embeddingModel, this.vectorDBManager)
+            await processFile(fileToIndex, this.parseMarkdownToBlocks, this.embeddingModel)
         } catch (error) {
             console.error(`[Worker] Failed to process file ${fileToIndex.absPath}`, error)
         } finally {

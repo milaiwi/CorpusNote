@@ -9,6 +9,7 @@ import { useCreateBlockNote } from '@blocknote/react'
 import { BlockNoteEditor } from '@blocknote/core'
 import HuggingFaceEmbed from '../../../backend/domain/llm/huggingfaceembed'
 import { Embedding } from '../../../backend/domain/llm/embedding'
+import { invoke } from '@tauri-apps/api/tauri'
 
 interface AIContextType {
     configuredModels: OllamaModel[],
@@ -61,10 +62,20 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     }, [settings])
 
     useEffect(() => {
+        const initializeDB = async () => {
+            if (!embeddingModel) return
+            console.log(`[AIContext] Initializing database...`)
+            await invoke('db_initialize', {
+                embedDim: embeddingModel.getEmbeddingDimension(),
+                forceRecreate: false,
+            })
+        }
+
         if (vaultTree.length > 0 && embeddingModel) {
             console.log(`[AIContext] Running indexing pipeline...`)
             const files = vaultTree[0].children
             const parseMarkdownToBlocks = editor.tryParseMarkdownToBlocks.bind(editor)
+            initializeDB()
 
             runIndexingPipeline(
                 vaultPath,

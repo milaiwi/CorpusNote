@@ -7,7 +7,8 @@ import { exists, writeFile, readTextFile } from '@tauri-apps/api/fs'
 import IndexingPipeline from './IndexingPipeline'
 import { Block } from '@blocknote/core'
 import { Embedding } from '../llm/embedding'
-import VectorDBManager from '../db/db'
+import { invoke } from '@tauri-apps/api/tauri'
+// import VectorDBManager from '../db/db'
 
 
 /**
@@ -67,20 +68,18 @@ const runIndexingPipeline = async (
     embeddingModel: Embedding,
 ) => {
     console.log(`[Worker] Embedding dimension: ${embeddingModel.getEmbeddingDimension()}`)
-    const vectorDBManager = new VectorDBManager(embeddingModel.getEmbeddingDimension())
     const manifestJson = await fetchManifest(vaultPath)
     const newFiles = diffCheck(files, manifestJson)
     const verbose = true
 
     if (newFiles.length > 0) {
         console.log(`Creating indexing pipeline...`)
-        const pipeline = new IndexingPipeline(parseMarkdownToBlocks, embeddingModel, vectorDBManager, verbose)
+        const pipeline = new IndexingPipeline(parseMarkdownToBlocks, embeddingModel, verbose)
         pipeline.addToQueue(newFiles)
         pipeline.startWorker()
     } else {
         console.log("No new files to index.")
     }
-    console.log(`New files: ${JSON.stringify(newFiles)}`)
 }
 
 export default runIndexingPipeline
