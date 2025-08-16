@@ -1,3 +1,6 @@
+// backend/domain/db/db.ts
+'use server'
+
 import * as lancedb from "@lancedb/lancedb";
 import * as arrow from "apache-arrow";
 import { appDataDir, join } from "@tauri-apps/api/path";
