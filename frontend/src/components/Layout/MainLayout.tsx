@@ -1,69 +1,115 @@
 // frontend/src/components/layout/MainLayout.tsx
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react';
 import TitleBar from './TitleBar/Titlebar';
-import ResizableSidebar from './ResizableSidebar';
 import FileSystemProvider from '../../contexts/FileSystemContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IconSidebarOptions } from './IconSidebar/IconSidebar';
 import { ThemeProvider } from '../../contexts/ThemeContext';
-// import EditorManager from './EditorManager/EditorManager';
 import FileCacheProvider from '../../contexts/FileCache';
 import { DialogProvider } from '../../contexts/DialogContext';
 import { AppProvider } from '../../contexts/AppContext';
 import { useAppSettings } from '../../contexts/AppContext';
 import { AIProvider } from '../../contexts/AIContext';
-import dynamic from "next/dynamic"
+import dynamic from "next/dynamic";
 import { FileItem } from './FileSidebar/utils';
-
-interface MainLayoutProps {
-    className?: string;
-}
+import FileSidebar from './FileSidebar/FileSidebar';
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+} from '../../../shadcn/ui/resizable';
+import { ImperativePanelHandle } from 'react-resizable-panels';
+import SemanticSidebar from './SemanticSidebar/SemanticSidebar';
 
 // Prevent the editor manager from being loaded immediately on the server side
-// -- prevents 'document is not defined' error
 const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
     ssr: false,
-})
+});
 
-const MainLayout: React.FC<MainLayoutProps> = ({ className = '' }) => {
-    // TODO: Move this up to a startup page -> sets the vault path and configurations
-    const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
-    const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files')
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
-    const { vaultPath, settings } = useAppSettings()
+const MainLayout: React.FC = () => {
+    const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+    const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+    const [isSemanticSearchOpen, setIsSemanticSearchOpen] = useState<boolean>(false);
+    const { vaultPath } = useAppSettings();
+
+    // Create a ref to imperatively control the left panel
+    const leftPanelRef = useRef<ImperativePanelHandle>(null);
+
+    // This single handler will be used by both the TitleBar and the FileSidebar
+    const handleToggleFileSidebar = () => {
+        const panel = leftPanelRef.current;
+        if (panel) {
+            // Use the panel's internal state to decide whether to expand or collapse
+            if (panel.isCollapsed()) {
+                panel.expand();
+            } else {
+                panel.collapse();
+            }
+        }
+    };
 
     return (
-        <div className="h-screen flex flex-1">
-            <ResizableSidebar
-                vaultPath={vaultPath}
-                selectedFile={selectedFile}
-                onFileSelect={setSelectedFile}
-                activeOption={activeOption}
-                setActiveOption={setActiveOption}
-                isCollapsed={isSidebarCollapsed}
-                onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
+            {/* Left Sidebar - Files and Icons */}
+            <ResizablePanel
+                ref={leftPanelRef}
+                collapsible={true}
+                collapsedSize={0}
+                minSize={15}
+                maxSize={30} // Capped at 30% of the window width
+                defaultSize={20}
+                onCollapse={() => setIsSidebarCollapsed(true)}
+                onExpand={() => setIsSidebarCollapsed(false)}
             >
-                <div className="flex flex-col flex-1">
-                    {/* Title Bar*/}
+                <FileSidebar
+                    vaultPath={vaultPath}
+                    selectedFile={selectedFile}
+                    onFileSelect={setSelectedFile}
+                    activeOption={activeOption}
+                    setActiveOption={setActiveOption}
+                    isCollapsed={isSidebarCollapsed}
+                    onToggleCollapse={handleToggleFileSidebar} // Use the new handler
+                />
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            {/* Editor Panel - Takes remaining space */}
+            <ResizablePanel defaultSize={60} minSize={40}>
+                <div className="flex-1 flex flex-col min-w-0 h-full">
                     <TitleBar
                         selectedFile={selectedFile}
                         isSidebarCollapsed={isSidebarCollapsed}
-                        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                        onToggleSidebar={handleToggleFileSidebar} // Use the new handler
+                        onToggleSemanticSearch={() => setIsSemanticSearchOpen(!isSemanticSearchOpen)}
                     />
-
-                    {/* Editor Window */}
-                    <EditorManager
-                        selectedFile={selectedFile}
-                    />
+                    <EditorManager selectedFile={selectedFile} />
                 </div>
-            </ResizableSidebar>
-        </div>
-    )
-}
+            </ResizablePanel>
 
+            {/* Right Sidebar - Semantic Search (conditionally rendered) */}
+            {isSemanticSearchOpen && (
+                <>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel
+                        collapsible={true}
+                        collapsedSize={0}
+                        minSize={15}
+                        maxSize={30} // Capped at 30% of the window width
+                        defaultSize={20}
+                        onCollapse={() => setIsSemanticSearchOpen(false)}
+                    >
+                        <SemanticSidebar onClose={() => setIsSemanticSearchOpen(false)} />
+                    </ResizablePanel>
+                </>
+            )}
+        </ResizablePanelGroup>
+    );
+};
 
 const MainPageLayout = () => {
-    const queryClient = new QueryClient()
+    const queryClient = new QueryClient();
 
     return (
         <ThemeProvider>
@@ -81,7 +127,7 @@ const MainPageLayout = () => {
                 </AppProvider>
             </QueryClientProvider>
         </ThemeProvider>
-    )
-}
+    );
+};
 
-export default MainPageLayout
+export default MainPageLayout;

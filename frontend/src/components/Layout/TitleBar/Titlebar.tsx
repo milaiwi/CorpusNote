@@ -1,19 +1,20 @@
 // frontend/src/components/Layout/TitleBar/Titlebar
 import React from 'react'
 import { getDisplayTitle, handleWindowControl } from './utils';
-import { Circle, Minimize2, Square, X, PanelLeft } from 'lucide-react';
+import { PanelLeft, PanelRight } from 'lucide-react';
 import { FileItem } from '../FileSidebar/utils';
 
 interface TitleBarProps {
     selectedFile: FileItem | null;
     isSidebarCollapsed?: boolean;
     onToggleSidebar?: () => void;
+    onToggleSemanticSearch?: () => void;
 }
 
 // TODO:
 //  - Need to change button and other containers to shadcn objects
 //  - Need to define default colors for borders
-const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = false, onToggleSidebar }) => {    
+const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = false, onToggleSidebar, onToggleSemanticSearch }) => {    
     // {/* TODO: Set up custom color schemes for the border*/}        
     return (
         <div 
@@ -30,22 +31,6 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = f
                         <PanelLeft size={16} className="text-gray-400" />
                     </button>
                 )}
-                <div className="flex space-x-2 md:hidden"> {/* Show on mobile/web */}
-                <button
-                    onClick={() => handleWindowControl('close')}
-                    className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center"
-                >
-                    <Circle size={8} className="fill-current opacity-0 hover:opacity-100" />
-                </button>
-                <button
-                    onClick={() => handleWindowControl('minimize')}
-                    className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600"
-                />
-                <button
-                    onClick={() => handleWindowControl('maximize')}
-                    className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600"
-                />
-                </div>
             </div>
 
             {/* Center - Title */}
@@ -58,25 +43,11 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = f
             {/* Right side - Window controls (Windows/Linux style) */}
             <div className="hidden md:flex items-center space-x-1">
                 <button
-                    onClick={() => handleWindowControl('minimize')}
-                    className="p-1 hover:bg-gray-700 rounded transition-colors"
-                    title="Minimize"
+                    onClick={onToggleSemanticSearch}
+                    className="p-1 hover:bg-gray-700 rounded transition-colors cursor-pointer"
+                    title="Toggle semantic search"
                 >
-                    <Minimize2 size={12} className="text-gray-400" />
-                </button>
-                <button
-                    onClick={() => handleWindowControl('maximize')}
-                    className="p-1 hover:bg-gray-700 rounded transition-colors"
-                    title="Maximize"
-                >
-                    <Square size={12} className="text-gray-400" />
-                </button>
-                <button
-                    onClick={() => handleWindowControl('close')}
-                    className="p-1 hover:bg-red-600 rounded transition-colors"
-                    title="Close"
-                >
-                    <X size={12} className="text-gray-400 hover:text-white" />
+                    <PanelRight size={16} className="text-gray-400" />
                 </button>
             </div>
         </div>
