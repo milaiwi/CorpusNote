@@ -9,18 +9,19 @@ import { Block } from '@blocknote/core'
 import { Embedding } from '../llm/embedding'
 // import VectorDBManager from '../db/db'
 
-
 /**
  * Returns the files that are new in the vault that do not exist in the manifest.
+ * This function now processes ALL files in the file tree, including those in subdirectories.
  * Right now this is just a O(N^2) check, but the FileTree is most likely
  * not large enough for this to be a problem. We can later optimize this
  * but I do not think it's worth the effort right now.
  * 
- * @param files - The files in the vault
+ * @param files - The files in the vault (can include directories with nested structure)
  * @param manifestJson - The manifest file
  * @returns The new files and the removed files
  */
 const diffCheck = (files: FileItem[], manifestJson: any[]): FileItem[] => {
+    // First, collect all files from the entire file tree (including subdirectories)    
     const filesToIndex: FileItem[] = []
     
     for (const file of files) {
@@ -32,7 +33,6 @@ const diffCheck = (files: FileItem[], manifestJson: any[]): FileItem[] => {
         if (!manifestFile) {
             filesToIndex.push(file)
         } else if (file.timeModified !== manifestFile.timeModified) {
-            // File exists but modification time is different - needs re-indexing
             filesToIndex.push(file)
         }
     }
@@ -60,21 +60,22 @@ const fetchManifest = async (vaultPath: string) => {
     return manifestJson
 }
 
+
 const runIndexingPipeline = async (
     vaultPath: string,
     files: FileItem[],
     parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
     embeddingModel: Embedding,
 ) => {
-    console.log(`[Worker] Embedding dimension: ${embeddingModel.getEmbeddingDimension()}`)
-    // const vectorDBManager = new VectorDBManager(embeddingModel.getEmbeddingDimension())
+    console.log(`Vault Path: `, vaultPath)
     const manifestJson = await fetchManifest(vaultPath)
     const newFiles = diffCheck(files, manifestJson)
+    const embed_dim = await embeddingModel.getEmbeddingDimension()
     const verbose = true
 
     if (newFiles.length > 0) {
         console.log(`Creating indexing pipeline...`)
-        const pipeline = new IndexingPipeline(parseMarkdownToBlocks, embeddingModel, verbose)
+        const pipeline = new IndexingPipeline(vaultPath, manifestJson, parseMarkdownToBlocks, embeddingModel, embed_dim, verbose)
         pipeline.addToQueue(newFiles)
         pipeline.startWorker()
     } else {

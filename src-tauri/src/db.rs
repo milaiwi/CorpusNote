@@ -172,6 +172,7 @@ async fn insert_chunks_into_existing_table(db: State<'_, DbConn>, name: String, 
     let texts = StringArray::from(chunks.iter().map(|c| c.text.as_str()).collect::<Vec<_>>());
     
     // Convert embeddings to FixedSizeListArray
+    println!("Embed dim is size {}", embed_dim);
     let embedding = FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
         chunks.iter().map(|chunk| {
             let row: Vec<Option<f32>> = chunk.embedding.iter().map(|&x| Some(x)).collect();

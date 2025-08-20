@@ -175,4 +175,32 @@ const validDisplayableFile = (entry: FileEntry) => {
     return entry.name && !entry.name.startsWith('.') && entry.path
 }
 
+/**
+ * Recursively collects all files from the file tree, including those in subdirectories.
+ * This function traverses the entire tree structure and returns a flat array of all files.
+ * 
+ * @param fileTree - The file tree to traverse
+ * @returns A flat array of all files (not directories)
+ */
+export const collectAllFiles = (fileTree: FileItem[]): FileItem[] => {
+    const allFiles: FileItem[] = []
+    
+    const traverse = (items: FileItem[]) => {
+        for (const item of items) {
+            if (item.isDirectory) {
+                // If it's a directory and has children, traverse them
+                if (item.children && item.children.length > 0) {
+                    traverse(item.children)
+                }
+            } else {
+                // If it's a file, add it to our collection
+                allFiles.push(item)
+            }
+        }
+    }
+    
+    traverse(fileTree)
+    return allFiles
+}
+
 export default readSingleDirectoryContent

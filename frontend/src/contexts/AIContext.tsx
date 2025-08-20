@@ -32,7 +32,7 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
     const { prefetchOllamaModels } = useFileCache()
     const { settings, vaultPath } = useAppSettings()
-    const { vaultTree } = useFileSystem()
+    const { vaultTree, flattedFiles } = useFileSystem()
 
     const editor = useCreateBlockNote()
 
@@ -62,13 +62,11 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (vaultTree.length > 0 && embeddingModel) {
-            console.log(`[AIContext] Running indexing pipeline...`)
-            const files = vaultTree[0].children
             const parseMarkdownToBlocks = editor.tryParseMarkdownToBlocks.bind(editor)
 
             runIndexingPipeline(
                 vaultPath,
-                files,
+                flattedFiles,
                 parseMarkdownToBlocks,
                 embeddingModel!,
             )

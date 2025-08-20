@@ -10,6 +10,7 @@ import { Block } from "@blocknote/core"
 type FileSystemContextType = {
     // File tree state
     vaultTree: FileItem[]
+    flattedFiles: FileItem[]
     expandedDirectories: Map<string, boolean>
     handleDirectoryToggle: (path: string) => void
 
@@ -52,6 +53,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     const { vaultPath } = useAppSettings()
     // File tree state
     const [files, setFiles] = useState<FileItem[]>([])
+    const [flattedFiles, setFlattedFiles] = useState<FileItem[]>([])
     const [expandedDirectories, setExpandedDirectories] = useState<Map<string, boolean>>(new Map())
 
     // File state management
@@ -87,6 +89,20 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             dummyRoot.children = sortedFiles
             
             setFiles([dummyRoot])
+            
+            // Populate flattedFiles with all files from the tree
+            const allFiles: FileItem[] = []
+            const collectAllFilesFromTree = (items: FileItem[]) => {
+                items.forEach(item => {
+                    allFiles.push(item)
+                    if (item.isDirectory && item.children && item.children.length > 0) {
+                        collectAllFilesFromTree(item.children)
+                    }
+                })
+            }
+            collectAllFilesFromTree(sortedFiles)
+            setFlattedFiles(allFiles)
+            
             return true
         }
 
@@ -119,6 +135,71 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         setChangingFilePath(false)
     }
 
+    const handleRemove = async (item: FileItem): Promise<[boolean, string]> => {
+        if (!item) return [false, 'File does not exist'] // Theoretically impossible
+
+        deleteFileAndCache(item.absPath)        
+        setFiles(prev => removeItemFromFileTree(prev, item.absPath))
+        
+        // Update flattedFiles based on whether it's a file or directory
+        if (item.isDirectory) {
+            removeDirectoryFromFlattedFiles(item)
+        } else {
+            setFlattedFiles(prev => prev.filter(file => file.absPath !== item.absPath))
+        }
+        
+        return [true, 'File deleted']
+    }
+
+    const saveFileFromEditor = async (blocks: Block[], markdown?: string) => {
+        if (!currentOpenedFile) return
+        writeFileAndCache(currentOpenedFile, blocks, markdown)
+        currentOpenedFile.isDirty = false
+    }
+
+    // Helper function to update flattedFiles when adding a new item
+    const updateFlattedFiles = (newItem: FileItem, operation: 'add' | 'remove' | 'rename', oldPath?: string) => {
+        if (operation === 'add') {
+            setFlattedFiles(prev => [...prev, newItem])
+        } else if (operation === 'remove') {
+            setFlattedFiles(prev => prev.filter(file => file.absPath !== newItem.absPath))
+        } else if (operation === 'rename' && oldPath) {
+            setFlattedFiles(prev => prev.map(file => 
+                file.absPath === oldPath ? { ...file, name: newItem.name, absPath: newItem.absPath } : file
+            ))
+        }
+    }
+
+    // Helper function to recursively add all files from a directory to flattedFiles
+    const addDirectoryToFlattedFiles = (directory: FileItem) => {
+        setFlattedFiles(prev => [...prev, directory])
+        // Recursively add all children if they exist
+        if (directory.children && directory.children.length > 0) {
+            directory.children.forEach(child => {
+                if (child.isDirectory) {
+                    addDirectoryToFlattedFiles(child)
+                } else {
+                    setFlattedFiles(prev => [...prev, child])
+                }
+            })
+        }
+    }
+
+    // Helper function to recursively remove all files from a directory from flattedFiles
+    const removeDirectoryFromFlattedFiles = (directory: FileItem) => {
+        setFlattedFiles(prev => prev.filter(file => file.absPath !== directory.absPath))
+        // Recursively remove all children if they exist
+        if (directory.children && directory.children.length > 0) {
+            directory.children.forEach(child => {
+                if (child.isDirectory) {
+                    removeDirectoryFromFlattedFiles(child)
+                } else {
+                    setFlattedFiles(prev => prev.filter(file => file.absPath !== child.absPath))
+                }
+            })
+        }
+    }
+
     const createNewNote = async (title: string, targetDirectory?: string) => {
         const targetPath = targetDirectory || (currentOpenedFile ? extractCurrentDirectory(currentOpenedFile.absPath) : vaultPath)
         const newNotePath = `${targetPath}/${title}.md`
@@ -142,6 +223,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         } else {
             setFiles(prev => addItemToDirectory(prev, vaultPath, targetPath, newFile))
         }
+        // Update flattedFiles directly since it's a 1D array
+        updateFlattedFiles(newFile, 'add')
     }
 
     const createNewDirectory = async (directory: string, targetDirectory?: string) => {
@@ -172,6 +255,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         } else {
             setFiles(prev => addItemToDirectory(prev, vaultPath, targetPath, newDir))
         }
+        // Update flattedFiles directly since it's a 1D array - handle directory properly
+        addDirectoryToFlattedFiles(newDir)
     }
 
     const handleRename = async (filePath: string, newName: string): Promise<[boolean, string]> => {
@@ -192,26 +277,24 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         renameFileAndCache(filePath, newFilePath)
         
         // Use the tree traversal function to properly update the file tree
+        // TODO: inefficient double call but this problably doesn't happen so often
+        // that it doesn't matter.
         setFiles(prev => renameItemInFileTree(prev, filePath, newName))
+        
+        // Update flattedFiles directly since it's a 1D array
+        const renamedFile = {
+            name: newName,
+            absPath: newFilePath,
+            isDirectory: false,
+        }
+        updateFlattedFiles(renamedFile, 'rename', filePath)
+        
         return [true, newFilePath]
-    }
-
-    const handleRemove = async (item: FileItem): Promise<[boolean, string]> => {
-        if (!item) return [false, 'File does not exist'] // Theoretically impossible
-
-        deleteFileAndCache(item.absPath)        
-        setFiles(prev => removeItemFromFileTree(prev, item.absPath))
-        return [true, 'File deleted']
-    }
-
-    const saveFileFromEditor = async (blocks: Block[], markdown?: string) => {
-        if (!currentOpenedFile) return
-        writeFileAndCache(currentOpenedFile, blocks, markdown)
-        currentOpenedFile.isDirty = false
     }
 
     const contextValue: FileSystemContextType = {
         vaultTree: files,
+        flattedFiles,
         expandedDirectories,
         handleDirectoryToggle,
         loadFileIntoEditor,

@@ -58,6 +58,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const shadowPath = await getShadowPath(vaultPath, file.absPath)
 
       try {
+        console.log(`[FileCache] Checking if shadow file exists: ${shadowPath}`)
         if (await exists(shadowPath)) {
           const jsonString = await readTextFile(shadowPath)
           const blocks = JSON.parse(jsonString) as Block[]
@@ -82,10 +83,14 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const queryKey = ['note-blocks', file.absPath]
     try {
       const jsonString = JSON.stringify(content, null, 2)
+      console.log(`Writing shadow file: ${shadowPath}`)
       await writeTextFile(shadowPath, jsonString)
-      if (markdown)
+      console.log(`[FileCache] Shadow file written: ${shadowPath}`)
+      if (markdown) {
+        console.log(`[FileCache] Markdown file written: ${file.absPath}`)
         await writeTextFile(file.absPath, markdown)
-
+      }
+        
       queryClient.setQueryData(queryKey, content)
     } catch (error) {
       console.error('Error writing file:', error)
