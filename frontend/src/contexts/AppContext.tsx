@@ -1,10 +1,9 @@
 // frontend/src/contexts/AppContext
+'use client'
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react'
 import { SettingsRepository } from '../../../backend/domain/settings/SettingsRepository'
 import TauriStoreAdapter from '../../../backend/api/TauriStoreAdapter'
 import { Settings } from '../../../backend/domain/settings/schema'
-import HuggingFaceEmbed from '../../../backend/domain/llm/huggingfaceembed'
-import { Embedding } from '../../../backend/domain/llm/embedding'
 import { createDir, exists } from '@tauri-apps/api/fs'
 import { join } from '@tauri-apps/api/path'
 

@@ -19,6 +19,18 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.8.1", features = [ "fs-exists", "path-all", "fs-remove-file", "fs-rename-file", "fs-create-dir", "dialog-open", "fs-read-dir", "fs-read-file", "fs-write-file"] }
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+lancedb       = "0.21.3"
+tokio         = { version = "1", features = ["full"] }
+anyhow        = "1"
+
+arrow         = "=55.2.0"
+arrow-array   = "=55.2.0"
+arrow-data    = "=55.2.0"
+arrow-schema  = "=55.2.0"
+arrow-ord     = "=55.2.0"
+arrow-cast    = "=55.2.0"
+arrow-ipc     = "=55.2.0"
+futures       = "0.3"
 
 
 [features]

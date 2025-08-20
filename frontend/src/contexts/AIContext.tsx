@@ -50,7 +50,7 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
             const embeddingModel = settings?.embeddingModel
 
             // Defaults to hugging face so do not need to check for undefined
-            if (embeddingModel.embeddingModelType === "huggingface") {
+            if (embeddingModel && embeddingModel.embeddingModelType === "huggingface") {
                 const huggingFacePipeline = new HuggingFaceEmbed(embeddingModel.embeddingModelName!)
                 const embeddingPipeline = await huggingFacePipeline.getInstance(embeddingModel.embeddingModelName!)
                 setEmbeddingModel(embeddingPipeline)

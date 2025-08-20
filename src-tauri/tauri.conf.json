@@ -4,7 +4,8 @@
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "",
     "devPath": "http://localhost:3000",
-    "distDir": "../.next"
+    "distDir": "../.next",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "corpusnote",

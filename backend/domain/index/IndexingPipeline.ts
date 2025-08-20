@@ -5,13 +5,14 @@ import { readTextFile } from "@tauri-apps/api/fs"
 import { splitBlocksIntoChunks } from "./chunking"
 import { Block } from "@blocknote/core"
 import { Embedding } from "../llm/embedding"
-import VectorDBManager from "../db/db"
+import { invoke } from "@tauri-apps/api/tauri"
+// import VectorDBManager from "../db/db"
 
 async function processFile(
     file: FileItem,
     parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
     embeddingModel: Embedding,
-    vectorDBManager: VectorDBManager
+    tableName: string
 ) {
     // Step 1: Load the content
     // TODO: We could optimize this by caching the content
@@ -39,10 +40,33 @@ async function processFile(
     console.log(`[Worker] Finsihed embeddings with size ${embeddings.length}`)
 
     // Step 4: Store the embeddings in the vector database
-    console.log(`[Worker] Attempting to upsert ${chunks.length} chunks into vector database`)
-    // await vectorDBManager.upsert(chunks, embeddings, file.absPath)
+    // First convert into our db chunk - backend will handle ID generation
+    console.log(`[Worker] Converting chunks to db chunks`)
+    const dbChunks = chunks.map((chunk, index) => ({
+        file_path: file.absPath,
+        text: chunk.text,
+        source_block_ids: chunk.sourceBlockIds,
+        embedding: Array.from(embeddings[index]),
+    }))    
 
-    // Step 5: Update the manifest file
+    const embed_dim = await embeddingModel.getEmbeddingDimension()
+    // // Step 5: Insert chunks into the database
+    console.log(`[Worker] Inserting chunks into database`)
+    console.log(`[Worker] embedding dimension is ${embed_dim}`)
+    try {
+        const result = await invoke('insert_chunks', { 
+            name: tableName, 
+            chunks: dbChunks,
+            embedDim: embed_dim
+        })
+        console.log(`[Worker] Successfully inserted chunks: ${result}`)
+    } catch (error) {
+        console.error(`[Worker] Failed to insert chunks:`, error)
+        throw error
+    }
+
+    // Step 6: Update the manifest file (placeholder for future implementation)
+    console.log(`[Worker] File ${file.absPath} processed successfully`)
 }
 
 class IndexingPipeline {
@@ -52,18 +76,18 @@ class IndexingPipeline {
     private verbose: boolean = false
     private parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>
     private embeddingModel: Embedding
-    private vectorDBManager: VectorDBManager
+    private tableName: string
 
     constructor(
         parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
         embeddingModel: Embedding,
-        vectorDBManager: VectorDBManager,
-        verbose: boolean = false
+        verbose: boolean = false,
+        tableName: string = "indexing_table"
     ) {
         this.parseMarkdownToBlocks = parseMarkdownToBlocks
         this.embeddingModel = embeddingModel
         this.verbose = verbose
-        this.vectorDBManager = vectorDBManager
+        this.tableName = tableName
     }
 
     public addToQueue(files: FileItem[]): void {
@@ -87,7 +111,7 @@ class IndexingPipeline {
         }
 
         try {
-            await processFile(fileToIndex, this.parseMarkdownToBlocks, this.embeddingModel, this.vectorDBManager)
+            await processFile(fileToIndex, this.parseMarkdownToBlocks, this.embeddingModel, this.tableName)
         } catch (error) {
             console.error(`[Worker] Failed to process file ${fileToIndex.absPath}`, error)
         } finally {
@@ -118,6 +142,5 @@ class IndexingPipeline {
         this.workerIntervalId = null
     }
 }
-
 
 export default IndexingPipeline

@@ -27,13 +27,23 @@ class HuggingFaceEmbed extends Embedding {
     }
 
     public async embed(text: string): Promise<number[]> {
-        const embedding = await this.model(text)
+        const embedding = await this.model(text, {
+            pooling: 'mean',
+            normalize: true
+        })
         return embedding.data
     }
 
     public async batchEmbed(texts: string[]): Promise<number[][]> {
-        const embeddings = await Promise.all(texts.map(text => this.embed(text)))
-        return embeddings
+        const embeddings = await this.model(texts, {
+            pooling: 'mean',
+            normalize: true
+        })
+        const result: number[][] = []
+        for (let i = 0; i < embeddings.dims[0]; i++) {
+            result.push(Array.from(embeddings.data.slice(embeddings.dims[1] * i, embeddings.dims[1] * (i + 1))))
+        }
+        return result
     }
 
     public similarity(embedding1: number[], embedding2: number[]): number {
@@ -45,8 +55,8 @@ class HuggingFaceEmbed extends Embedding {
         return this.model.similarity(embedding1, embedding2)
     }
     
-    public getEmbeddingDimension(): number {
-        return this.model.embedding_dimension
+    public async getEmbeddingDimension(): Promise<number> {
+        return (await this.embed('hello world')).length
     }
 }
 

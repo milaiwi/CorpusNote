@@ -20,7 +20,7 @@ abstract class Embedding {
 
     abstract batchSimilarity(embedding1: number[], embedding2: number[]): Promise<number[]>;
 
-    abstract getEmbeddingDimension(): number;
+    abstract getEmbeddingDimension(): Promise<number>;
 }
 
 export { embeddingModelSchema, Embedding }
