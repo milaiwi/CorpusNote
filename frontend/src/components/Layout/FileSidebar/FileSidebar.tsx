@@ -19,13 +19,12 @@ import { FilesContextMenu } from '../../ui/FilesContextMenu'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
     selectedFile,
-    onFileSelect,
     activeOption,
     setActiveOption,
     isCollapsed = false,
     onToggleCollapse
 }) => {
-    const { vaultTree: files, expandedDirectories, handleDirectoryToggle } = useFileSystem()
+    const { vaultTree: files, expandedDirectories, handleDirectoryToggle, loadFileIntoEditor } = useFileSystem()
     const [loading, setLoading] = useState<boolean>(false)
     const { openDialog } = useDialog()
 
@@ -53,7 +52,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                             if (item.isDirectory)
                                 handleDirectoryToggle(item.absPath)
                             else
-                                onFileSelect(item)
+                                loadFileIntoEditor(item)
                         }}
                     >
                         {item.isDirectory && (

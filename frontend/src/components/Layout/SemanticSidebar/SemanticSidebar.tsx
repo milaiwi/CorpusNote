@@ -16,7 +16,7 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
     const [error, setError] = useState<string | null>(null)
     const { editorInitialBlocks } = useFileSystem()
     const { embeddingModel } = useAIContext()
-    const { currentOpenedFile, loadFileIntoEditor } = useFileSystem()
+    const { currentOpenedFile, loadFileIntoEditor, getFileItemFromPath } = useFileSystem()
     
     useEffect(() => {
         const search = async () => {
@@ -58,7 +58,7 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
         }
 
         search()
-    }, [embeddingModel, editorInitialBlocks])
+    }, [embeddingModel, editorInitialBlocks, currentOpenedFile])
 
     return (
         <div className="flex flex-col overflow-y-auto h-full">
@@ -105,7 +105,7 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
                                             className="p-3 border border-border rounded-lg cursor-pointer"
                                             onClick={() => {
                                                 console.log("Opening file: ", result.file_path)
-                                                loadFileIntoEditor(result)
+                                                loadFileIntoEditor(getFileItemFromPath(result.file_path)!)
                                             }}
                                         >
                                             <div className="text-sm text-gray-300 font-medium truncate">{getFileNameFromPath(result.file_path || '')}</div>

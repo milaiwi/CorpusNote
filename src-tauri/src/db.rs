@@ -216,10 +216,6 @@ pub async fn search(db: State<'_, DbConn>, name: String, query: String, query_ve
 
     let query_limit = limit.unwrap_or(10);
 
-    let indices = tbl.list_indices().await.map_err(|e| e.to_string())?;
-    let fts_index_exists = indices.iter().any(|index| index.index_type.to_string() == "FTS");
-    println!("FTS index exists: {}", fts_index_exists);
-
     let mut stream = tbl.query()
         .nearest_to(query_vector)
         .map_err(|e| format!("Failed to execute query: {e}"))?

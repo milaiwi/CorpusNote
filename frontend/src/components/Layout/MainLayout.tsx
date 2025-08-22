@@ -11,8 +11,8 @@ import { AppProvider } from '../../contexts/AppContext';
 import { useAppSettings } from '../../contexts/AppContext';
 import { AIProvider } from '../../contexts/AIContext';
 import dynamic from "next/dynamic";
-import { FileItem } from './FileSidebar/utils';
 import FileSidebar from './FileSidebar/FileSidebar';
+import { useFileSystem } from '../../contexts/FileSystemContext';
 import {
     ResizableHandle,
     ResizablePanel,
@@ -21,17 +21,20 @@ import {
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import SemanticSidebar from './SemanticSidebar/SemanticSidebar';
 
+
+
 // Prevent the editor manager from being loaded immediately on the server side
 const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
     ssr: false,
 });
 
 const MainLayout: React.FC = () => {
-    const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
     const [isSemanticSearchOpen, setIsSemanticSearchOpen] = useState<boolean>(false);
     const { vaultPath } = useAppSettings();
+    const { currentOpenedFile } = useFileSystem();
+    
 
     // Create a ref to imperatively control the left panel
     const leftPanelRef = useRef<ImperativePanelHandle>(null);
@@ -63,9 +66,7 @@ const MainLayout: React.FC = () => {
                 onExpand={() => setIsSidebarCollapsed(false)}
             >
                 <FileSidebar
-                    vaultPath={vaultPath}
-                    selectedFile={selectedFile}
-                    onFileSelect={setSelectedFile}
+                    selectedFile={currentOpenedFile}
                     activeOption={activeOption}
                     setActiveOption={setActiveOption}
                     isCollapsed={isSidebarCollapsed}
@@ -79,12 +80,12 @@ const MainLayout: React.FC = () => {
             <ResizablePanel defaultSize={60} minSize={40}>
                 <div className="flex-1 flex flex-col min-w-0 h-full">
                     <TitleBar
-                        selectedFile={selectedFile}
+                        selectedFile={currentOpenedFile}
                         isSidebarCollapsed={isSidebarCollapsed}
                         onToggleSidebar={handleToggleFileSidebar} // Use the new handler
                         onToggleSemanticSearch={() => setIsSemanticSearchOpen(!isSemanticSearchOpen)}
                     />
-                    <EditorManager selectedFile={selectedFile} />
+                    <EditorManager />
                 </div>
             </ResizablePanel>
 

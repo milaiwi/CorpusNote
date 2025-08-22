@@ -21,6 +21,7 @@ type FileSystemContextType = {
     handleRename: (filePath: string, newName: string) => Promise<[boolean, string]>
     handleRemove: (item: FileItem) => Promise<[boolean, string]>
     saveFileFromEditor: (blocks: Block[], markdown?: string) => Promise<void>
+    getFileItemFromPath: (filePath: string) => FileItem | null
 
     // File tree management
 
@@ -115,10 +116,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     }
 
     const loadFileIntoEditor = async (file: FileItem) => {
-        console.log(`>>> Loading file: `, file.absPath)
         if (currentOpenedFile?.absPath === file.absPath)
             setCurrentOpenedFile(null)
-        console.log(`Loading file into editor: ${file.absPath}`)
         setCurrentOpenedFile(file)
         setChangingFilePath(true)
 
@@ -293,6 +292,12 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, newFilePath]
     }
 
+    // Helper function to get a file item from a path. Ideally, can make
+    // this more efficient by mapping filePath -> fileItem
+    const getFileItemFromPath = (filePath: string): FileItem | null => {
+        return flattedFiles.find(file => file.absPath === filePath) || null
+    }
+
     const contextValue: FileSystemContextType = {
         vaultTree: files,
         flattedFiles,
@@ -304,6 +309,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         handleRename,
         handleRemove,
         saveFileFromEditor,
+        getFileItemFromPath,
         changingFilePath,
         editorInitialBlocks,
         editorInitialMarkdown,

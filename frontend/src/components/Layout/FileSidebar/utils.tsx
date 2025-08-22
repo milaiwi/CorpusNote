@@ -17,9 +17,7 @@ export interface FileItem {
 }
 
 export interface FileSidebarProps {
-    vaultPath: string | null,
     selectedFile: FileItem | null;
-    onFileSelect: (file: FileItem) => void;
     activeOption: IconSidebarOptions;
     setActiveOption: (option: IconSidebarOptions) => void;
     isCollapsed?: boolean;
