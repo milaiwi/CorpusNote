@@ -84,7 +84,7 @@ const EditorManager = () => {
     
     return (
         <div className='w-full h-full'>
-            <BlockNoteView editor={editor} onChange={handleEditorChange} />
+            <BlockNoteView editor={editor} onChange={handleEditorChange}/>
         </div>
     )
 }

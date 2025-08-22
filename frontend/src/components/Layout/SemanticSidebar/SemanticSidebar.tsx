@@ -96,7 +96,7 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
                 <div className="flex-1 p-4">
                     {searchResults.length > 0 ? (
                         <div>
-                            <h4 className="font-medium mb-4">Search Results ({searchResults.length - 1})</h4>
+                            <h4 className="font-medium mb-4">Related Notes ({searchResults.length - 1})</h4>
                             <div className="space-y-3">
                                 {searchResults.map((result, index) => (
                                     result.file_path != currentOpenedFile?.absPath && (
