@@ -20,6 +20,7 @@ import {
 } from '../../../shadcn/ui/resizable';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import SemanticSidebar from './SemanticSidebar/SemanticSidebar';
+import { SearchSemanticProvider } from '../../contexts/Semantics/SearchSemanticContext';
 
 
 
@@ -32,7 +33,6 @@ const MainLayout: React.FC = () => {
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
     const [isSemanticSearchOpen, setIsSemanticSearchOpen] = useState<boolean>(false);
-    const { vaultPath } = useAppSettings();
     const { currentOpenedFile } = useFileSystem();
     
 
@@ -119,9 +119,11 @@ const MainPageLayout = () => {
                     <FileCacheProvider>
                         <FileSystemProvider>
                             <AIProvider>
-                                <DialogProvider>
-                                    <MainLayout />
-                                </DialogProvider>
+                                <SearchSemanticProvider>
+                                    <DialogProvider>
+                                        <MainLayout />
+                                    </DialogProvider>
+                                </SearchSemanticProvider>
                             </AIProvider>
                         </FileSystemProvider>
                     </FileCacheProvider>

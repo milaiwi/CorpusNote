@@ -9,6 +9,7 @@ import { useAppSettings } from './AppContext'
 
 import { join } from '@tauri-apps/api/path'
 import { Block } from '@blocknote/core'
+import { SearchResult } from './Semantics/types'
 
 /**
  * A helper function to generate the path for the shadow JSON file.
@@ -31,6 +32,7 @@ interface FileCacheContextType {
   writeFileAndCache: (file: FileItem, content: Block[], markdown?: string) => Promise<void>
   renameFileAndCache: (oldPath: string, newPath: string) => Promise<void>
   deleteFileAndCache: (path: string) => Promise<void>
+  cacheSimilarFile: (file: FileItem, results: SearchResult[]) => Promise<SearchResult[]>
 
   // Cache management
   invalidateFile: (path: string) => void
@@ -58,7 +60,6 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const shadowPath = await getShadowPath(vaultPath, file.absPath)
 
       try {
-        console.log(`[FileCache] Checking if shadow file exists: ${shadowPath}`)
         if (await exists(shadowPath)) {
           const jsonString = await readTextFile(shadowPath)
           const blocks = JSON.parse(jsonString) as Block[]
@@ -76,6 +77,14 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       console.error('Error reading file:', error)
       return null
     }
+  }
+
+  const cacheSimilarFile = async (file: FileItem, results: SearchResult[]): Promise<SearchResult[]> => {
+    const queryKey = ['similar-files', file.absPath]
+    const cachedData = queryClient.getQueryData<SearchResult[]>(queryKey)
+    if (cachedData)
+      return cachedData
+    queryClient.setQueryData(queryKey, results)
   }
 
   const writeFileAndCache = async (file: FileItem, content: Block[], markdown?: string): Promise<void> => {
@@ -182,7 +191,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       writeFileAndCache,
       renameFileAndCache,
       deleteFileAndCache,
-    //   createFileAndCache,
+      cacheSimilarFile,
       invalidateFile,
       prefetchFile,
       prefetchOllamaModels,

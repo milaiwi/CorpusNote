@@ -6,10 +6,13 @@ import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
 import './editor.css'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
+import { useSearchSemanticContext } from '../../../contexts/Semantics/SearchSemanticContext'
+import { customInputRules } from './lib/editor/CustomInputRules'
+import { InputRuleManager } from './lib/editor/InputRules'
 
 
 const EditorManager = () => {
@@ -23,8 +26,11 @@ const EditorManager = () => {
     } = useFileSystem()
 
     const { editor } = useAIContext()
+    const { searchSimilarUsingCurrentFile } = useSearchSemanticContext()
 
     const isInitialLoad = useRef<boolean>(false)
+
+    const inputRuleManager = useMemo(() => new InputRuleManager(customInputRules), [searchSimilarUsingCurrentFile])
 
     useEffect(() => {
         if (changingFilePath) return
@@ -67,6 +73,12 @@ const EditorManager = () => {
         }
 
         if (!currentOpenedFile) return
+
+        const context = {
+            searchSimilarUsingCurrentFile
+        }
+        
+        inputRuleManager.process(editor, context)
 
         const changes = getChanges()
         if (changes.length > 0 && !currentOpenedFile?.isDirty) {
