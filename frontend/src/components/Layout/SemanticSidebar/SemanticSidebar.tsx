@@ -20,16 +20,8 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
     
     useEffect(() => {
         const search = async () => {
-            console.log("Embedding model: ", embeddingModel)
-            if (!embeddingModel) {
-                console.log("No embedding model available yet")
-                return
-            }
-
-            if (!editorInitialBlocks) {
-                console.log("Loading editor markdown...")
-                return
-            }
+            if (!embeddingModel) return
+            if (!editorInitialBlocks) return
             
             setIsLoading(true)
             setError(null)
@@ -37,7 +29,6 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
             try {
                 // Extract text content from each block's content array
                 const query = extractTextFromBlocks(editorInitialBlocks)
-                console.log(`Query: ${query}`)
                 const queryVector = Array.from(await embeddingModel.embed(query))
                 const results: string = await invoke("search", {
                     name: "indexing_table",
@@ -47,7 +38,6 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
                 })
 
                 const resultsJson = JSON.parse(results)
-                console.log("Search results: ", resultsJson)
                 setSearchResults(resultsJson)
             } catch (err) {
                 console.error("Search failed:", err)
