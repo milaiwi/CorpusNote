@@ -13,7 +13,8 @@ import { Embedding } from '../../../backend/domain/llm/embedding'
 interface AIContextType {
     configuredModels: OllamaModel[],
     selectedModel: OllamaModel | null,
-    setSelectedModel: (model: OllamaModel | null) => void
+    setSelectedModel: (model: OllamaModel | null) => void,
+    embeddingModel: Embedding | null,
     editor: BlockNoteEditor
 }
 
@@ -47,13 +48,20 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const loadEmbeddingModel = async () => {
+            console.log("Loading embedding model")
             const embeddingModel = settings?.embeddingModel
+            console.log("Embedding model: ", embeddingModel?.embeddingModelType)
 
             // Defaults to hugging face so do not need to check for undefined
             if (embeddingModel && embeddingModel.embeddingModelType === "huggingface") {
-                const huggingFacePipeline = new HuggingFaceEmbed(embeddingModel.embeddingModelName!)
-                const embeddingPipeline = await huggingFacePipeline.getInstance(embeddingModel.embeddingModelName!)
-                setEmbeddingModel(embeddingPipeline)
+                try {
+                    const huggingFacePipeline = new HuggingFaceEmbed(embeddingModel.embeddingModelName!)
+                    const embeddingPipeline = await huggingFacePipeline.getInstance(embeddingModel.embeddingModelName!)
+                    console.log("Setting embedding model: ", embeddingPipeline)
+                    setEmbeddingModel(embeddingPipeline)
+                } catch (error) {
+                    console.error("Failed to load embedding model:", error)
+                }
             }    
         }
 
@@ -86,9 +94,10 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
             configuredModels,
             selectedModel,
             setSelectedModel,
+            embeddingModel,
             editor,
         }),
-        [configuredModels, selectedModel, setSelectedModel]
+        [configuredModels, selectedModel, setSelectedModel, embeddingModel, editor]
     )
 
     return (

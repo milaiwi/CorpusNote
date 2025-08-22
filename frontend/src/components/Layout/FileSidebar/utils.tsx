@@ -1,5 +1,6 @@
 // frontend/src/components/Layout/FileSidebar/utils
 import { IconSidebarOptions } from "../IconSidebar/IconSidebar";
+import { getDisplayTitle } from "../TitleBar/utils";
 
 export interface FileItem {
     name: string;   // name of the file
@@ -25,3 +26,9 @@ export interface FileSidebarProps {
     onToggleCollapse?: () => void;
 }
 
+
+export const getFileNameFromPath = (filePath: string | null) => {
+    if (filePath)
+        return getDisplayTitle(filePath.split('/').pop())
+    return 'Untitled'
+}

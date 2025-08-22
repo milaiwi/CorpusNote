@@ -1,5 +1,3 @@
-import React from 'react';
-
 type TAURI_WINDOW_ACTIONS = 'minimize' | 'maximize' | 'close';
 
 /**

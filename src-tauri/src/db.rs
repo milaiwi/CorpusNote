@@ -1,12 +1,14 @@
 use std::{path::PathBuf, sync::Arc};
 
-use arrow_array::{FixedSizeListArray, Int32Array, ListArray, RecordBatch, RecordBatchIterator, StringArray, types::Float32Type};
+use arrow_array::{FixedSizeListArray, Int32Array, ListArray, RecordBatch, RecordBatchIterator, StringArray, types::Float32Type, Float32Array};
 use arrow_schema::{DataType, Field, Schema};
 use arrow::buffer::OffsetBuffer;
 
 use lancedb::connection::Connection;
 use lancedb::query::{ExecutableQuery, QueryBase};
-use lancedb::{connect, Table as LanceDbTable};
+use lancedb::{connect, Table as LanceDbTable, index::Index};
+use lancedb::index::scalar::FtsIndexBuilder;
+use lance_index::scalar::FullTextSearchQuery;
 
 // Scanning / printing our table out
 use futures::TryStreamExt;
@@ -15,12 +17,14 @@ use arrow::util::pretty::print_batches;
 use tauri::State;
 use crate::DbConn;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct Chunk {
     pub file_path: String,
     pub text: String,
     pub source_block_ids: Vec<String>,
     pub embedding: Vec<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub score: Option<f32>,
 }
 
 // --------------------- initialize the database connection ---------------------
@@ -80,11 +84,12 @@ pub async fn create_empty_table(db: State<'_, DbConn>, name: String, embed_dim: 
       ),
   ]));
 
-  // Create the table and return a success message instead of the table
-  match db.0.create_empty_table(&name, schema).execute().await {
-    Ok(_table) => Ok(format!("Table '{}' created successfully", name)),
-    Err(e) => Err(e.to_string()),
-  }
+  // Create the table
+  let tbl = db.0.create_empty_table(&name, schema).execute().await
+    .map_err(|e| e.to_string())?;
+
+  create_fts_index_for_table(&tbl).await?;
+  Ok(format!("Table '{}' created successfully", name))
 }
 
 // --------------------- insert chunks into the table ---------------------
@@ -200,6 +205,69 @@ async fn insert_chunks_into_existing_table(db: State<'_, DbConn>, name: String, 
         .map_err(|e| format!("Failed to add data: {e}"))?;
     
     Ok(format!("Successfully inserted {} chunks into table '{}'", chunks.len(), name))
+}
+
+// --------------------- search the table ---------------------
+#[tauri::command]
+pub async fn search(db: State<'_, DbConn>, name: String, query: String, query_vector: Vec<f32>, limit: Option<usize>) -> Result<String, String> {
+
+    let tbl: LanceDbTable = db.0.open_table(&name).execute().await
+        .map_err(|e| format!("Failed to open table: {e}"))?;
+
+    let query_limit = limit.unwrap_or(10);
+
+    let indices = tbl.list_indices().await.map_err(|e| e.to_string())?;
+    let fts_index_exists = indices.iter().any(|index| index.index_type.to_string() == "FTS");
+    println!("FTS index exists: {}", fts_index_exists);
+
+    let mut stream = tbl.query()
+        .nearest_to(query_vector)
+        .map_err(|e| format!("Failed to execute query: {e}"))?
+        .full_text_search(FullTextSearchQuery::new(query.clone()))
+        .limit(query_limit as usize)
+        .execute()
+        .await
+        .map_err(|e| format!("Failed to execute query: {e}"))?;
+
+    let mut results: Vec<Chunk> = Vec::new();
+
+    while let Some(batch_result) = stream.try_next().await.map_err(|e| e.to_string())? {
+        let batch = batch_result;
+
+        let file_path_array = batch.column_by_name("file_path").unwrap().as_any().downcast_ref::<StringArray>().unwrap();
+        let text_array = batch.column_by_name("text").unwrap().as_any().downcast_ref::<StringArray>().unwrap();
+        let source_block_ids_array = batch.column_by_name("source_block_ids").unwrap().as_any().downcast_ref::<ListArray>().unwrap();
+        let embedding_array = batch.column_by_name("embedding").unwrap().as_any().downcast_ref::<FixedSizeListArray>().unwrap();
+        let score_array = batch.column_by_name("_score").unwrap().as_any().downcast_ref::<Float32Array>().unwrap();
+
+        for i in 0..batch.num_rows() {
+            let source_block_ids_list = source_block_ids_array.value(i);
+            let source_block_ids_str_array = source_block_ids_list.as_any().downcast_ref::<StringArray>().unwrap();
+            
+            results.push(Chunk {
+                file_path: file_path_array.value(i).to_string(),
+                text: text_array.value(i).to_string(),
+                source_block_ids: source_block_ids_str_array.iter().map(|v| v.unwrap().to_string()).collect(),
+                embedding: embedding_array.value(i).as_any().downcast_ref::<Float32Array>().unwrap().values().to_vec(),
+                score: Some(score_array.value(i)),
+            });
+        }
+    }
+    
+    serde_json::to_string(&results).map_err(|e| e.to_string())
+}
+
+
+// --------------------- create FTS index ---------------------
+async fn create_fts_index_for_table(table: &LanceDbTable) -> Result<String, String> {
+    println!("Creating FTS index for table...");
+    
+    table.create_index(&["text"], Index::FTS(FtsIndexBuilder::default()))
+        .execute()
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    Ok(format!("Successfully created FTS index on 'text' column."))
 }
 
 // --------------------- view the table ---------------------

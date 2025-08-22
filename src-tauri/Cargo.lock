@@ -95,6 +95,7 @@ dependencies = [
  "arrow-ord",
  "arrow-schema",
  "futures",
+ "lance-index",
  "lancedb",
  "serde",
  "serde_json",

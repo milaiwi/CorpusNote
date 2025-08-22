@@ -36,6 +36,7 @@ fn main() {
       db::table_exists,
       db::view_table,
       db::insert_chunks,
+      db::search,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

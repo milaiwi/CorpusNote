@@ -38,6 +38,7 @@ async function processFile(
     // First convert into our db chunk - backend will handle ID generation
     // console.log(`[Worker] Converting chunks to db chunks`)
     const dbChunks = chunks.map((chunk, index) => ({
+        file_item: file,
         file_path: file.absPath,
         text: chunk.text,
         source_block_ids: chunk.sourceBlockIds,

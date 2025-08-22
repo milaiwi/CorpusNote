@@ -1,6 +1,6 @@
 // frontend/src/components/Layout/TitleBar/Titlebar
 import React from 'react'
-import { getDisplayTitle, handleWindowControl } from './utils';
+import { getDisplayTitle } from './utils';
 import { PanelLeft, PanelRight } from 'lucide-react';
 import { FileItem } from '../FileSidebar/utils';
 
@@ -14,8 +14,7 @@ interface TitleBarProps {
 // TODO:
 //  - Need to change button and other containers to shadcn objects
 //  - Need to define default colors for borders
-const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = false, onToggleSidebar, onToggleSemanticSearch }) => {    
-    // {/* TODO: Set up custom color schemes for the border*/}        
+const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = false, onToggleSidebar, onToggleSemanticSearch }) => {
     return (
         <div 
             className="border-b border-border flex items-center justify-between px-4 select-none h-[45px]"

@@ -115,6 +115,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     }
 
     const loadFileIntoEditor = async (file: FileItem) => {
+        console.log(`>>> Loading file: `, file.absPath)
         if (currentOpenedFile?.absPath === file.absPath)
             setCurrentOpenedFile(null)
         console.log(`Loading file into editor: ${file.absPath}`)

@@ -1,4 +1,4 @@
-import { Block, InlineContent } from "@blocknote/core";
+import { Block } from "@blocknote/core";
 
 // A reasonable approximation for a token limit. 
 // Average token is ~4 chars. 1024 * 4 = 4096.
