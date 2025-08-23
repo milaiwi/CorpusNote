@@ -6,7 +6,7 @@ import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
 import './editor.css'
 
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState, ReactNode } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
@@ -30,7 +30,23 @@ const EditorManager = () => {
 
     const isInitialLoad = useRef<boolean>(false)
 
+    const [activePopover, setActivePopover] = useState<ReactNode | null>(null)
     const inputRuleManager = useMemo(() => new InputRuleManager(customInputRules), [getCurrentFileSimilarFiles])
+
+    // Add click outside handler to close popover
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (activePopover && !(event.target as Element).closest('[data-popover]')) {
+                setActivePopover(null);
+                inputRuleManager.clearActiveRule(setActivePopover);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [activePopover, inputRuleManager]);
 
     useEffect(() => {
         if (changingFilePath) return
@@ -78,7 +94,7 @@ const EditorManager = () => {
             getCurrentFileSimilarFiles
         }
         
-        inputRuleManager.process(editor, context)
+        inputRuleManager.process(editor, context, setActivePopover)
 
         const changes = getChanges()
         if (changes.length > 0 && !currentOpenedFile?.isDirty) {
@@ -97,6 +113,7 @@ const EditorManager = () => {
     return (
         <div className='w-full h-full'>
             <BlockNoteView editor={editor} onChange={handleEditorChange}/>
+            {activePopover}
         </div>
     )
 }
