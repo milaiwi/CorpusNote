@@ -3,12 +3,17 @@ import React, { createContext, useContext, ReactNode, useMemo, useState, useEffe
 import { useAIContext } from '../AIContext'
 import { invoke } from '@tauri-apps/api/tauri'
 import { useFileSystem } from '../FileSystemContext'
+import { useFileCache } from '../FileCache'
 import { extractTextFromBlocks } from '../../components/layout/EditorManager/utils/blockUtils'
 
 interface SearchSemanticContextType {
     // search functions
     search: (query: string) => Promise<any[]>
     searchSimilarUsingCurrentFile: () => Promise<void>
+    
+    // synchronous getters for cached data
+    getCurrentFileSimilarFiles: () => any[]
+    getCachedSimilarFilesForFile: (filePath: string) => any[]
 
     // state management
     searchResults: any[]
@@ -28,6 +33,7 @@ const SearchSemanticContext = createContext<SearchSemanticContextType | undefine
 export const SearchSemanticProvider = ({ children }: { children: ReactNode }) => {
     const { embeddingModel } = useAIContext()
     const { currentOpenedFile, editorInitialBlocks } = useFileSystem()
+    const { cacheSimilarFiles, getCachedSimilarFiles } = useFileCache()
     
     // State management
     const [searchResults, setSearchResults] = useState<any[]>([])
@@ -82,22 +88,51 @@ export const SearchSemanticProvider = ({ children }: { children: ReactNode }) =>
             const currentFileText = extractTextFromBlocks(editorInitialBlocks)
             const results = await search(currentFileText)
             setSearchResults(results)
+            
+            // Cache the results for this file using FileCache
+            if (currentOpenedFile) {
+                cacheSimilarFiles(currentOpenedFile.absPath, results)
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : String(err))
         } finally {
             setIsLoading(false)
         }
     }
+    
+    // Synchronous getter for current file's similar files
+    const getCurrentFileSimilarFiles = (): any[] => {
+        if (!currentOpenedFile) return []
+        return getCachedSimilarFiles(currentOpenedFile.absPath) || []
+    }
+    
+    // Synchronous getter for any file's similar files
+    const getCachedSimilarFilesForFile = (filePath: string): any[] => {
+        return getCachedSimilarFiles(filePath) || []
+    }
 
     const value = useMemo(
         () => ({
             search,
             searchSimilarUsingCurrentFile,
+            getCurrentFileSimilarFiles,
+            getCachedSimilarFilesForFile,
             searchResults,
             isLoading,
             error
         }),
-        [embeddingModel, currentOpenedFile, editorInitialBlocks, searchResults, isLoading, error]
+        [
+            embeddingModel,
+            currentOpenedFile,
+            editorInitialBlocks,
+            searchResults,
+            isLoading,
+            error,
+            getCurrentFileSimilarFiles,
+            getCachedSimilarFilesForFile,
+            cacheSimilarFiles,
+            getCachedSimilarFiles
+        ]
     )
 
     return (

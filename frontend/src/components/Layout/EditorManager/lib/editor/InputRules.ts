@@ -8,7 +8,7 @@ export interface InputRule {
 
 // Context interface that can hold any functions from different contexts
 export interface EditorContext {
-  searchSimilarUsingCurrentFile?: () => Promise<void>;
+  getCurrentFileSimilarFiles?: () => any[];
 }
 
 // Manages and processes all registered input rules

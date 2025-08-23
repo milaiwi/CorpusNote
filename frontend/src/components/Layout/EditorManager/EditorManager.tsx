@@ -10,9 +10,9 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
-import { useSearchSemanticContext } from '../../../contexts/Semantics/SearchSemanticContext'
 import { customInputRules } from './lib/editor/CustomInputRules'
 import { InputRuleManager } from './lib/editor/InputRules'
+import { useSearchSemanticContext } from '../../../contexts/Semantics/SearchSemanticContext'
 
 
 const EditorManager = () => {
@@ -26,11 +26,11 @@ const EditorManager = () => {
     } = useFileSystem()
 
     const { editor } = useAIContext()
-    const { searchSimilarUsingCurrentFile } = useSearchSemanticContext()
+    const { getCurrentFileSimilarFiles } = useSearchSemanticContext()
 
     const isInitialLoad = useRef<boolean>(false)
 
-    const inputRuleManager = useMemo(() => new InputRuleManager(customInputRules), [searchSimilarUsingCurrentFile])
+    const inputRuleManager = useMemo(() => new InputRuleManager(customInputRules), [getCurrentFileSimilarFiles])
 
     useEffect(() => {
         if (changingFilePath) return
@@ -75,7 +75,7 @@ const EditorManager = () => {
         if (!currentOpenedFile) return
 
         const context = {
-            searchSimilarUsingCurrentFile
+            getCurrentFileSimilarFiles
         }
         
         inputRuleManager.process(editor, context)

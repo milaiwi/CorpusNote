@@ -32,7 +32,10 @@ interface FileCacheContextType {
   writeFileAndCache: (file: FileItem, content: Block[], markdown?: string) => Promise<void>
   renameFileAndCache: (oldPath: string, newPath: string) => Promise<void>
   deleteFileAndCache: (path: string) => Promise<void>
-  cacheSimilarFile: (file: FileItem, results: SearchResult[]) => Promise<SearchResult[]>
+  
+  // Similar files caching
+  cacheSimilarFiles: (filePath: string, results: SearchResult[]) => void
+  getCachedSimilarFiles: (filePath: string) => SearchResult[] | undefined
 
   // Cache management
   invalidateFile: (path: string) => void
@@ -79,12 +82,14 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }
 
-  const cacheSimilarFile = async (file: FileItem, results: SearchResult[]): Promise<SearchResult[]> => {
-    const queryKey = ['similar-files', file.absPath]
-    const cachedData = queryClient.getQueryData<SearchResult[]>(queryKey)
-    if (cachedData)
-      return cachedData
+  const cacheSimilarFiles = (filePath: string, results: SearchResult[]): void => {
+    const queryKey = ['similar-files', filePath]
     queryClient.setQueryData(queryKey, results)
+  }
+
+  const getCachedSimilarFiles = (filePath: string): SearchResult[] | undefined => {
+    const queryKey = ['similar-files', filePath]
+    return queryClient.getQueryData<SearchResult[]>(queryKey)
   }
 
   const writeFileAndCache = async (file: FileItem, content: Block[], markdown?: string): Promise<void> => {
@@ -191,7 +196,8 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       writeFileAndCache,
       renameFileAndCache,
       deleteFileAndCache,
-      cacheSimilarFile,
+      cacheSimilarFiles,
+      getCachedSimilarFiles,
       invalidateFile,
       prefetchFile,
       prefetchOllamaModels,

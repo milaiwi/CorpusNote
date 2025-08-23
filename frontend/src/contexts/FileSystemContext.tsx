@@ -120,7 +120,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             setCurrentOpenedFile(null)
         setCurrentOpenedFile(file)
         setChangingFilePath(true)
-
+        
         setEditorInitialBlocks(null)
         setEditorInitialMarkdown(null)
         const result = await readFileAndCache(file)

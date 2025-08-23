@@ -6,8 +6,16 @@ const similarFileRule: InputRule = {
         const linkText = match[1].trim()
         console.log(`[[${linkText}]]`)
         
-        if (context.searchSimilarUsingCurrentFile) {
-            context.searchSimilarUsingCurrentFile()
+        // Get cached similar files synchronously
+        if (context.getCurrentFileSimilarFiles) {
+            const similarFiles = context.getCurrentFileSimilarFiles()
+            console.log('Similar files found:', similarFiles.length)
+            
+            // You can now use the similarFiles data immediately
+            // For example, show them in a dropdown, insert them, etc.
+            if (similarFiles.length > 0) {
+                console.log('First similar file:', similarFiles[0])
+            }
         }
     }
 }
