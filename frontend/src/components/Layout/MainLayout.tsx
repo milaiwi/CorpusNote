@@ -21,8 +21,7 @@ import {
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import SemanticSidebar from './SemanticSidebar/SemanticSidebar';
 import { SearchSemanticProvider } from '../../contexts/Semantics/SearchSemanticContext';
-
-
+import EmptyPage from './Misc/EmptyPage';
 
 // Prevent the editor manager from being loaded immediately on the server side
 const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
@@ -79,13 +78,21 @@ const MainLayout: React.FC = () => {
             {/* Editor Panel - Takes remaining space */}
             <ResizablePanel defaultSize={60} minSize={40}>
                 <div className="flex-1 flex flex-col min-w-0 h-full">
-                    <TitleBar
-                        selectedFile={currentOpenedFile}
-                        isSidebarCollapsed={isSidebarCollapsed}
-                        onToggleSidebar={handleToggleFileSidebar} // Use the new handler
-                        onToggleSemanticSearch={() => setIsSemanticSearchOpen(!isSemanticSearchOpen)}
-                    />
-                    <EditorManager />
+                    {currentOpenedFile ? (
+                        <div>
+                            <TitleBar
+                                selectedFile={currentOpenedFile}
+                                isSidebarCollapsed={isSidebarCollapsed}
+                                onToggleSidebar={handleToggleFileSidebar} // Use the new handler
+                                onToggleSemanticSearch={() => setIsSemanticSearchOpen(!isSemanticSearchOpen)}
+                            />
+                            <EditorManager />
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col min-w-0 h-full">
+                            <EmptyPage />
+                        </div>
+                    )}
                 </div>
             </ResizablePanel>
 
