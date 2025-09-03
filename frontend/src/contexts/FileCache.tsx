@@ -54,6 +54,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const readFileAndCache = async (file: FileItem): Promise<{ content: Block[] | string; source: 'json' | 'markdown'} | null> => {
     try {
+      console.log(`[FileCache] Reading file: ${file.absPath}`)
       const queryKey = ['note-blocks', file.absPath]
       // Use the cache instead of bypassing it
       const cachedData = queryClient.getQueryData<Block[]>(queryKey)

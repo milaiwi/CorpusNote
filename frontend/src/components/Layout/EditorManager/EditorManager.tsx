@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
 import { useSearchSemanticContext } from '../../../contexts/Semantics/SearchSemanticContext'
 import { SimilarCommand } from '../SemanticSidebar/SimilarCommand'
+import { FileItem } from '../FileSidebar/utils'
 
 
 const EditorManager = () => {
@@ -22,6 +23,7 @@ const EditorManager = () => {
         currentOpenedFile,
         loadFileIntoEditor,
         saveFileFromEditor,
+        saveCurrentFileBeforeLoad,
         loadFilePathIntoEditor,
     } = useFileSystem()
 
@@ -47,22 +49,25 @@ const EditorManager = () => {
     }, [changingFilePath, editor, editorInitialBlocks, editorInitialMarkdown])
 
     useEffect(() => {
-        const fetchFile = async () => {
-            if (!currentOpenedFile) return
-
-            // Before loading the new file, we need to save the current opened file
-            console.log(`Dirty: ${currentOpenedFile?.isDirty}`)
-            if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
-                const markdown = await editor.blocksToMarkdownLossy(editor.document)
-                console.log(`[DIRTY MODIFICATION] Saving current file: ${currentOpenedFile.absPath}`)
-                saveFileFromEditor(editor.document, markdown)
-            }
-
+        if (changingFilePath && currentOpenedFile) {
             loadFileIntoEditor(currentOpenedFile)
         }
+    }, [changingFilePath, currentOpenedFile, loadFileIntoEditor])
 
-        fetchFile()
-    }, [changingFilePath, currentOpenedFile])
+    // Save current file when switching to a new file
+    // useEffect(() => {
+    //     return () => {
+    //         console.log(`[CLEANUP] Saving file`)
+    //         // const saveFile = async () => {
+    //         //     if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
+    //         //         console.log(`[CLEANUP] Saving previous file: ${currentOpenedFile.absPath}`)
+    //         //         const markdown = await editor.blocksToMarkdownLossy(editor.document)
+    //         //         await saveCurrentFileBeforeLoad(editor.document, markdown)
+    //         //     }
+    //         // }
+    //         // saveFile()
+    //     }
+    // }, [currentOpenedFile, editor, saveCurrentFileBeforeLoad])
 
     const handleEditorChange = (editor: BlockNoteEditor, { getChanges }) => {
         if (isInitialLoad.current) {
@@ -74,7 +79,7 @@ const EditorManager = () => {
         
         const changes = getChanges()
         if (changes.length > 0 && !currentOpenedFile?.isDirty) {
-            console.log(`[DIRTY MODIFICATION] Marking file as dirty!!`)
+            console.log(`[DIRTY MODIFICATION] Marking file as dirty!! ${currentOpenedFile?.absPath}`)
             currentOpenedFile!.isDirty = true
         }
     }

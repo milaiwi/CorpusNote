@@ -21,7 +21,8 @@ type FileSystemContextType = {
     createNewDirectory: (directory: string, targetDirectory?: string) => Promise<void>
     handleRename: (filePath: string, newName: string) => Promise<[boolean, string]>
     handleRemove: (item: FileItem) => Promise<[boolean, string]>
-    saveFileFromEditor: (blocks: Block[], markdown?: string) => Promise<void>
+    saveFileFromEditor: (blocks: Block[], markdown?: string, currentOpenedFile?: FileItem) => Promise<void>
+    saveCurrentFileBeforeLoad: (blocks: Block[], markdown?: string) => Promise<void>
     getFileItemFromPath: (filePath: string) => FileItem | null
 
     // File tree management
@@ -125,7 +126,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
 
     const loadFileIntoEditor = useCallback(async (file: FileItem) => {
         if (currentOpenedFile?.absPath === file.absPath)
-            setCurrentOpenedFile(null)
+            return
         console.log(`Loading file: ${file.absPath}`)
         console.log(`Storing file: ${currentOpenedFile?.absPath}`)
         setCurrentOpenedFile(file)
@@ -169,9 +170,17 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, 'File deleted']
     }
 
-    const saveFileFromEditor = async (blocks: Block[], markdown?: string) => {
+    const saveFileFromEditor = async (blocks: Block[], markdown?: string, currentOpenedFile?: FileItem) => {
         if (!currentOpenedFile) return
+        console.log(`[DIRTY MODIFICATION] Saving file: ${currentOpenedFile.absPath}`)
         writeFileAndCache(currentOpenedFile, blocks, markdown)
+        currentOpenedFile.isDirty = false
+    }
+
+    const saveCurrentFileBeforeLoad = async (blocks: Block[], markdown?: string) => {
+        if (!currentOpenedFile || !currentOpenedFile.isDirty) return
+        console.log(`[SAVE BEFORE LOAD] Saving current file: ${currentOpenedFile.absPath}`)
+        await writeFileAndCache(currentOpenedFile, blocks, markdown)
         currentOpenedFile.isDirty = false
     }
 
@@ -328,6 +337,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         handleRename,
         handleRemove,
         saveFileFromEditor,
+        saveCurrentFileBeforeLoad,
         getFileItemFromPath,
         changingFilePath,
         editorInitialBlocks,
