@@ -51,8 +51,10 @@ const EditorManager = () => {
             if (!currentOpenedFile) return
 
             // Before loading the new file, we need to save the current opened file
+            console.log(`Dirty: ${currentOpenedFile?.isDirty}`)
             if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
                 const markdown = await editor.blocksToMarkdownLossy(editor.document)
+                console.log(`[DIRTY MODIFICATION] Saving current file: ${currentOpenedFile.absPath}`)
                 saveFileFromEditor(editor.document, markdown)
             }
 
@@ -72,6 +74,7 @@ const EditorManager = () => {
         
         const changes = getChanges()
         if (changes.length > 0 && !currentOpenedFile?.isDirty) {
+            console.log(`[DIRTY MODIFICATION] Marking file as dirty!!`)
             currentOpenedFile!.isDirty = true
         }
     }

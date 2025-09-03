@@ -3,6 +3,7 @@ import React from 'react'
 import { getDisplayTitle } from './utils';
 import { PanelLeft, PanelRight } from 'lucide-react';
 import { FileItem } from '../FileSidebar/utils';
+import { useFileSystem } from '../../../contexts/FileSystemContext';
 
 interface TitleBarProps {
     selectedFile: FileItem | null;
@@ -15,6 +16,7 @@ interface TitleBarProps {
 //  - Need to change button and other containers to shadcn objects
 //  - Need to define default colors for borders
 const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = false, onToggleSidebar, onToggleSemanticSearch }) => {
+    const { currentOpenedFile } = useFileSystem()
     return (
         <div 
             className="border-b border-border flex items-center justify-between px-4 select-none h-[45px]"
@@ -35,7 +37,7 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = f
             {/* Center - Title */}
             <div className="flex-1 flex justify-center">
                 <h1 className="text-sm font-medium text-gray-200 truncate max-w-md">
-                    {getDisplayTitle(selectedFile?.name || '')}
+                    {currentOpenedFile?.isDirty && '*'} {getDisplayTitle(selectedFile?.name || '')}
                 </h1>
             </div>
 

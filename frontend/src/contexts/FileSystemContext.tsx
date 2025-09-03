@@ -1,5 +1,5 @@
 // frontend/src/contexts/FileSystemContext.tsx
-import React, { createContext, useContext, ReactNode, useState, useEffect } from "react"
+import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback, useRef } from "react"
 import { FileItem } from "../components/layout/FileSidebar/utils"
 import readSingleDirectoryContent, { sortFiles, addItemToDirectory, renameItemInFileTree, removeItemFromFileTree } from "../components/layout/FileSidebar/FileTree"
 import { useFileCache } from "./FileCache"
@@ -66,11 +66,16 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     const [editorInitialBlocks, setEditorInitialBlocks] = useState<Block[] | null>(null)
     const [editorInitialMarkdown, setEditorInitialMarkdown] = useState<string | null>(null)
 
+    // reference to map to store files in memory
+    const filesByPathRef = useRef<Map<string, FileItem>>(new Map())
+    const [isReady, setIsReady] = useState<boolean>(false)
+
     const { readFileAndCache, createDirectory, renameFileAndCache, deleteFileAndCache, writeFileAndCache } = useFileCache()
 
     // Load files from vault
     useEffect(() => {
         const readFilesFromDirectory = async () => {
+            setIsReady(false)
             const startingPath = vaultPath
 
             // Create a dummy root node that contains all top-level files
@@ -87,38 +92,42 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
 
             const fileItems = await readSingleDirectoryContent(vaultPath, startingPath, dummyRoot)
             const sortedFiles = sortFiles(fileItems)
-
             dummyRoot.children = sortedFiles
-            
             setFiles([dummyRoot])
-            
-            // Populate flattedFiles with all files from the tree
-            const allFiles: FileItem[] = []
-            const collectAllFilesFromTree = (items: FileItem[]) => {
-                items.forEach(item => {
-                    allFiles.push(item)
-                    if (item.isDirectory && item.children && item.children.length > 0) {
-                        collectAllFilesFromTree(item.children)
-                    }
-                })
+
+            // Flatten + Map
+            const all: FileItem[] = []
+            const map = new Map<string, FileItem>()
+
+            const collect = (items: FileItem[]) => {
+                for (const item of items) {
+                    all.push(item)
+                    map.set(item.absPath, item)
+                    if (item.isDirectory && item.children?.length) collect(item.children)
+                }
             }
-            collectAllFilesFromTree(sortedFiles)
-            setFlattedFiles(allFiles)
+            collect(sortedFiles)
+            setFlattedFiles(all)
+            filesByPathRef.current = map
             
+            setIsReady(true)
             return true
         }
 
         readFilesFromDirectory()
     }, [vaultPath])
 
+
     const handleDirectoryToggle = (path: string) => {
         const isExpanded = expandedDirectories.get(path)
         setExpandedDirectories(prev => new Map(prev).set(path, !isExpanded))
     }
 
-    const loadFileIntoEditor = async (file: FileItem) => {
+    const loadFileIntoEditor = useCallback(async (file: FileItem) => {
         if (currentOpenedFile?.absPath === file.absPath)
             setCurrentOpenedFile(null)
+        console.log(`Loading file: ${file.absPath}`)
+        console.log(`Storing file: ${currentOpenedFile?.absPath}`)
         setCurrentOpenedFile(file)
         setChangingFilePath(true)
         
@@ -134,15 +143,15 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             }
         }
         setChangingFilePath(false)
-    }
+    }, [currentOpenedFile, readFileAndCache])
 
-    const loadFilePathIntoEditor = async (filePath: string) => {
+    const loadFilePathIntoEditor = useCallback(async (filePath: string) => {
+        if (!isReady) return
+
         const file = getFileItemFromPath(filePath)
-        console.log("file", file)
-        if (file) {
-            await loadFileIntoEditor(file)
-        }
-    }
+        if (!file) return
+        await loadFileIntoEditor(file)
+    }, [flattedFiles, loadFileIntoEditor, isReady])
 
     const handleRemove = async (item: FileItem): Promise<[boolean, string]> => {
         if (!item) return [false, 'File does not exist'] // Theoretically impossible
@@ -304,8 +313,6 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     // Helper function to get a file item from a path. Ideally, can make
     // this more efficient by mapping filePath -> fileItem
     const getFileItemFromPath = (filePath: string): FileItem | null => {
-        console.log("filePath", filePath)
-        console.log("flattedFiles", flattedFiles)
         return flattedFiles.find(file => file.absPath === filePath) || null
     }
 
