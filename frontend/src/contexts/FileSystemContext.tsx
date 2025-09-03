@@ -21,8 +21,7 @@ type FileSystemContextType = {
     createNewDirectory: (directory: string, targetDirectory?: string) => Promise<void>
     handleRename: (filePath: string, newName: string) => Promise<[boolean, string]>
     handleRemove: (item: FileItem) => Promise<[boolean, string]>
-    saveFileFromEditor: (blocks: Block[], markdown?: string, currentOpenedFile?: FileItem) => Promise<void>
-    saveCurrentFileBeforeLoad: (blocks: Block[], markdown?: string) => Promise<void>
+    saveFile: (fileToSave: FileItem, contentToSave: Block[], markdown?: string) => Promise<void>
     getFileItemFromPath: (filePath: string) => FileItem | null
 
     // File tree management
@@ -170,18 +169,11 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         return [true, 'File deleted']
     }
 
-    const saveFileFromEditor = async (blocks: Block[], markdown?: string, currentOpenedFile?: FileItem) => {
-        if (!currentOpenedFile) return
-        console.log(`[DIRTY MODIFICATION] Saving file: ${currentOpenedFile.absPath}`)
-        writeFileAndCache(currentOpenedFile, blocks, markdown)
-        currentOpenedFile.isDirty = false
-    }
-
-    const saveCurrentFileBeforeLoad = async (blocks: Block[], markdown?: string) => {
-        if (!currentOpenedFile || !currentOpenedFile.isDirty) return
-        console.log(`[SAVE BEFORE LOAD] Saving current file: ${currentOpenedFile.absPath}`)
-        await writeFileAndCache(currentOpenedFile, blocks, markdown)
-        currentOpenedFile.isDirty = false
+    const saveFile = async (fileToSave: FileItem, contentToSave: Block[], markdown?: string) => {
+        if (!fileToSave || !fileToSave.isDirty) return
+        console.log(`[SAVE BEFORE LOAD] Saving current file: ${fileToSave.absPath}`)
+        await writeFileAndCache(fileToSave, contentToSave, markdown)
+        fileToSave.isDirty = false
     }
 
     // Helper function to update flattedFiles when adding a new item
@@ -336,8 +328,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         createNewDirectory,
         handleRename,
         handleRemove,
-        saveFileFromEditor,
-        saveCurrentFileBeforeLoad,
+        saveFile,
         getFileItemFromPath,
         changingFilePath,
         editorInitialBlocks,

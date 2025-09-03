@@ -1,34 +1,48 @@
 // frontend/src/components/Layout/EditorManager/EditorManager.tsx
 "use client"
 import { BlockNoteView } from '@blocknote/mantine'
-import { BlockNoteEditor } from '@blocknote/core'
+import { Block, BlockNoteEditor } from '@blocknote/core'
 import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
 import './editor.css'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
-import { useSearchSemanticContext } from '../../../contexts/Semantics/SearchSemanticContext'
 import { SimilarCommand } from '../SemanticSidebar/SimilarCommand'
 import { FileItem } from '../FileSidebar/utils'
 
+export type EditorManagerRef = {
+    getMarkdownContent: () => Promise<string | null>
+    getBlocksContent: () => Promise<Block[] | null>
+}
 
-const EditorManager = () => {
+type EditorManagerProps = {
+    onOpenFile: (file: FileItem) => Promise<void>
+}
+
+const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, ref) => {
+    const { onOpenFile } = props
     const {
         editorInitialBlocks,
         editorInitialMarkdown,
         changingFilePath,
         currentOpenedFile,
-        loadFileIntoEditor,
-        saveFileFromEditor,
-        saveCurrentFileBeforeLoad,
-        loadFilePathIntoEditor,
     } = useFileSystem()
 
     const { editor, similarUI, setSimilarUI } = useAIContext()
-    const { getCurrentFileSimilarFiles } = useSearchSemanticContext()
+
+    useImperativeHandle(ref, () => ({
+        getMarkdownContent: async () => {
+            if (!editor) return null
+            return await editor.blocksToMarkdownLossy(editor.document)
+        },
+        getBlocksContent: async () => {
+            if (!editor) return null;
+            return editor.document
+        }
+    }))
 
     const isInitialLoad = useRef<boolean>(false)
 
@@ -48,26 +62,12 @@ const EditorManager = () => {
         loadMarkdownContent()
     }, [changingFilePath, editor, editorInitialBlocks, editorInitialMarkdown])
 
-    useEffect(() => {
-        if (changingFilePath && currentOpenedFile) {
-            loadFileIntoEditor(currentOpenedFile)
-        }
-    }, [changingFilePath, currentOpenedFile, loadFileIntoEditor])
-
-    // Save current file when switching to a new file
     // useEffect(() => {
-    //     return () => {
-    //         console.log(`[CLEANUP] Saving file`)
-    //         // const saveFile = async () => {
-    //         //     if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
-    //         //         console.log(`[CLEANUP] Saving previous file: ${currentOpenedFile.absPath}`)
-    //         //         const markdown = await editor.blocksToMarkdownLossy(editor.document)
-    //         //         await saveCurrentFileBeforeLoad(editor.document, markdown)
-    //         //     }
-    //         // }
-    //         // saveFile()
+    //     if (changingFilePath && currentOpenedFile) {
+    //         onOpenFile(currentOpenedFile)
     //     }
-    // }, [currentOpenedFile, editor, saveCurrentFileBeforeLoad])
+    // }, [changingFilePath, currentOpenedFile, onOpenFile])
+
 
     const handleEditorChange = (editor: BlockNoteEditor, { getChanges }) => {
         if (isInitialLoad.current) {
@@ -103,6 +103,6 @@ const EditorManager = () => {
             </BlockNoteView>
         </div>
     )
-}
+})
 
 export default EditorManager

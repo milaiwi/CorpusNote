@@ -1,5 +1,5 @@
 // frontend/src/components/layout/MainLayout.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import TitleBar from './TitleBar/Titlebar';
 import FileSystemProvider from '../../contexts/FileSystemContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,7 +8,6 @@ import { ThemeProvider } from '../../contexts/ThemeContext';
 import FileCacheProvider from '../../contexts/FileCache';
 import { DialogProvider } from '../../contexts/DialogContext';
 import { AppProvider } from '../../contexts/AppContext';
-import { useAppSettings } from '../../contexts/AppContext';
 import { AIProvider } from '../../contexts/AIContext';
 import dynamic from "next/dynamic";
 import FileSidebar from './FileSidebar/FileSidebar';
@@ -22,6 +21,8 @@ import { ImperativePanelHandle } from 'react-resizable-panels';
 import SemanticSidebar from './SemanticSidebar/SemanticSidebar';
 import { SearchSemanticProvider } from '../../contexts/Semantics/SearchSemanticContext';
 import EmptyPage from './Misc/EmptyPage';
+import { EditorManagerRef } from './EditorManager/EditorManager';
+import { FileItem } from './FileSidebar/utils';
 
 // Prevent the editor manager from being loaded immediately on the server side
 const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
@@ -32,8 +33,30 @@ const MainLayout: React.FC = () => {
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
     const [isSemanticSearchOpen, setIsSemanticSearchOpen] = useState<boolean>(false);
-    const { currentOpenedFile } = useFileSystem();
-    
+
+    const { currentOpenedFile, loadFileIntoEditor, saveFile } = useFileSystem();
+    const editorManagerRef = useRef<EditorManagerRef>(null);
+
+    const handleOpenFile = useCallback(async (newFileToOpen: FileItem) => {
+        console.log(`[OPEN FILE] Handling open file: ${newFileToOpen.absPath}`)
+        console.log(`[OPEN FILE] Current opened file: ${currentOpenedFile?.absPath}`)
+        if (currentOpenedFile?.absPath === newFileToOpen.absPath) return
+
+        const fileToSave = currentOpenedFile
+        const isDirty = fileToSave?.isDirty
+
+        const contentToSave = isDirty
+            ? await editorManagerRef.current?.getBlocksContent()
+            : null
+        
+        await loadFileIntoEditor(newFileToOpen)
+
+        if (fileToSave && contentToSave) {
+            console.log(`[OPEN FILE] Saving file: ${fileToSave.absPath}`)
+            const markdown = await editorManagerRef.current?.getMarkdownContent()
+            await saveFile(fileToSave, contentToSave, markdown)
+        }
+    }, [currentOpenedFile, loadFileIntoEditor, saveFile])
 
     // Create a ref to imperatively control the left panel
     const leftPanelRef = useRef<ImperativePanelHandle>(null);
@@ -86,7 +109,7 @@ const MainLayout: React.FC = () => {
                                 onToggleSidebar={handleToggleFileSidebar} // Use the new handler
                                 onToggleSemanticSearch={() => setIsSemanticSearchOpen(!isSemanticSearchOpen)}
                             />
-                            <EditorManager />
+                            <EditorManager onOpenFile={handleOpenFile} ref={editorManagerRef} />
                         </div>
                     ) : (
                         <div className="flex-1 flex flex-col min-w-0 h-full">
