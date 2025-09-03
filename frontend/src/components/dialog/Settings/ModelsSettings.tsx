@@ -21,7 +21,6 @@ export const ModelsSettings: React.FC<ModelsSettingsProps> = ({ configuredModels
         })
     }
 
-    console.log(`Configured Models ${configuredModels.length}: ${configuredModels}`)
     return (
         <div className="flex flex-col gap-2">
             <h3 className="text-lg font-semibold">Models Settings</h3>

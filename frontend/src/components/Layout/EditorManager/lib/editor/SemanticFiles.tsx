@@ -1,102 +1,95 @@
 import { SearchResult } from "../../../../../contexts/Semantics/types"
+import {
+    Command,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "../../../../../../shadcn/ui/command"
+import { useEffect, useRef } from "react"
+import { useAppSettings } from "../../../../../contexts/AppContext"
+import { getRelativePath } from "../../../../../../lib/utils"
 
-interface DummyTemplateProps {
+interface SemanticFilesProps {
     similarFiles: SearchResult[]
     rect?: { top: number; left: number; bottom: number; right: number }
     onFileSelect?: (file: SearchResult) => void
     onClose?: () => void
+    open: boolean
 }
 
-export const DummyTemplate: React.FC<DummyTemplateProps> = ({ 
+export const SemanticFilePopover: React.FC<SemanticFilesProps> = ({ 
     similarFiles, 
     rect, 
     onFileSelect, 
-    onClose 
+    onClose,
+    open
 }) => {
-    console.log('similarFiles', similarFiles)
+    const { vaultPath } = useAppSettings()
+    const contentRef = useRef<HTMLDivElement>(null)
     
-    const style: React.CSSProperties = {
-        position: 'fixed',
-        bottom: `calc(100vh - ${rect.top}px)`, 
-        left: rect.left,
-        width: '50%',
-        maxHeight: '400px',
-        backgroundColor: 'white',
-        border: '1px solid #e2e8f0',
-        color: 'black',
-        borderRadius: 8,
-        padding: 16,
-        zIndex: 1000,
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        overflow: 'auto',
-    }
-
-    const handleFileClick = (file: SearchResult) => {
-        if (onFileSelect) {
-            onFileSelect(file);
+    const handleValueChange = (value: string) => {
+        const selectedFile = similarFiles.find(file => file.file_path === value);
+        if (selectedFile && onFileSelect) {
+            onFileSelect(selectedFile);
         }
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Escape' && onClose) {
-            onClose();
+    // Handle click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
+                if (onClose) onClose();
+            }
+        };
+
+        if (open) {
+            document.addEventListener('mousedown', handleClickOutside);
         }
-    }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [open, onClose]);
+
+    if (!open) return null;
 
     return (
         <div 
-            style={style} 
-            onKeyDown={handleKeyDown}
-            tabIndex={0}
-            data-popover="true"
+            ref={contentRef}
+            style={{
+                position: 'fixed',
+                bottom: `calc(100vh - ${rect?.top || 0}px)`, 
+                left: rect?.left || 0,
+                zIndex: 1000,
+            }}
         >
-            <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                marginBottom: 12 
-            }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
-                    Similar files
-                </h3>
-                {onClose && (
-                    <button
-                        onClick={onClose}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '18px',
-                            color: '#6b7280'
-                        }}
-                    >
-                        ×
-                    </button>
-                )}
-            </div>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                {similarFiles.map((file) => (
-                    <li 
-                        key={file.file_path}
-                        onClick={() => handleFileClick(file)}
-                        style={{
-                            padding: '8px 12px',
-                            cursor: 'pointer',
-                            borderRadius: 4,
-                            marginBottom: 4,
-                            transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f3f4f6'
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent'
-                        }}
-                    >
-                        {file.file_path}
-                    </li>
-                ))}
-            </ul>
+            <Command className="w-[300px] rounded-lg border shadow-md">
+                <CommandList>
+                    <CommandGroup heading="Similar files">
+                        {similarFiles.map((file) => (
+                            <CommandItem 
+                                key={file.file_path} 
+                                value={file.file_path}
+                                onSelect={() => handleValueChange(file.file_path)}
+                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                            >
+                                {getRelativePath(file.file_path, vaultPath)}
+                            </CommandItem>
+                        ))}
+                    </CommandGroup>
+                </CommandList>
+                <CommandInput 
+                    placeholder="Type to search or select a file..." 
+                    autoFocus
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            if (onClose) onClose();
+                        }
+                    }}
+                />
+            </Command>
         </div>
     )
 }

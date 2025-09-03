@@ -54,7 +54,6 @@ const fetchManifest = async (vaultPath: string) => {
     if (!manifestExists)
         await writeFile(manifestPath, JSON.stringify([]))
 
-    console.log('Manifest path loaded.')
     const manifest = await readTextFile(manifestPath)
     const manifestJson = JSON.parse(manifest)
     return manifestJson
@@ -67,19 +66,15 @@ const runIndexingPipeline = async (
     parseMarkdownToBlocks: (markdown: string) => Promise<Block[]>,
     embeddingModel: Embedding,
 ) => {
-    console.log(`Vault Path: `, vaultPath)
     const manifestJson = await fetchManifest(vaultPath)
     const newFiles = diffCheck(files, manifestJson)
     const embed_dim = await embeddingModel.getEmbeddingDimension()
     const verbose = true
 
     if (newFiles.length > 0) {
-        console.log(`Creating indexing pipeline...`)
         const pipeline = new IndexingPipeline(vaultPath, manifestJson, parseMarkdownToBlocks, embeddingModel, embed_dim, verbose)
         pipeline.addToQueue(newFiles)
         pipeline.startWorker()
-    } else {
-        console.log("No new files to index.")
     }
 }
 

@@ -6,19 +6,31 @@ import { useAppSettings } from './AppContext'
 import runIndexingPipeline from '../../../backend/domain/index/run-workflow'
 import { useFileSystem } from './FileSystemContext'
 import { useCreateBlockNote } from '@blocknote/react'
-import { BlockNoteEditor } from '@blocknote/core'
+import { BlockNoteEditor, BlockNoteSchema, defaultInlineContentSpecs } from '@blocknote/core'
 import HuggingFaceEmbed from '../../../backend/domain/llm/huggingfaceembed'
 import { Embedding } from '../../../backend/domain/llm/embedding'
+import RichTextLink from '../components/layout/EditorManager/lib/editor/extensions/RichTextLink'
+import { makeFileLink } from '../components/layout/EditorManager/lib/editor/extensions/RichTextLink'
+import { SimilarTrigger } from '../components/layout/EditorManager/lib/editor/SimilarTrigger'
 
 interface AIContextType {
     configuredModels: OllamaModel[],
     selectedModel: OllamaModel | null,
     setSelectedModel: (model: OllamaModel | null) => void,
     embeddingModel: Embedding | null,
-    editor: BlockNoteEditor
+    editor: any, // TODO: Change this to BlockNoteEditor with the new custom schema
+    similarUI: SimilarUI | null,
+    setSimilarUI: (similarUI: SimilarUI | null) => void
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined)
+
+
+interface SimilarUI {
+    query: string,
+    from: number,
+    to: number,
+}
 
 /**
  * AIContext is a context that provides the configured models and the selected model to the app.
@@ -31,11 +43,36 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     const [configuredModels, setConfiguredModels] = useState<OllamaModel[]>([])
     const [selectedModel, setSelectedModel] = useState<OllamaModel | null>(null)
     const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
+    const [similarUI, setSimilarUI] = useState<SimilarUI | null>(null)
+
     const { prefetchOllamaModels } = useFileCache()
     const { settings, vaultPath } = useAppSettings()
-    const { vaultTree, flattedFiles } = useFileSystem()
+    const { vaultTree, flattedFiles, loadFilePathIntoEditor } = useFileSystem()
 
-    const editor = useCreateBlockNote()
+    const FileLink = makeFileLink(loadFilePathIntoEditor)
+
+    const schema = BlockNoteSchema.create({
+        inlineContentSpecs: {
+            ...defaultInlineContentSpecs,
+            fileLink: FileLink,
+        }
+    })
+
+    const editor = useCreateBlockNote({
+        schema,
+        _tiptapOptions: {
+            extensions: [
+                RichTextLink,
+                SimilarTrigger.configure({
+                    onOpen: ({ query, from, to }, view) => {
+                        setSimilarUI({ query, from, to })
+                    },
+                    onClose: () => setSimilarUI(null)
+                })
+            ],
+        },
+    })
+
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -48,16 +85,13 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const loadEmbeddingModel = async () => {
-            console.log("Loading embedding model")
             const embeddingModel = settings?.embeddingModel
-            console.log("Embedding model: ", embeddingModel?.embeddingModelType)
 
             // Defaults to hugging face so do not need to check for undefined
             if (embeddingModel && embeddingModel.embeddingModelType === "huggingface") {
                 try {
                     const huggingFacePipeline = new HuggingFaceEmbed(embeddingModel.embeddingModelName!)
                     const embeddingPipeline = await huggingFacePipeline.getInstance(embeddingModel.embeddingModelName!)
-                    console.log("Setting embedding model: ", embeddingPipeline)
                     setEmbeddingModel(embeddingPipeline)
                 } catch (error) {
                     console.error("Failed to load embedding model:", error)
@@ -87,7 +121,7 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
         if (selectedLocalModel) {
             setSelectedModel(configuredModels.find(model => model.model === selectedLocalModel) ?? null)
         }
-    }, [settings, configuredModels])    
+    }, [settings, configuredModels])
 
     const value = useMemo(
         () => ({    
@@ -96,8 +130,10 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
             setSelectedModel,
             embeddingModel,
             editor,
+            similarUI,
+            setSimilarUI,
         }),
-        [configuredModels, selectedModel, setSelectedModel, embeddingModel, editor]
+        [configuredModels, selectedModel, setSelectedModel, embeddingModel, editor, similarUI, setSimilarUI]
     )
 
     return (

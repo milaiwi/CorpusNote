@@ -43,36 +43,33 @@ export class InputRuleManager {
     
     if (blockContent.type === "text") {
       const blockText = blockContent.text
-      console.log(`Block text:`, blockText)
 
       let foundMatch = false;
-      let matchedRule: InputRule | null = null;
-      let match: RegExpMatchArray | null = null;
+      let matchedRule: InputRule | null = null
+      let match: RegExpMatchArray | null = null
 
       for (const rule of this.rules) {
-        match = blockText.match(rule.regex);
-        console.log(`Match:`, match)
+        match = blockText.match(rule.regex)
         if (match) {
-          foundMatch = true;
-          matchedRule = rule;
-          break;
+          foundMatch = true
+          matchedRule = rule
+          break
         }
       }
 
       // If we have an active rule but no match found, clear the popover
       if (this.activeRule && !foundMatch) {
-        console.log('Clearing popover - rule no longer matches');
-        setPopover(null);
-        this.activeRule = null;
-        this.lastMatch = null;
-        return;
+        setPopover(null)
+        this.activeRule = null
+        this.lastMatch = null
+        return
       }
 
       // If we found a match and it's different from the last one, update the popover
       if (foundMatch && matchedRule && (!this.activeRule || this.activeRule !== matchedRule || !this.lastMatch || match![0] !== this.lastMatch[0])) {
-        this.activeRule = matchedRule;
-        this.lastMatch = match;
-        matchedRule.action(editor, match!, context, setPopover);
+        this.activeRule = matchedRule
+        this.lastMatch = match
+        matchedRule.action(editor, match!, context, setPopover)
       }
     }
   }
@@ -82,9 +79,9 @@ export class InputRuleManager {
    */
   public clearActiveRule(setPopover: SetPopoverFunc): void {
     if (this.activeRule) {
-      setPopover(null);
-      this.activeRule = null;
-      this.lastMatch = null;
+      setPopover(null)
+      this.activeRule = null
+      this.lastMatch = null
     }
   }
 }

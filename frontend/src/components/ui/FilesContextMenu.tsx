@@ -43,9 +43,8 @@ export function FilesContextMenu({
         openDialog(<NewDirectoryDialog directoryPath={directoryPath} />)
     }
 
-    const handleDelete = () => {
-        // TODO: Implement delete 
-        const [success, error] = handleRemove(item)
+    const handleDelete = async () => {
+        const [success, error] = await handleRemove(item)
         if (success) {
             console.log('File deleted:', item.name)
         } else {

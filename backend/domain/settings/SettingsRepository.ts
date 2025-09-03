@@ -26,7 +26,6 @@ export class SettingsRepository {
 
     async update(patch: Partial<Omit<Settings, "version">>): Promise<Settings> {
         const current = await this.load()
-        console.log(`Updating settings: `, current, patch)
         const updated = { ...current, ...patch }
         await this.store.set(KEY, updated)
         await this.store.save()

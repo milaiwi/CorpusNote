@@ -27,7 +27,6 @@ export function invalidCharactersExist(title: string) {
   return INVALID_CHARACTERS_ARRAY.some(char => title.includes(char))
 }
 
-
 /**
  * Extract the file name from a path
  * @param title - The path to extract the file name from
@@ -35,4 +34,27 @@ export function invalidCharactersExist(title: string) {
  */
 export function extractFileName(title: string) {
   return title.split('/').pop()?.split('.')[0]
+}
+
+/**
+ * Convert an absolute path to a relative path based on the vault path
+ * @param absPath - The absolute path to convert
+ * @param vaultPath - The vault path to make relative to
+ * @returns The relative path (e.g., "./testin/hehe")
+ */
+export function getRelativePath(absPath: string, vaultPath: string): string {
+  // Normalize paths by converting backslashes to forward slashes and removing trailing slashes
+  const normalizedAbsPath = absPath.replace(/\\/g, '/').replace(/\/+$/, '')
+  const normalizedVaultPath = vaultPath.replace(/\\/g, '/').replace(/\/+$/, '')
+  
+  // Check if the absolute path starts with the vault path
+  if (!normalizedAbsPath.startsWith(normalizedVaultPath)) {
+    throw new Error(`Absolute path '${absPath}' is not within vault path '${vaultPath}'`)
+  }
+  
+  // Remove the vault path prefix and any leading slashes
+  const relativePath = normalizedAbsPath.slice(normalizedVaultPath.length).replace(/^\/+/, '')
+  
+  // Return with "./" prefix if there's a path, or "." if it's the vault root
+  return relativePath ? `./${relativePath}` : '.'
 }

@@ -16,6 +16,7 @@ type FileSystemContextType = {
 
     // File operations
     loadFileIntoEditor: (file: FileItem) => Promise<void>
+    loadFilePathIntoEditor: (filePath: string) => Promise<void>
     createNewNote: (title: string, targetDirectory?: string) => Promise<void>
     createNewDirectory: (directory: string, targetDirectory?: string) => Promise<void>
     handleRename: (filePath: string, newName: string) => Promise<[boolean, string]>
@@ -133,6 +134,14 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             }
         }
         setChangingFilePath(false)
+    }
+
+    const loadFilePathIntoEditor = async (filePath: string) => {
+        const file = getFileItemFromPath(filePath)
+        console.log("file", file)
+        if (file) {
+            await loadFileIntoEditor(file)
+        }
     }
 
     const handleRemove = async (item: FileItem): Promise<[boolean, string]> => {
@@ -295,6 +304,8 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
     // Helper function to get a file item from a path. Ideally, can make
     // this more efficient by mapping filePath -> fileItem
     const getFileItemFromPath = (filePath: string): FileItem | null => {
+        console.log("filePath", filePath)
+        console.log("flattedFiles", flattedFiles)
         return flattedFiles.find(file => file.absPath === filePath) || null
     }
 
@@ -304,6 +315,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
         expandedDirectories,
         handleDirectoryToggle,
         loadFileIntoEditor,
+        loadFilePathIntoEditor,
         createNewNote,
         createNewDirectory,
         handleRename,

@@ -6,13 +6,12 @@ import '@blocknote/mantine/style.css'
 import '@blocknote/core/fonts/inter.css'
 import './editor.css'
 
-import React, { useEffect, useMemo, useRef, useState, ReactNode } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
-import { customInputRules } from './lib/editor/CustomInputRules'
-import { InputRuleManager } from './lib/editor/InputRules'
 import { useSearchSemanticContext } from '../../../contexts/Semantics/SearchSemanticContext'
+import { SimilarCommand } from '../SemanticSidebar/SimilarCommand'
 
 
 const EditorManager = () => {
@@ -23,30 +22,13 @@ const EditorManager = () => {
         currentOpenedFile,
         loadFileIntoEditor,
         saveFileFromEditor,
+        loadFilePathIntoEditor,
     } = useFileSystem()
 
-    const { editor } = useAIContext()
+    const { editor, similarUI, setSimilarUI } = useAIContext()
     const { getCurrentFileSimilarFiles } = useSearchSemanticContext()
 
     const isInitialLoad = useRef<boolean>(false)
-
-    const [activePopover, setActivePopover] = useState<ReactNode | null>(null)
-    const inputRuleManager = useMemo(() => new InputRuleManager(customInputRules), [getCurrentFileSimilarFiles])
-
-    // Add click outside handler to close popover
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (activePopover && !(event.target as Element).closest('[data-popover]')) {
-                setActivePopover(null);
-                inputRuleManager.clearActiveRule(setActivePopover);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [activePopover, inputRuleManager]);
 
     useEffect(() => {
         if (changingFilePath) return
@@ -72,8 +54,6 @@ const EditorManager = () => {
             if (editor.document.length > 0 && currentOpenedFile?.isDirty) {
                 const markdown = await editor.blocksToMarkdownLossy(editor.document)
                 saveFileFromEditor(editor.document, markdown)
-            } else {
-                console.log('No changes to save')
             }
 
             loadFileIntoEditor(currentOpenedFile)
@@ -89,13 +69,7 @@ const EditorManager = () => {
         }
 
         if (!currentOpenedFile) return
-
-        const context = {
-            getCurrentFileSimilarFiles
-        }
         
-        inputRuleManager.process(editor, context, setActivePopover)
-
         const changes = getChanges()
         if (changes.length > 0 && !currentOpenedFile?.isDirty) {
             currentOpenedFile!.isDirty = true
@@ -112,8 +86,13 @@ const EditorManager = () => {
     
     return (
         <div className='w-full h-full'>
-            <BlockNoteView editor={editor} onChange={handleEditorChange}/>
-            {activePopover}
+            <BlockNoteView editor={editor} onChange={handleEditorChange}>
+                <SimilarCommand
+                    editor={editor}
+                    state={similarUI}
+                    onClose={() => setSimilarUI(null)}
+                />
+            </BlockNoteView>
         </div>
     )
 }

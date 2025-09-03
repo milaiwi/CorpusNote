@@ -51,14 +51,10 @@ async function processFile(
             chunks: dbChunks,
             embedDim: embed_dim
         })
-        console.log(`[Worker] Successfully inserted chunks: ${result}`)
     } catch (error) {
         console.error(`[Worker] Failed to insert chunks:`, error)
         throw error
     }
-
-    // Step 6: Update the manifest file (placeholder for future implementation)
-    console.log(`[Worker] File ${file.absPath} processed successfully`)
 }
 
 class IndexingPipeline {
