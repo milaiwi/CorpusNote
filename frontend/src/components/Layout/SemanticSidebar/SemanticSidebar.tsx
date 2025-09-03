@@ -1,14 +1,15 @@
 import { X } from "lucide-react";
-import { getFileNameFromPath } from "../FileSidebar/utils";
+import { FileItem, getFileNameFromPath } from "../FileSidebar/utils";
 import { useFileSystem } from "../../../contexts/FileSystemContext";
 import { useSearchSemanticContext } from "../../../contexts/Semantics/SearchSemanticContext";
 
 interface SemanticSidebarProps {
     onClose: () => void;
+    handleOpenFile: (file: FileItem) => Promise<void>;
 }
 
-const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
-    const { loadFileIntoEditor, getFileItemFromPath } = useFileSystem()
+const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose, handleOpenFile }) => {
+    const { getFileItemFromPath } = useFileSystem()
     const { searchResults, isLoading, error } = useSearchSemanticContext()
 
     return (
@@ -47,7 +48,7 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose }) => {
                                         key={index} 
                                         className="p-3 border border-border rounded-lg cursor-pointer"
                                         onClick={() => {
-                                            loadFileIntoEditor(getFileItemFromPath(result.file_path)!)
+                                            handleOpenFile(getFileItemFromPath(result.file_path)!)
                                         }}
                                     >
                                         <div className="text-sm text-gray-300 font-medium truncate">{getFileNameFromPath(result.file_path || '')}</div>

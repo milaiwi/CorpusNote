@@ -93,6 +93,7 @@ const MainLayout: React.FC = () => {
                     setActiveOption={setActiveOption}
                     isCollapsed={isSidebarCollapsed}
                     onToggleCollapse={handleToggleFileSidebar} // Use the new handler
+                    handleOpenFile={handleOpenFile}
                 />
             </ResizablePanel>
 
@@ -131,7 +132,7 @@ const MainLayout: React.FC = () => {
                         defaultSize={20}
                         onCollapse={() => setIsSemanticSearchOpen(false)}
                     >
-                        <SemanticSidebar onClose={() => setIsSemanticSearchOpen(false)} />
+                        <SemanticSidebar onClose={() => setIsSemanticSearchOpen(false)} handleOpenFile={handleOpenFile} />
                     </ResizablePanel>
                 </>
             )}

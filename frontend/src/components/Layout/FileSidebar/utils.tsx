@@ -22,6 +22,7 @@ export interface FileSidebarProps {
     setActiveOption: (option: IconSidebarOptions) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
+    handleOpenFile?: (file: FileItem) => Promise<void>;
 }
 
 

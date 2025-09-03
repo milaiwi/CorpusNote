@@ -22,9 +22,10 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     activeOption,
     setActiveOption,
     isCollapsed = false,
-    onToggleCollapse
+    onToggleCollapse,
+    handleOpenFile
 }) => {
-    const { vaultTree: files, expandedDirectories, handleDirectoryToggle, loadFileIntoEditor } = useFileSystem()
+    const { vaultTree: files, expandedDirectories, handleDirectoryToggle } = useFileSystem()
     const [loading, setLoading] = useState<boolean>(false)
     const { openDialog } = useDialog()
 
@@ -52,7 +53,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
                             if (item.isDirectory)
                                 handleDirectoryToggle(item.absPath)
                             else
-                                loadFileIntoEditor(item)
+                                handleOpenFile(item)
                         }}
                     >
                         {item.isDirectory && (
