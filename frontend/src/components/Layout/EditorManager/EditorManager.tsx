@@ -23,7 +23,6 @@ type EditorManagerProps = {
 }
 
 const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, ref) => {
-    const { onOpenFile } = props
     const {
         editorInitialBlocks,
         editorInitialMarkdown,
@@ -32,6 +31,8 @@ const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, r
     } = useFileSystem()
 
     const { editor, similarUI, setSimilarUI } = useAIContext()
+
+    const isInitialLoad = useRef<boolean>(false)
 
     useImperativeHandle(ref, () => ({
         getMarkdownContent: async () => {
@@ -44,30 +45,26 @@ const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, r
         }
     }))
 
-    const isInitialLoad = useRef<boolean>(false)
-
     useEffect(() => {
+        console.log(`Changing file path: ${changingFilePath}`)
         if (changingFilePath) return
-
-        const loadMarkdownContent = async () => {
-            isInitialLoad.current = true
-            if (editorInitialBlocks) {
-                editor.replaceBlocks(editor.document, editorInitialBlocks)
-            } else {
-                const blocks = await editor.tryParseMarkdownToBlocks(editorInitialMarkdown)
-                editor.replaceBlocks(editor.document, blocks)
+   
+        if (editorInitialBlocks || editorInitialMarkdown) {
+            const loadContent = async () => {
+                if (editorInitialBlocks) {
+                    editor.replaceBlocks(editor.document, editorInitialBlocks)
+                } else {
+                    const blocks = await editor.tryParseMarkdownToBlocks(editorInitialMarkdown)
+                    editor.replaceBlocks(editor.document, blocks)
+                }
             }
+
+            setTimeout(() => {
+                loadContent()
+                isInitialLoad.current = false
+            }, 0)
         }
-
-        loadMarkdownContent()
     }, [changingFilePath, editor, editorInitialBlocks, editorInitialMarkdown])
-
-    // useEffect(() => {
-    //     if (changingFilePath && currentOpenedFile) {
-    //         onOpenFile(currentOpenedFile)
-    //     }
-    // }, [changingFilePath, currentOpenedFile, onOpenFile])
-
 
     const handleEditorChange = (editor: BlockNoteEditor, { getChanges }) => {
         if (isInitialLoad.current) {
