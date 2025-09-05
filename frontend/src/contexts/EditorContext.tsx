@@ -33,7 +33,6 @@ interface EditorContextType {
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
-    const [openFileHandler, setOpenFileHandler] = useState<OpenFileHandler | null>(null);
     const [similarUI, setSimilarUI] = useState<SimilarUI | null>(null)
 
     const openFileHandlerRef = useRef<OpenFileHandler | null>(null);
@@ -44,8 +43,6 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const openFileProxy = useCallback(async (fileToOpen: FileItem | string) => {
-        console.log(`[EditorContext] Opening file: ${fileToOpen}`);
-        console.log(`[EditorContext] Open file handler: ${openFileHandler}`);
         if (openFileHandlerRef.current) {
             await openFileHandlerRef.current(fileToOpen);
         } else {
