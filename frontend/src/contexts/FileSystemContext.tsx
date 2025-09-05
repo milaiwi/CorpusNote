@@ -110,6 +110,7 @@ const FileSystemProvider: React.FC<FileSystemProviderProps> = ({ children }) => 
             setFlattedFiles(all)
             filesByPathRef.current = map
             
+            console.log(`[FileSystemProvider] IsReady: true`)
             setIsReady(true)
             return true
         }
