@@ -43,6 +43,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --color-bn-editor-background: var(--bn-colors-editor-background);
 }
 
 :root {
@@ -50,7 +52,9 @@
   --bg-primary: oklch(1 0 0); /* White background */
   --bg-secondary: oklch(1 0 0); /* White secondary background */
   --bg-tertiary: oklch(0.941 0 0); /* Light gray background */
-  
+
+  --bn-colors-editor-background: oklch(1 0 0);
+
   --text-primary: oklch(0.4819 0.0049 91.5); /* Your specified light mode text color */
   --text-secondary: oklch(0.471 0 0); /* Secondary text */
   --text-tertiary: oklch(0.608 0 0); /* Tertiary text */
@@ -126,6 +130,8 @@
   --bg-primary:  oklch(0.2134 0 0); /* Dark gray background (25,25,25) */
   --bg-secondary:  oklch(0.2435 0 0); /* Medium gray background (45,45,45) */
   --bg-tertiary: oklch(0.235 0 0); /* Lighter gray background (60,60,60) */
+
+  --bn-colors-editor-background: oklch(0.252 0 0);
   
   --text-primary: oklch(0.6895 0 0); /* Light gray text (155,155,155) */
   --text-secondary: oklch(0.471 0 0); /* Medium gray text (120,120,120) */

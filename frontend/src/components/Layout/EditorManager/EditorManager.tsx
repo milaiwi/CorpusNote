@@ -9,10 +9,10 @@ import './editor.css'
 import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { useFileSystem } from '../../../contexts/FileSystemContext'
 import { Loader2 } from 'lucide-react'
-import { useAIContext } from '../../../contexts/AIContext'
 import { SimilarCommand } from '../SemanticSidebar/SimilarCommand'
 import { FileItem } from '../FileSidebar/utils'
 import { useEditor } from '../../../contexts/EditorContext'
+import { useTheme } from '../../../contexts/ThemeContext'
 
 export type EditorManagerRef = {
     getMarkdownContent: () => Promise<string | null>
@@ -30,6 +30,7 @@ const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, r
         changingFilePath,
         currentOpenedFile,
     } = useFileSystem()
+    const { theme } = useTheme()
 
     const { editor, similarUI, setSimilarUI } = useEditor()
 
@@ -90,15 +91,23 @@ const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, r
         )
     }
     
+    console.log(`Theme: ${theme}`)
     return (
-        <div className='w-full h-full'>
-            <BlockNoteView editor={editor} onChange={handleEditorChange}>
-                <SimilarCommand
+        <div className='w-full h-full flex justify-center p-8 bg-bn-editor-background'>
+            <div className="w-4/5">
+                <BlockNoteView 
                     editor={editor}
-                    state={similarUI}
-                    onClose={() => setSimilarUI(null)}
-                />
-            </BlockNoteView>
+                    onChange={handleEditorChange}
+                    data-theming-css-variables-corpus
+                    data-color-theme={theme}
+                >
+                    <SimilarCommand
+                        editor={editor}
+                        state={similarUI}
+                        onClose={() => setSimilarUI(null)}
+                    />
+                </BlockNoteView>
+            </div>
         </div>
     )
 })
