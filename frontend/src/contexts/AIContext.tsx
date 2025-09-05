@@ -5,32 +5,18 @@ import { OllamaModel } from '../components/models/ollama'
 import { useAppSettings } from './AppContext'
 import runIndexingPipeline from '../../../backend/domain/index/run-workflow'
 import { useFileSystem } from './FileSystemContext'
-import { useCreateBlockNote } from '@blocknote/react'
-import { BlockNoteEditor, BlockNoteSchema, defaultInlineContentSpecs } from '@blocknote/core'
 import HuggingFaceEmbed from '../../../backend/domain/llm/huggingfaceembed'
 import { Embedding } from '../../../backend/domain/llm/embedding'
-import RichTextLink from '../components/layout/EditorManager/lib/editor/extensions/RichTextLink'
-import { makeFileLink } from '../components/layout/EditorManager/lib/editor/extensions/RichTextLink'
-import { SimilarTrigger } from '../components/layout/EditorManager/lib/editor/SimilarTrigger'
+import { useEditor } from './EditorContext'
 
 interface AIContextType {
     configuredModels: OllamaModel[],
     selectedModel: OllamaModel | null,
     setSelectedModel: (model: OllamaModel | null) => void,
     embeddingModel: Embedding | null,
-    editor: any, // TODO: Change this to BlockNoteEditor with the new custom schema
-    similarUI: SimilarUI | null,
-    setSimilarUI: (similarUI: SimilarUI | null) => void
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined)
-
-
-interface SimilarUI {
-    query: string,
-    from: number,
-    to: number,
-}
 
 /**
  * AIContext is a context that provides the configured models and the selected model to the app.
@@ -43,36 +29,11 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     const [configuredModels, setConfiguredModels] = useState<OllamaModel[]>([])
     const [selectedModel, setSelectedModel] = useState<OllamaModel | null>(null)
     const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
-    const [similarUI, setSimilarUI] = useState<SimilarUI | null>(null)
 
     const { prefetchOllamaModels } = useFileCache()
     const { settings, vaultPath } = useAppSettings()
-    const { vaultTree, flattedFiles, loadFilePathIntoEditor } = useFileSystem()
-
-    const FileLink = makeFileLink(loadFilePathIntoEditor)
-
-    const schema = BlockNoteSchema.create({
-        inlineContentSpecs: {
-            ...defaultInlineContentSpecs,
-            fileLink: FileLink,
-        }
-    })
-
-    const editor = useCreateBlockNote({
-        schema,
-        _tiptapOptions: {
-            extensions: [
-                RichTextLink,
-                SimilarTrigger.configure({
-                    onOpen: ({ query, from, to }, view) => {
-                        setSimilarUI({ query, from, to })
-                    },
-                    onClose: () => setSimilarUI(null)
-                })
-            ],
-        },
-    })
-
+    const { vaultTree, flattedFiles } = useFileSystem()
+    const { editor } = useEditor()
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -129,11 +90,8 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
             selectedModel,
             setSelectedModel,
             embeddingModel,
-            editor,
-            similarUI,
-            setSimilarUI,
         }),
-        [configuredModels, selectedModel, setSelectedModel, embeddingModel, editor, similarUI, setSimilarUI]
+        [configuredModels, selectedModel, setSelectedModel, embeddingModel]
     )
 
     return (

@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react'
 import { useAIContext } from '../../../contexts/AIContext'
 import { SimilarCommand } from '../SemanticSidebar/SimilarCommand'
 import { FileItem } from '../FileSidebar/utils'
+import { useEditor } from '../../../contexts/EditorContext'
 
 export type EditorManagerRef = {
     getMarkdownContent: () => Promise<string | null>
@@ -30,7 +31,7 @@ const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, r
         currentOpenedFile,
     } = useFileSystem()
 
-    const { editor, similarUI, setSimilarUI } = useAIContext()
+    const { editor, similarUI, setSimilarUI } = useEditor()
 
     const isInitialLoad = useRef<boolean>(false)
 

@@ -1,5 +1,5 @@
 // frontend/src/components/layout/MainLayout.tsx
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import TitleBar from './TitleBar/Titlebar';
 import FileSystemProvider from '../../contexts/FileSystemContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ import { SearchSemanticProvider } from '../../contexts/Semantics/SearchSemanticC
 import EmptyPage from './Misc/EmptyPage';
 import { EditorManagerRef } from './EditorManager/EditorManager';
 import { FileItem } from './FileSidebar/utils';
+import { EditorProvider, useEditor } from '../../contexts/EditorContext';
 
 // Prevent the editor manager from being loaded immediately on the server side
 const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
@@ -34,13 +35,23 @@ const MainLayout: React.FC = () => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
     const [isSemanticSearchOpen, setIsSemanticSearchOpen] = useState<boolean>(false);
 
-    const { currentOpenedFile, loadFileIntoEditor, saveFile } = useFileSystem();
+    const { currentOpenedFile, loadFileIntoEditor, saveFile, getFileItemFromPath } = useFileSystem();
+    const { registerOpenFileHandler } = useEditor();
+
     const editorManagerRef = useRef<EditorManagerRef>(null);
 
-    const handleOpenFile = useCallback(async (newFileToOpen: FileItem) => {
-        console.log(`[OPEN FILE] Handling open file: ${newFileToOpen.absPath}`)
-        console.log(`[OPEN FILE] Current opened file: ${currentOpenedFile?.absPath}`)
-        if (currentOpenedFile?.absPath === newFileToOpen.absPath) return
+    const handleOpenFile = useCallback(async (newFileToOpen: FileItem | string) => {
+        let fileToOpen: FileItem | string = null;
+        if (typeof newFileToOpen === 'string') {
+            fileToOpen = getFileItemFromPath(newFileToOpen)
+        } else {
+            fileToOpen = newFileToOpen
+        }
+        console.log(`[OPEN FILE] File to open: ${fileToOpen}`)
+        if (!fileToOpen) return
+        console.log(`[OPEN FILE] Handling open file: ${fileToOpen.absPath}`)
+        console.log(`[OPEN FILE] Current opened file: ${fileToOpen?.absPath}`)
+        if (currentOpenedFile?.absPath === fileToOpen.absPath) return
 
         const fileToSave = currentOpenedFile
         const isDirty = fileToSave?.isDirty
@@ -49,7 +60,7 @@ const MainLayout: React.FC = () => {
             ? await editorManagerRef.current?.getBlocksContent()
             : null
         
-        await loadFileIntoEditor(newFileToOpen)
+        await loadFileIntoEditor(fileToOpen)
 
         if (fileToSave && contentToSave) {
             console.log(`[OPEN FILE] Saving file: ${fileToSave.absPath}`)
@@ -73,6 +84,15 @@ const MainLayout: React.FC = () => {
             }
         }
     };
+
+    useEffect(() => {
+        console.log(`[MAIN LAYOUT] Registering open file handler`)
+        registerOpenFileHandler(handleOpenFile)
+
+        return () => {
+            registerOpenFileHandler(null)
+        }
+    }, [registerOpenFileHandler, handleOpenFile])
 
     return (
         <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
@@ -149,13 +169,15 @@ const MainPageLayout = () => {
                 <AppProvider>
                     <FileCacheProvider>
                         <FileSystemProvider>
-                            <AIProvider>
-                                <SearchSemanticProvider>
-                                    <DialogProvider>
-                                        <MainLayout />
-                                    </DialogProvider>
-                                </SearchSemanticProvider>
-                            </AIProvider>
+                            <EditorProvider>
+                                <AIProvider>
+                                    <SearchSemanticProvider>
+                                        <DialogProvider>
+                                            <MainLayout />
+                                        </DialogProvider>
+                                    </SearchSemanticProvider>
+                                </AIProvider>
+                            </EditorProvider>
                         </FileSystemProvider>
                     </FileCacheProvider>
                 </AppProvider>
