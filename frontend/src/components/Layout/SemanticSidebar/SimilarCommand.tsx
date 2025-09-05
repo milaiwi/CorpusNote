@@ -41,7 +41,7 @@ export function SimilarCommand({
           .deleteSelection()
           .run();
 
-        const name =
+        const name = state.query ||
           (file as any).title ||
           (file as any).file_name ||
           (file as any).file_path?.split("/").pop() ||

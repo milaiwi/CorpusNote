@@ -30,6 +30,8 @@ export type FloatingCommandItem = {
   value: string;       // used by cmdk to filter/select
   label?: string;      // what to render if you don't provide renderItem
   [key: string]: any;
+
+
 };
 
 export type FloatingCommandProps = {

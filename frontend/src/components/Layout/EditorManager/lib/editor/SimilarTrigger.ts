@@ -18,8 +18,9 @@ function findTrigger(state: EditorState): OpenPayload | null {
   if (!m) return null;
 
   const query = (m[1] ?? "").trim();
-  const to = state.selection.from;                 // caret position (end of match)
-  const from = to - m[0].length;                   // start of the matched pattern
+  console.log("query", query);
+  const to = state.selection.from;
+  const from = to - m[0].length;
   return { query, from, to };
 }
 

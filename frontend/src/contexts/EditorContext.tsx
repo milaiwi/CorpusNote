@@ -8,7 +8,7 @@ import React, {
     useRef,
 } from 'react';
 import { useCreateBlockNote } from "@blocknote/react";
-import { BlockNoteSchema, defaultInlineContentSpecs, BlockNoteEditor } from '@blocknote/core';
+import { BlockNoteSchema, defaultInlineContentSpecs } from '@blocknote/core';
 import { FileItem } from '../components/layout/FileSidebar/utils';
 
 import { makeFileLink } from '../components/layout/EditorManager/lib/editor/extensions/RichTextLink';

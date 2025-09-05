@@ -8,24 +8,8 @@ import {
   FloatingCommand,
   type FloatingCommandItem,
 } from "../../../../../../shadcn/ui/FloatingCommand";
-
-const similarFiles = {
-    "The Roman Empire": [
-      {
-          "id": "re-001",
-          "file_path": "/Users/milaiwi/documents/notes/roman_empire.md",
-          "score": 0.92,
-          "title": "The Roman Empire"
-      },
-      {
-          "id": "re-002",
-          "file_path": "/Users/milaiwi/documents/notes/roman_empire_2.md",
-          "score": 0.90,
-          "title": "The Roman Empire 2"
-      }
-    ]
-  };
-  
+import { useSearchSemanticContext } from "../../../../../contexts/Semantics/SearchSemanticContext";
+import { useFileSystem } from "../../../../../contexts/FileSystemContext";
 
 interface SemanticFilesProps {
   /** Anchor rect for the caret/selection (e.g., from posToDOMRect) */
@@ -41,11 +25,13 @@ export const SemanticFilePopover: React.FC<SemanticFilesProps> = ({
   onClose,
   open,
 }) => {
+  const { getCachedSimilarFilesForFile } = useSearchSemanticContext();
+  const { currentOpenedFile } = useFileSystem();
   const { vaultPath } = useAppSettings();
 
   const items: FloatingCommandItem[] = useMemo(
     () =>
-      similarFiles["The Roman Empire"].map((f) => {
+      getCachedSimilarFilesForFile(currentOpenedFile?.absPath || "").map((f) => {
         const rel = getRelativePath(f.file_path, vaultPath);
         return {
           id: f.file_path,
@@ -54,7 +40,7 @@ export const SemanticFilePopover: React.FC<SemanticFilesProps> = ({
           ...f,
         };
       }),
-    [similarFiles, vaultPath]
+    [currentOpenedFile, vaultPath]
   );
 
   return (
@@ -71,13 +57,10 @@ export const SemanticFilePopover: React.FC<SemanticFilesProps> = ({
       maxWidth={360}
       emptyText="No similar files"
       placeholder="Type to search or select a file…"
-      // Optional: custom row rendering (keeps text truncated nicely)
       renderItem={(it) => <div className="truncate">{it.label ?? it.value}</div>}
       onSelect={(it) => {
-        // it includes the original SearchResult fields via the spread above
-        const selected =
-          similarFiles["The Roman Empire"].find((s) => s.file_path === (it as any).file_path) || (it as any);
-        onFileSelect?.(selected as SearchResult);
+        // it contains all SearchResult fields via the spread operator in items mapping
+        onFileSelect?.(it as unknown as SearchResult);
         onClose?.();
       }}
     />
