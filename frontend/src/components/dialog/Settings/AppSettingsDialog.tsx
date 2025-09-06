@@ -88,7 +88,7 @@ export const SettingsDialog: React.FC = () => {
     }
 
     return (
-        <GenericDialog className="min-w-[600px] px-1" isOpen={isOpen} onOpenChange={(open) => {
+        <GenericDialog className="min-w-[600px] px-1 bg-primary text-secondary-foreground" isOpen={isOpen} onOpenChange={(open) => {
             if (!open) {
                 closeDialog()
             }
@@ -105,8 +105,8 @@ export const SettingsDialog: React.FC = () => {
                                     onClick={() => setSelectedHeader(header.key)}
                                     className={cn(
                                         "w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md transition-colors",
-                                        "hover:bg-[var(--button)] cursor-pointer",
-                                        selectedHeader === header.key ? "bg-[var(--button)]" : ""
+                                        "hover:bg-[var(--button)] hover:text-white cursor-pointer",
+                                        selectedHeader === header.key ? "bg-[var(--button)] text-white" : ""
                                     )}
                                 >
                                     {header.label}
