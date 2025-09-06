@@ -2,22 +2,23 @@ import React from 'react'
 import { SettingsRow } from './utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../../shadcn/ui/dropdown-menu'
 import { Button } from '../../../../shadcn/ui/button'
-import { OllamaModel } from '../../models/ollama'
 import { useAppSettings } from '../../../contexts/AppContext'
+import { LanguageModel } from '../../../../../backend/domain/llm/LanguageModel'
+
 
 interface ModelsSettingsProps {
-    configuredModels: OllamaModel[],
-    selectedModel: OllamaModel | null,
-    setSelectedModel: (model: OllamaModel | null) => void
+    configuredModels: LanguageModel[],
+    selectedModel: LanguageModel | null,
+    setSelectedModel: (model: LanguageModel | null) => void
 }
 
 export const ModelsSettings: React.FC<ModelsSettingsProps> = ({ configuredModels, selectedModel, setSelectedModel }) => {
     const { updateSettings } = useAppSettings()
 
-    const handleModelChange = (model: OllamaModel | null) => {
+    const handleModelChange = (model: LanguageModel | null) => {
         setSelectedModel(model)
         updateSettings({
-            selectedLocalModel: model?.model,
+            selectedLocalModelId: model?.getIdentifier(),
         })
     }
 
@@ -28,11 +29,11 @@ export const ModelsSettings: React.FC<ModelsSettingsProps> = ({ configuredModels
             <SettingsRow title="Models" description="Configure AI models and language settings.">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant='outline' className="truncate w-full">{selectedModel ? selectedModel.model : "Select Model"}</Button>
+                        <Button variant='outline' className="truncate w-full">{selectedModel ? selectedModel.getDisplayName() : "Select Model"}</Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         {configuredModels.map((_model) => (
-                            <DropdownMenuItem key={_model.model} onClick={() => handleModelChange(_model)}>{_model.model}</DropdownMenuItem>
+                            <DropdownMenuItem key={_model.getIdentifier()} onClick={() => handleModelChange(_model)}>{_model.getDisplayName()}</DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
 

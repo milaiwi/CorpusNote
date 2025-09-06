@@ -6,7 +6,7 @@ export const SettingsSchema = z.object({
     version: z.literal(1),
     theme: z.enum(["light", "dark"]).default("dark"),
     vaultPath: z.string().default(""),
-    selectedLocalModel: z.string().optional(),
+    selectedLocalModelId: z.string().optional(), // e.g., llama3.2, qwen2.5, etc.
     selectedRemoteModel: z.string().optional(),
     configuredModels: z.array(z.string()).default([]),
     embeddingModel: z.object({
@@ -22,7 +22,7 @@ export const defaultSettings: Settings = {
     theme: "dark",
     vaultPath: "/Users/milaiwi/documents/notes",
     configuredModels: [],
-    selectedLocalModel: undefined,
+    selectedLocalModelId: undefined,
     selectedRemoteModel: undefined,
     embeddingModel: {
         embeddingModelType: "huggingface",

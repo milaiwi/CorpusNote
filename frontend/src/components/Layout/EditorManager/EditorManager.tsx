@@ -91,7 +91,6 @@ const EditorManager = forwardRef<EditorManagerRef, EditorManagerProps>((props, r
         )
     }
     
-    console.log(`Theme: ${theme}`)
     return (
         <div className='w-full h-full flex justify-center p-8 bg-bn-editor-background'>
             <div className="w-4/5">
