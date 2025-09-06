@@ -217,7 +217,7 @@ export function FloatingCommand({
                     onSelect(it);
                     if (closeOnSelect) onOpenChange?.(false);
                   }}
-                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  className="cursor-pointer hover:text-accent-foreground"
                 >
                   {renderItem ? renderItem(it) : (it.label ?? it.value)}
                 </CommandItem>

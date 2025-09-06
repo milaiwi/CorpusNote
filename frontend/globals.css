@@ -32,6 +32,8 @@
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-tertiary: var(--tertiary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
@@ -98,6 +100,9 @@
 
   --secondary: var(--bg-secondary);
   --secondary-foreground: oklch(0.205 0 0);
+
+  --tertiary: var(--bg-tertiary);
+  --tertiary-foreground: var(--text-tertiary);
 
   --button: var(--button-blue);
 
@@ -192,15 +197,6 @@
   --border: var(--border-primary);
   --input: var(--border-primary);
   --ring: var(--text-primary);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }
 
 html, body {
