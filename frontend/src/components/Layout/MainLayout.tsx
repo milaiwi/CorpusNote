@@ -33,7 +33,7 @@ const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
 const MainLayout: React.FC = () => {
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-    const [isSemanticSearchOpen, setIsSemanticSearchOpen] = useState<boolean>(false);
+    const [activeView, setActiveView] = useState<string>('default');
 
     const { currentOpenedFile, loadFileIntoEditor, saveFile, getFileItemFromPath } = useFileSystem();
     const { registerOpenFileHandler } = useEditor();
@@ -85,6 +85,16 @@ const MainLayout: React.FC = () => {
         }
     };
 
+    const viewMap = {
+        semanticSearch: (
+            <SemanticSidebar
+                onClose={() => setActiveView('default')}
+                handleOpenFile={handleOpenFile}
+            />
+        ),
+        default: (<></>)
+    }
+
     useEffect(() => {
         console.log(`[MAIN LAYOUT] Registering open file handler`)
         registerOpenFileHandler(handleOpenFile)
@@ -128,7 +138,9 @@ const MainLayout: React.FC = () => {
                                 selectedFile={currentOpenedFile}
                                 isSidebarCollapsed={isSidebarCollapsed}
                                 onToggleSidebar={handleToggleFileSidebar} // Use the new handler
-                                onToggleSemanticSearch={() => setIsSemanticSearchOpen(!isSemanticSearchOpen)}
+                                onToggleSemanticSearch={() => {
+                                    setActiveView(activeView === 'semanticSearch' ? 'default' : 'semanticSearch')
+                                }}
                             />
                             <EditorManager onOpenFile={handleOpenFile} ref={editorManagerRef} />
                         </div>
@@ -141,7 +153,7 @@ const MainLayout: React.FC = () => {
             </ResizablePanel>
 
             {/* Right Sidebar - Semantic Search (conditionally rendered) */}
-            {isSemanticSearchOpen && (
+            {activeView !== 'default' && (
                 <>
                     <ResizableHandle withHandle />
                     <ResizablePanel
@@ -150,9 +162,9 @@ const MainLayout: React.FC = () => {
                         minSize={15}
                         maxSize={30} // Capped at 30% of the window width
                         defaultSize={20}
-                        onCollapse={() => setIsSemanticSearchOpen(false)}
+                        onCollapse={() => setActiveView('default')}
                     >
-                        <SemanticSidebar onClose={() => setIsSemanticSearchOpen(false)} handleOpenFile={handleOpenFile} />
+                        {viewMap[activeView]}
                     </ResizablePanel>
                 </>
             )}
