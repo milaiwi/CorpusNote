@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { FileItem, getFileNameFromPath } from "../FileSidebar/utils";
 import { useFileSystem } from "../../../contexts/FileSystemContext";
 import { useSearchSemanticContext } from "../../../contexts/Semantics/SearchSemanticContext";
+import { Button } from "../../../../shadcn/ui/button";
 
 interface SemanticSidebarProps {
     onClose: () => void;
@@ -16,13 +17,20 @@ const SemanticSidebar: React.FC<SemanticSidebarProps> = ({ onClose, handleOpenFi
         <div className="flex flex-col overflow-y-auto h-full">
             <div className="flex items-center justify-between h-[45px] border-b border-border border-l px-4">
                 <h3 className="text-sm font-medium text-gray-200">Semantic Search</h3>
-                <button
+                {/* <button
                     onClick={onClose}
                     className="p-1 hover:bg-gray-700 rounded transition-colors cursor-pointer"
                     title="Hide semantic search"
                 >
                     <X size={16} className="text-gray-400" />
-                </button>
+                </button> */}
+                <Button
+                    onClick={onClose}
+                    variant="sidebar"
+                    size="sidebarIcon"
+                >
+                    <X size={16} className="text-gray-400" />
+                </Button>
             </div>
             
             {error ? (

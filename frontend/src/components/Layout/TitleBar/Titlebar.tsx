@@ -4,6 +4,7 @@ import { getDisplayTitle } from './utils';
 import { PanelLeft, PanelRight } from 'lucide-react';
 import { FileItem } from '../FileSidebar/utils';
 import { useFileSystem } from '../../../contexts/FileSystemContext';
+import { Button } from '../../../../shadcn/ui/button';
 
 interface TitleBarProps {
     selectedFile: FileItem | null;
@@ -24,13 +25,13 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = f
         >
             <div className="flex items-center space-x-2">
                 {isSidebarCollapsed && onToggleSidebar && (
-                    <button
+                    <Button
                         onClick={onToggleSidebar}
-                        className="p-1 hover:bg-gray-700 rounded transition-colors"
-                        title="Show sidebar"
+                        variant="sidebar"
+                        size="sidebarIcon"
                     >
                         <PanelLeft size={16} className="text-gray-400" />
-                    </button>
+                    </Button>
                 )}
             </div>
 
@@ -43,13 +44,13 @@ const TitleBar: React.FC<TitleBarProps> = ({selectedFile, isSidebarCollapsed = f
 
             {/* Right side - Window controls (Windows/Linux style) */}
             <div className="hidden md:flex items-center space-x-1">
-                <button
+                <Button
                     onClick={onToggleSemanticSearch}
-                    className="p-1 hover:bg-gray-700 rounded transition-colors cursor-pointer"
-                    title="Toggle semantic search"
+                    variant="sidebar"
+                    size="sidebarIcon"
                 >
                     <PanelRight size={16} className="text-gray-400" />
-                </button>
+                </Button>
             </div>
         </div>
     )
