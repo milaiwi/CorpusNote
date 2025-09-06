@@ -42,15 +42,11 @@ const MainLayout: React.FC = () => {
 
     const handleOpenFile = useCallback(async (newFileToOpen: FileItem | string) => {
         let fileToOpen: FileItem | string = null;
-        if (typeof newFileToOpen === 'string') {
-            fileToOpen = getFileItemFromPath(newFileToOpen)
-        } else {
-            fileToOpen = newFileToOpen
-        }
-        console.log(`[OPEN FILE] File to open: ${fileToOpen}`)
+        fileToOpen = typeof newFileToOpen === 'string'
+            ? getFileItemFromPath(newFileToOpen)
+            : newFileToOpen
+
         if (!fileToOpen) return
-        console.log(`[OPEN FILE] Handling open file: ${fileToOpen.absPath}`)
-        console.log(`[OPEN FILE] Current opened file: ${fileToOpen?.absPath}`)
         if (currentOpenedFile?.absPath === fileToOpen.absPath) return
 
         const fileToSave = currentOpenedFile
@@ -63,7 +59,6 @@ const MainLayout: React.FC = () => {
         await loadFileIntoEditor(fileToOpen)
 
         if (fileToSave && contentToSave) {
-            console.log(`[OPEN FILE] Saving file: ${fileToSave.absPath}`)
             const markdown = await editorManagerRef.current?.getMarkdownContent()
             await saveFile(fileToSave, contentToSave, markdown)
         }
@@ -96,7 +91,6 @@ const MainLayout: React.FC = () => {
     }
 
     useEffect(() => {
-        console.log(`[MAIN LAYOUT] Registering open file handler`)
         registerOpenFileHandler(handleOpenFile)
 
         return () => {
