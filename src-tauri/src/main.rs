@@ -4,6 +4,7 @@
 use tauri::Manager;
 
 mod db;
+mod ollama;
 
 pub struct DbConn(pub lancedb::connection::Connection);
 
@@ -37,6 +38,7 @@ fn main() {
       db::view_table,
       db::insert_chunks,
       db::search,
+      ollama::ollama_generate,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

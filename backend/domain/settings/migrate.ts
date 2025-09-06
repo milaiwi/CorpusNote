@@ -12,7 +12,7 @@ export const migrateSettings = (raw: unknown): Settings => {
         theme: current.theme ?? defaultSettings.theme,
         vaultPath: current.vaultPath == '' ? defaultSettings.vaultPath : current.vaultPath,
         configuredModels: current.configuredModels ?? defaultSettings.configuredModels,
-        selectedLocalModel: current.selectedLocalModel ?? defaultSettings.selectedLocalModel,
+        selectedLocalModelId: current.selectedLocalModelId ?? defaultSettings.selectedLocalModelId,
         selectedRemoteModel: current.selectedRemoteModel ?? defaultSettings.selectedRemoteModel,
         embeddingModel: current.embeddingModel ?? defaultSettings.embeddingModel,
     }

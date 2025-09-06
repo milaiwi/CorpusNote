@@ -1,18 +1,19 @@
 // frontend/src/contexts/AppContext
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react'
 import { useFileCache } from './FileCache'
-import { OllamaModel } from '../components/models/ollama'
 import { useAppSettings } from './AppContext'
 import runIndexingPipeline from '../../../backend/domain/index/run-workflow'
 import { useFileSystem } from './FileSystemContext'
 import HuggingFaceEmbed from '../../../backend/domain/llm/huggingfaceembed'
 import { Embedding } from '../../../backend/domain/llm/embedding'
 import { useEditor } from './EditorContext'
+import { LanguageModel } from '../../../backend/domain/llm/LanguageModel'
+import { LocalModel } from '../../../backend/domain/llm/LocalModel'
 
 interface AIContextType {
-    configuredModels: OllamaModel[],
-    selectedModel: OllamaModel | null,
-    setSelectedModel: (model: OllamaModel | null) => void,
+    availableModels: LanguageModel[],
+    activeModel: LanguageModel | null,
+    setActiveModel: (model: LanguageModel | null) => void,
     embeddingModel: Embedding | null,
 }
 
@@ -26,8 +27,8 @@ const AIContext = createContext<AIContextType | undefined>(undefined)
  * @returns The AIContext
  */
 export const AIProvider = ({ children }: { children: ReactNode }) => {
-    const [configuredModels, setConfiguredModels] = useState<OllamaModel[]>([])
-    const [selectedModel, setSelectedModel] = useState<OllamaModel | null>(null)
+    const [availableModels, setAvailableModels] = useState<LanguageModel[]>([])
+    const [activeModel, setActiveModel] = useState<LanguageModel | null>(null)
     const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
 
     const { prefetchOllamaModels } = useFileCache()
@@ -36,12 +37,20 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     const { editor } = useEditor()
 
     useEffect(() => {
-        const fetchModels = async () => {
-            const _models = await prefetchOllamaModels()
-            if (_models)
-                setConfiguredModels(_models.models)
+        const fetchAndSetModels = async () => {
+            const allModels: LanguageModel[] = []
+
+            const localModels = await prefetchOllamaModels()
+            if (localModels) {
+                localModels.models.forEach((model) => {
+                    allModels.push(new LocalModel(model.model))
+                })
+            }
+
+            setAvailableModels(allModels)
         }
-        fetchModels()
+        
+        fetchAndSetModels()
     }, [])
 
     useEffect(() => {
@@ -78,20 +87,24 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
 
     // Load the previous selected model from settings
     useEffect(() => {
-        const selectedLocalModel = settings?.selectedLocalModel
-        if (selectedLocalModel) {
-            setSelectedModel(configuredModels.find(model => model.model === selectedLocalModel) ?? null)
+        console.log(`[AIContext] Setting active model to ${settings?.selectedLocalModelId}`)
+        if (settings?.selectedLocalModelId && availableModels.length > 0) {
+            const model = availableModels.find(m => m.getIdentifier() === settings.selectedLocalModelId)
+            console.log(`[AIContext] Setting active model to ${model?.getDisplayName()}`)
+            setActiveModel(model)
+        } else {
+            setActiveModel(null)
         }
-    }, [settings, configuredModels])
+    }, [settings?.selectedLocalModelId, availableModels])
 
     const value = useMemo(
         () => ({    
-            configuredModels,
-            selectedModel,
-            setSelectedModel,
+            availableModels,
+            activeModel,
+            setActiveModel,
             embeddingModel,
         }),
-        [configuredModels, selectedModel, setSelectedModel, embeddingModel]
+        [availableModels, activeModel, setActiveModel, embeddingModel]
     )
 
     return (
