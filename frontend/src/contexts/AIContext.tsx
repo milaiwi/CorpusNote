@@ -87,10 +87,8 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
 
     // Load the previous selected model from settings
     useEffect(() => {
-        console.log(`[AIContext] Setting active model to ${settings?.selectedLocalModelId}`)
         if (settings?.selectedLocalModelId && availableModels.length > 0) {
             const model = availableModels.find(m => m.getIdentifier() === settings.selectedLocalModelId)
-            console.log(`[AIContext] Setting active model to ${model?.getDisplayName()}`)
             setActiveModel(model)
         } else {
             setActiveModel(null)

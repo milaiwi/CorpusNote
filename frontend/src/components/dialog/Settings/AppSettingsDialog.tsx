@@ -60,7 +60,7 @@ export const SettingsDialog: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(true)
     const [selectedHeader, setSelectedHeader] = useState<SettingsHeader>(SettingsHeader.General)
     const { closeDialog } = useDialog()
-    const { configuredModels, selectedModel, setSelectedModel } = useAIContext()
+    const { availableModels, activeModel, setActiveModel } = useAIContext()
 
     const settingsHeaders = [
         { key: SettingsHeader.General, label: 'General' },
@@ -77,7 +77,7 @@ export const SettingsDialog: React.FC = () => {
             case SettingsHeader.Appearance:
                 return <AppearanceSettings />
             case SettingsHeader.Models:
-                return <ModelsSettings configuredModels={configuredModels} selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
+                return <ModelsSettings configuredModels={availableModels} selectedModel={activeModel} setSelectedModel={setActiveModel} />
             case SettingsHeader.Privacy:
                 return <PrivacySettings />
             case SettingsHeader.About:

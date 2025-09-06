@@ -2,7 +2,6 @@ import React from 'react'
 import { SettingsRow } from './utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../../shadcn/ui/dropdown-menu'
 import { Button } from '../../../../shadcn/ui/button'
-import { OllamaModel } from '../../models/ollama'
 import { useAppSettings } from '../../../contexts/AppContext'
 import { LanguageModel } from '../../../../../backend/domain/llm/LanguageModel'
 
@@ -10,7 +9,7 @@ import { LanguageModel } from '../../../../../backend/domain/llm/LanguageModel'
 interface ModelsSettingsProps {
     configuredModels: LanguageModel[],
     selectedModel: LanguageModel | null,
-    setSelectedModel: (model: OllamaModel | null) => void
+    setSelectedModel: (model: LanguageModel | null) => void
 }
 
 export const ModelsSettings: React.FC<ModelsSettingsProps> = ({ configuredModels, selectedModel, setSelectedModel }) => {
