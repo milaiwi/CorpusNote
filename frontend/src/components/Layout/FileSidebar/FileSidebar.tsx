@@ -80,7 +80,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
 
     if (!files) {
         return (
-            <div className="w-64 border-r border-border p-4 flex items-center justify-center">
+            <div className="w-64 p-4 flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
                     <Folder size={48} className="mx-auto mb-2 opacity-50" />
                     <p className="text-sm">There are no files in this vault</p>
@@ -90,7 +90,7 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
     }
 
     return (
-        <div className="flex flex-col h-full border-r border-border">
+        <div className="flex flex-col h-full ">
             {/* Header */}
             <FileSidebarHeader onToggleCollapse={onToggleCollapse} isCollapsed={isCollapsed} />
       

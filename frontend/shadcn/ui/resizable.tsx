@@ -23,9 +23,16 @@ function ResizablePanelGroup({
 }
 
 function ResizablePanel({
+  className,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
-  return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />
+  return (
+    <ResizablePrimitive.Panel
+      data-slot="resizable-panel"
+      className={cn("bg-primary text-primary-foreground", className)}
+      {...props}
+    />
+  )
 }
 
 function ResizableHandle({
@@ -43,7 +50,7 @@ function ResizableHandle({
       className={cn(
         "relative transition-all duration-150 ease-out flex items-center justify-center",
         "w-1 hover:w-3 focus:w-3",
-        "hover:bg-blue-500 focus:bg-blue-500",
+        "hover:bg-blue-500 focus:bg-blue-500 bg-border",
         "after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2",
         "focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-hidden",
         "data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full",
@@ -60,8 +67,8 @@ function ResizableHandle({
       {...props}
     >
       {withHandle && (
-        <div className="z-10 flex h-4 w-3 items-center justify-center rounded-xs border bg-background">
-          <GripVerticalIcon className="size-2.5" />
+        <div className="z-10 flex h-4 w-3 items-center justify-center rounded-xs bg-tertiary">
+          <GripVerticalIcon className="size-2.5" color="#222222" />
         </div>
       )}
     </ResizablePrimitive.PanelResizeHandle>
