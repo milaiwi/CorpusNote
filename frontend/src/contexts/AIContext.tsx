@@ -12,8 +12,8 @@ import { LocalModel } from '../../../backend/domain/llm/LocalModel'
 
 interface AIContextType {
     availableModels: LanguageModel[],
-    activeModel: LanguageModel | null,
-    setActiveModel: (model: LanguageModel | null) => void,
+    activeModel: LocalModel | null,
+    setActiveModel: (model: LocalModel | null) => void,
     embeddingModel: Embedding | null,
 }
 
@@ -28,7 +28,7 @@ const AIContext = createContext<AIContextType | undefined>(undefined)
  */
 export const AIProvider = ({ children }: { children: ReactNode }) => {
     const [availableModels, setAvailableModels] = useState<LanguageModel[]>([])
-    const [activeModel, setActiveModel] = useState<LanguageModel | null>(null)
+    const [activeModel, setActiveModel] = useState<LocalModel | null>(null)
     const [embeddingModel, setEmbeddingModel] = useState<Embedding | null>(null)
 
     const { prefetchOllamaModels } = useFileCache()
@@ -89,7 +89,7 @@ export const AIProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (settings?.selectedLocalModelId && availableModels.length > 0) {
             const model = availableModels.find(m => m.getIdentifier() === settings.selectedLocalModelId)
-            setActiveModel(model)
+            setActiveModel(model as LocalModel)
         } else {
             setActiveModel(null)
         }

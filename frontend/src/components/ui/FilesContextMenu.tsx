@@ -11,7 +11,8 @@ import {
     Copy, 
     Type,
     File,
-    Folder
+    Folder,
+    FileDiff
 } from "lucide-react"
 import { RenameDialog } from "../dialog/RenameDialog"
 import { useDialog } from "../../contexts/DialogContext";
@@ -22,11 +23,15 @@ import { useFileSystem } from "../../contexts/FileSystemContext";
 interface FilesContextMenuProps {
     children: React.ReactNode;
     item: FileItem;
+    handleCompareNotes: (item: FileItem) => void;
+    currentOpenedFile: FileItem | null;
 }
 
 export function FilesContextMenu({ 
     children, 
     item, 
+    handleCompareNotes,
+    currentOpenedFile,
 }: FilesContextMenuProps) {
     const { openDialog } = useDialog()
     const { handleRemove } = useFileSystem()
@@ -71,18 +76,32 @@ export function FilesContextMenu({
                     </>
                 )}
 
+                {/* Renaming file */}
                 <ContextMenuItem onClick={() => openDialog(<RenameDialog item={item} />)} className="cursor-pointer">
                     <Type size={8} />
                     <span className="text-xs">Rename</span>
                 </ContextMenuItem>
                 
+                {/* Copying path */}
                 <ContextMenuItem onClick={handleCopyPath} className="cursor-pointer">
                     <Copy size={8} />
                     <span className="text-xs">Copy path</span>
                 </ContextMenuItem>
                 
+                {/* Comparing Notes */}
+                {currentOpenedFile && (
+                    <ContextMenuItem
+                        onClick={() => handleCompareNotes(item)}
+                        className="cursor-pointer"
+                    >
+                        <FileDiff size={8} />
+                        <span className="text-xs">Compare Notes</span>
+                    </ContextMenuItem>
+                )}
+
                 <ContextMenuSeparator />
                 
+                {/* Deleting file */}
                 <ContextMenuItem 
                     onClick={handleDelete}
                     className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950 cursor-pointer"

@@ -24,6 +24,7 @@ import EmptyPage from './Misc/EmptyPage';
 import { EditorManagerRef } from './EditorManager/EditorManager';
 import { FileItem } from './FileSidebar/utils';
 import { EditorProvider, useEditor } from '../../contexts/EditorContext';
+import CompareNotesView from './CompareNotesView/CompareNotesView';
 
 // Prevent the editor manager from being loaded immediately on the server side
 const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
@@ -31,6 +32,7 @@ const EditorManager = dynamic(() => import('./EditorManager/EditorManager'), {
 });
 
 const MainLayout: React.FC = () => {
+    const [filesToCompare, setFilesToCompare] = useState<[FileItem, FileItem] | null>(null);
     const [activeOption, setActiveOption] = useState<IconSidebarOptions>('files');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
     const [activeView, setActiveView] = useState<string>('default');
@@ -39,6 +41,12 @@ const MainLayout: React.FC = () => {
     const { registerOpenFileHandler } = useEditor();
 
     const editorManagerRef = useRef<EditorManagerRef>(null);
+
+    const handleCompareNotes = (otherFile: FileItem) => {
+        if (!currentOpenedFile) return
+        setFilesToCompare([currentOpenedFile, otherFile])
+        setActiveView('compareNotes')
+    }
 
     const handleOpenFile = useCallback(async (newFileToOpen: FileItem | string) => {
         let fileToOpen: FileItem | string = null;
@@ -87,6 +95,15 @@ const MainLayout: React.FC = () => {
                 handleOpenFile={handleOpenFile}
             />
         ),
+        compareNotes: (
+            <CompareNotesView
+                files={filesToCompare}
+                onClose={() => {
+                    setFilesToCompare(null)
+                    setActiveView('default')
+                }}
+            />
+        ),
         default: (<></>)
     }
 
@@ -112,12 +129,14 @@ const MainLayout: React.FC = () => {
                 onExpand={() => setIsSidebarCollapsed(false)}
             >
                 <FileSidebar
+                    currentOpenedFile={currentOpenedFile}
                     selectedFile={currentOpenedFile}
                     activeOption={activeOption}
                     setActiveOption={setActiveOption}
                     isCollapsed={isSidebarCollapsed}
                     onToggleCollapse={handleToggleFileSidebar} // Use the new handler
                     handleOpenFile={handleOpenFile}
+                    handleCompareNotes={handleCompareNotes}
                 />
             </ResizablePanel>
 

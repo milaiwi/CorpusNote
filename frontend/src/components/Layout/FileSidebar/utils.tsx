@@ -17,12 +17,14 @@ export interface FileItem {
 }
 
 export interface FileSidebarProps {
+    currentOpenedFile: FileItem | null;
     selectedFile: FileItem | null;
     activeOption: IconSidebarOptions;
     setActiveOption: (option: IconSidebarOptions) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
     handleOpenFile?: (file: FileItem) => Promise<void>;
+    handleCompareNotes?: (file: FileItem) => void;
 }
 
 

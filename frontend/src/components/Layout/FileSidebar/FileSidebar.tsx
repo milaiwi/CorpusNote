@@ -18,12 +18,14 @@ import { ThemeToggle } from '../../ui/ThemeToggle'
 import { FilesContextMenu } from '../../ui/FilesContextMenu'
 
 const FileSidebar: React.FC<FileSidebarProps> = ({
+    currentOpenedFile,
     selectedFile,
     activeOption,
     setActiveOption,
     isCollapsed = false,
     onToggleCollapse,
-    handleOpenFile
+    handleOpenFile,
+    handleCompareNotes
 }) => {
     const { vaultTree: files, expandedDirectories, handleDirectoryToggle } = useFileSystem()
     const [loading, setLoading] = useState<boolean>(false)
@@ -41,6 +43,8 @@ const FileSidebar: React.FC<FileSidebarProps> = ({
             <div key={item.absPath}>
                 <FilesContextMenu
                     item={item}
+                    handleCompareNotes={handleCompareNotes}
+                    currentOpenedFile={currentOpenedFile}
                 >
                     <Button
                         variant={isSelected ? "item_generic_active" : "item_generic"}

@@ -39,7 +39,7 @@ interface FileCacheContextType {
 
   // Cache management
   invalidateFile: (path: string) => void
-  prefetchFile: (path: string) => Promise<void>
+  prefetchFile: (path: string) => Promise<string>
   prefetchOllamaModels: () => Promise<OllamaTagsResp | null>
 
   // File system operations with no cache validation
@@ -161,8 +161,8 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     queryClient.invalidateQueries({ queryKey: ['file', path] })
   }
 
-  const prefetchFile = async (path: string): Promise<void> => {
-    await queryClient.prefetchQuery({
+  const prefetchFile = async (path: string): Promise<string> => {
+    const fileContent = await queryClient.fetchQuery({
       queryKey: ['file', path],
       queryFn: async () => {
         const fileContent = await readTextFile(path)
@@ -171,6 +171,7 @@ const FileCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       staleTime: 1000 * 60 * 5,
       gcTime: 1000 * 60 * 10,
     })
+    return fileContent as string
   }
 
   const createDirectory = async (path: string): Promise<void> => {
