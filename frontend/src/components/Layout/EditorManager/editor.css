@@ -1,5 +1,14 @@
 .bn-container {
-    height: calc(100vh - 45px)
+    height: calc(100vh - 45px);
+}
+
+.bn-side-menu {
+    margin-right: 0.5rem;
+}
+
+.bn-side-menu .mantine-ActionIcon-icon {
+    width: 80%;
+    height: 80%;
 }
 
 .bn-editor {
@@ -35,7 +44,7 @@
     
     --bn-colors-shadow: #cfcfcf;
     --bn-colors-border: #efefef;
-    --bn-colors-side-menu: #cfcfcf;
+    /* --bn-colors-side-menu: #cfcfcf; */
     
     --bn-colors-highlights-gray-text: #9b9a97;
     --bn-colors-highlights-gray-background: #ebeced;
