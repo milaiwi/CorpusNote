@@ -25,6 +25,5 @@ export const runAITask = async<T>(
     const fullPrompt = prompt.prompt(data)
     console.log(`[runAITask] Running prompt: ${fullPrompt}`)
     const response = await model.generate(fullPrompt)
-    console.log(`[runAITask] Response: ${response}`)
     return response
 }

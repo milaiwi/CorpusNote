@@ -1,6 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer utilities {
+  /* Hiding the scrollbar for Chrome, Safari, and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hiding the scrollbar for IE, Edge, and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* This registers custom colors for tailwind */

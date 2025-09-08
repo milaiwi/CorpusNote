@@ -9,6 +9,7 @@ import { runAITask } from "../../../lib/ai";
 import { compareNotesPrompt } from "../../../lib/ai/prompt";
 import ReactMarkdown from "react-markdown";
 import { Block } from "@blocknote/core";
+import { useEditor } from "../../../contexts/EditorContext";
 
 interface CompareNotesViewProps {
     files: [FileItem, FileItem] | null;
@@ -22,6 +23,7 @@ const CompareNotesView: React.FC<CompareNotesViewProps> = ({ files, onClose }) =
 
     const { activeModel } = useAIContext();
     const { readFileAndCache } = useFileCache();
+    const { editor } = useEditor();
 
     useEffect(() => {
         if (!files) return
@@ -39,15 +41,20 @@ const CompareNotesView: React.FC<CompareNotesViewProps> = ({ files, onClose }) =
                     readFileAndCache(files[1]),
                 ])
 
-                console.log(noteAContent)
-                console.log(noteBContent)
+                const noteAMarkdown = await editor.blocksToMarkdownLossy(noteAContent.content as Block[])
+                const noteBMarkdown = await editor.blocksToMarkdownLossy(noteBContent.content as Block[])
+
+                console.log(noteAMarkdown)
+                console.log(noteBMarkdown)
 
                 if (noteAContent === null || noteBContent === null)
                     throw new Error('Could not read the content of one or both notes.')
                 
                 const result = await runAITask(activeModel, compareNotesPrompt, {
-                    noteAContent: noteAContent.content as Block[],
-                    noteBContent: noteBContent.content as Block[],
+                    fileA: files[0],
+                    fileB: files[1],
+                    noteAContent: noteAMarkdown,
+                    noteBContent: noteBMarkdown,
                 })
 
                 console.log(result)
@@ -71,7 +78,7 @@ const CompareNotesView: React.FC<CompareNotesViewProps> = ({ files, onClose }) =
                 </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto prose dark:prose-invert">
+            <div className="flex-1 overflow-y-auto no-scrollbar prose dark:prose-invert">
                 {isLoading && <p>Comparing notes...</p>}
                 {error && <p className="text-red-500">{error}</p>}
                 {comparison && <ReactMarkdown>{comparison}</ReactMarkdown>}
