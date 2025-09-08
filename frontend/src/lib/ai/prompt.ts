@@ -10,9 +10,7 @@ export const compareNotesPrompt = {
 
         Here is an example of a good comparison:
 
-        ---
-        EXAMPLE START
-        ---
+        <example>
 
         USER:
         Here are the two notes:
@@ -51,9 +49,7 @@ export const compareNotesPrompt = {
         * **Hybrid Approaches**: These paradigms are not mutually exclusive. Many modern languages (like Python, JavaScript, and C#) are multi-paradigm, allowing developers to use OOP principles for overall structure (e.g., defining services) and functional techniques for data manipulation (e.g., processing lists of items).
         * **Problem Domain**: The choice often depends on the problem. OOP can be intuitive for modeling systems with distinct, stateful entities (like a user interface with buttons and windows). Functional Programming excels in data processing, parallel computing, and mathematical tasks where predictability is paramount.
 
-        ---
-        EXAMPLE END
-        ---
+        </example>
 
         Here are the two notes:
 

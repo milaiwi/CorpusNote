@@ -78,10 +78,14 @@ const CompareNotesView: React.FC<CompareNotesViewProps> = ({ files, onClose }) =
                 </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar prose dark:prose-invert">
+            <div className="flex-1 overflow-y-auto no-scrollbar">
                 {isLoading && <p>Comparing notes...</p>}
                 {error && <p className="text-red-500">{error}</p>}
-                {comparison && <ReactMarkdown>{comparison}</ReactMarkdown>}
+                {comparison && (
+                    <div className="prose dark:prose-invert max-w-none">
+                        <ReactMarkdown>{comparison}</ReactMarkdown>
+                    </div>
+                )}
             </div>
         </div>
     )
