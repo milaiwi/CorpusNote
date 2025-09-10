@@ -1,5 +1,5 @@
 // frontend/src/components/layout/CompareNotesView/CompareNotesView.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FileItem } from "../FileSidebar/utils";
 import { useAIContext } from "../../../contexts/AIContext";
 import { useFileCache } from "../../../contexts/FileCache";
@@ -25,17 +25,36 @@ const CompareNotesView: React.FC<CompareNotesViewProps> = ({ files, onClose }) =
     const { readFileAndCache } = useFileCache();
     const { editor } = useEditor();
 
+    const isMountedRef = useRef(true);
+
     useEffect(() => {
-        if (!files) return
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+            // Reset all state variables
+            setIsLoading(false);
+            setError(null);
+            setComparison('');
+        }
+    }, [])
+
+    useEffect(() => {
+        if (comparison) {
+            setIsLoading(false)
+            setError(null)
+        }
+    }, [comparison])
+
+
+    useEffect(() => {
+        if (!files || !activeModel) return
 
         const performComparison = async () => {
             setIsLoading(true)
             setError(null)
             setComparison('')
 
-            try {
-                if (!activeModel) throw new Error('No AI model selected.')
-                
+            try {                
                 const [noteAContent, noteBContent] = await Promise.all([
                     readFileAndCache(files[0]),
                     readFileAndCache(files[1]),
@@ -50,19 +69,31 @@ const CompareNotesView: React.FC<CompareNotesViewProps> = ({ files, onClose }) =
                 if (noteAContent === null || noteBContent === null)
                     throw new Error('Could not read the content of one or both notes.')
                 
-                const result = await runAITask(activeModel, compareNotesPrompt, {
-                    fileA: files[0],
-                    fileB: files[1],
-                    noteAContent: noteAMarkdown,
-                    noteBContent: noteBMarkdown,
-                })
+                const handleChunk = (chunk: string) => {
+                    setComparison(prev => prev + chunk)
+                }
 
-                console.log(result)
-                setComparison(result)
+                await runAITask(
+                    activeModel,
+                    compareNotesPrompt,
+                    {
+                        fileA: files[0],
+                        fileB: files[1],
+                        noteAContent: noteAMarkdown,
+                        noteBContent: noteBMarkdown,
+                    },
+                    true,
+                    handleChunk
+                )
+
             } catch (err) {
-                setError(err.message || 'An unkown error occurred.')
+                if (isMountedRef.current) {
+                    setError(err.message || 'An unkown error occurred.')
+                }
             } finally {
-                setIsLoading(false)
+                if (isMountedRef.current) {
+                    setIsLoading(false)
+                }
             }
         }
 

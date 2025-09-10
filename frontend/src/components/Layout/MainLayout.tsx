@@ -173,8 +173,8 @@ const MainLayout: React.FC = () => {
                         collapsible={true}
                         collapsedSize={0}
                         minSize={15}
-                        maxSize={30} // Capped at 30% of the window width
-                        defaultSize={20}
+                        maxSize={40} // Capped at 30% of the window width
+                        defaultSize={35}
                         onCollapse={() => setActiveView('default')}
                     >
                         {viewMap[activeView]}

@@ -18,12 +18,21 @@ interface AIPrompt<T> {
 export const runAITask = async<T>(
     model: LocalModel,
     prompt: AIPrompt<T>,
-    data: T
+    data: T,
+    stream?: boolean,
+    onChunk?: (chunk: string) => void
 ) => {
     if (!model) throw new Error("Model not found")
 
-    const fullPrompt = prompt.prompt(data)
-    console.log(`[runAITask] Running prompt: ${fullPrompt}`)
-    const response = await model.generate(fullPrompt)
-    return response
+    if (stream) {
+        const fullPrompt = prompt.prompt(data)
+        console.log(`[runAITask] Running prompt: ${fullPrompt}`)
+        await model.generateStream(fullPrompt, onChunk)
+        return
+    } else {
+        const fullPrompt = prompt.prompt(data)
+        console.log(`[runAITask] Running prompt: ${fullPrompt}`)
+        const response = await model.generate(fullPrompt)
+        return response
+    }
 }

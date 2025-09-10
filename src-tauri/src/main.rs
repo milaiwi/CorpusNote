@@ -39,6 +39,7 @@ fn main() {
       db::insert_chunks,
       db::search,
       ollama::ollama_generate,
+      ollama::ollama_generate_stream,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
